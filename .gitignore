@@ -7,7 +7,7 @@ build/toolchain
 *cache*/
 *stub*/
 *.egg-info/
-.venv/
+.*/
 *.old
 *.so
 *.py[cod]
