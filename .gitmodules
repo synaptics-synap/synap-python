@@ -1,0 +1,4 @@
+[submodule "extern/framework"]
+	path = extern/framework
+	url = https://github.com/synaptics-synap/runtime.git
+	branch = wip/framework-port
