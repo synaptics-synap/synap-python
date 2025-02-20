@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
+
+[project]
+name = "synap-python"
+version = "0.0.1"
+requires-python = ">=3.10"
+authors = [{ "name" = "Sauryadeep Pal", "email" = "sauryadeep.pal@synaptics.com" }]
+description = "Python bindings for SyNAP"
+license = { "file" = "LICENSE" }
+dependencies = []
+
+[build-system]
+requires = ["py-build-cmake", "pybind11", "pybind11-stubgen"]
+build-backend = "py_build_cmake.build"
+
+[tool.py-build-cmake.module]
+name = "synap"
+directory = "src"
+
+[tool.py-build-cmake.sdist]
+include = ["CMakeLists.txt", "src/*.cpp", "extern/framework/lib/*"]
+exclude = []
+
+[tool.py-build-cmake.cmake]
+minimum_version = "3.19"
+build_type = "Release"
+source_path = "."
+args = ["-Wdev"]
+build_args = ["-j"]
+install_args = ["--verbose"]
+install_components = ["python_modules"]
+
+[tool.py-build-cmake.stubgen]
+args = ["-v"]

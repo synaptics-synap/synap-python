@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
+
+[cmake]
+build_path = ".py-build-cmake_cache/{build_config}-x86_64-linux-gnu"
+[cmake.options]
+TOOLCHAIN_PYTHON_VERSION = "3.10"
+ENABLE_SYNAP_DEVICE_SIMULATOR = "1"

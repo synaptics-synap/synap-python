@@ -1,0 +1,17 @@
+__pycache__/
+dist/
+toolchains/
+log*/
+build/python-dev
+build/toolchain
+*cache*/
+*stub*/
+*.egg-info/
+.*/
+*.old
+*.so
+*.py[cod]
+_build
+.pytest_cache
+.vscode
+CMakeLists.txt.user
