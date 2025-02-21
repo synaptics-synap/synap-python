@@ -96,7 +96,7 @@ This will generate wheel stored in the `dist` folder and Output should look some
 ```sh
 Successfully built synap_python-0.0.1-cp310-cp310-xxxx.whl
 Building Python extensions ... Success!
-Build completed successfully, wheel located at /home/../SyNAP-Python-API/dist/
+Build completed successfully, wheel located at /home/../synap-python/dist/
 ```
 
  
