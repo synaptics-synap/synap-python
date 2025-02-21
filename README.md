@@ -15,7 +15,13 @@ SyNAP-Python-API
 
 ## Overview
 
-The **SyNAP Python API** provides Python bindings that closely mirror our SyNAP C++ API, enabling seamless integration for inference in Python. The bindings offer a straightforward yet flexible approach to deep learning workflows, allowing users to incorporate custom pre-processing and post-processing functionalities.
+The **SyNAP Python API** provides Python bindings that closely mirror our SyNAP C++ API, enabling seamless integration for inference in Python. The Python bindings offer a straightforward yet flexible approach to deep learning workflows, allowing users to incorporate custom pre-processing and post-processing functionalities.
+
+
+> Note: SyNAP Python API serves as the primary interface for low-level access to [SyNAP C++ Framework](https://github.com/synaptics-astra/synap-framework), enabling seamless integration for inference in Python. 
+
+> Note: For a rapid AI development experience, we recommend using [SynapRT](https://github.com/synaptics-synap/synap-rt), which provides ready-to-use AI pipelines.
+
 
 ### Available Modules and Classes
 
