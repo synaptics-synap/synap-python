@@ -9,6 +9,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 
@@ -64,9 +65,26 @@ static void export_preprocessor(py::module_& m)
 {
     auto preprocessor = m.def_submodule("preprocessor", "SyNAP preprocessor");
 
+    /* InputType */
+    py::enum_<InputType>(preprocessor, "InputType")
+    .value("invalid", InputType::invalid)
+    .value("raw", InputType::raw)
+    .value("encoded_image", InputType::encoded_image)
+    .value("nv12", InputType::nv12)
+    .value("nv21", InputType::nv21)
+    ;
+
     /* InputData */
     py::class_<InputData>(preprocessor, "InputData")
     .def(py::init<const string &>(), "load input data from file")
+    .def(
+        py::init<vector<uint8_t>&&, InputType, Shape, Layout>(),
+        py::arg("buffer"),
+        py::arg("type"),
+        py::arg("shape") = Shape(),
+        py::arg("layout") = Layout::none,
+        "create input data from buffer"
+    )
     .def("empty", &InputData::empty, "check if data present or not")
     .def("data", &InputData::data, py::return_value_policy::reference, "get pointer to data")
     .def("size", &InputData::size, "get data size in bytes")
