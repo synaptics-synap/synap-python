@@ -5,10 +5,12 @@ from __future__ import annotations
 
 from .._synap.preprocessor import (
     InputData,
-    Preprocessor
+    InputType,
+    Preprocessor,
 )
 
 __all__ = [
     "InputData",
-    "Preprocessor"
+    "InputType",
+    "Preprocessor",
 ]

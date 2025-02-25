@@ -13,13 +13,6 @@ from . import preprocessor
 from . import types
 __all__ = ['Buffer', 'Network', 'Tensor', 'Tensors', 'postprocessor', 'preprocessor', 'synap_version', 'types']
 class Buffer:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
-    # def __init__(self: typing_extensions.Buffer, rhs: typing_extensions.Buffer, offset: int, size: int) -> None:
-    #     """
-    #     Create a new Buffer from an existing buffer
-    #     """
     def allow_cpu_access(self: typing_extensions.Buffer, allow: bool) -> bool:
         """
         Enable/disable the possibility for the CPU to read/write the buffer data
@@ -30,9 +23,6 @@ class Buffer:
         Buffer data size
         """
 class Network:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     @typing.overload
     def __init__(self) -> None:
         ...
@@ -71,9 +61,6 @@ class Network:
     def outputs(self) -> Tensors:
         ...
 class Tensor:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self, arg0: Tensor) -> None:
         ...
     @typing.overload
@@ -139,9 +126,6 @@ class Tensor:
         Get size of tensor in bytes
         """
 class Tensors:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __getitem__(self, arg0: int) -> Tensor:
         """
         Access tensor by index
