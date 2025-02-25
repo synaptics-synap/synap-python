@@ -58,9 +58,6 @@ class DataType:
     uint16: typing.ClassVar[DataType]  # value = <DataType.uint16: 5>
     uint32: typing.ClassVar[DataType]  # value = <DataType.uint32: 7>
     uint8: typing.ClassVar[DataType]  # value = <DataType.uint8: 3>
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __eq__(self, other: typing.Any) -> bool:
         ...
     def __getstate__(self) -> int:
@@ -101,9 +98,6 @@ class Dim2d:
             
     """
     __hash__: typing.ClassVar[None] = None
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __add__(self, arg0: Dim2d) -> Dim2d:
         ...
     def __eq__(self, arg0: Dim2d) -> bool:
@@ -146,9 +140,6 @@ class Landmark:
     x: int
     y: int
     z: int
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __eq__(self, arg0: Landmark) -> bool:
         ...
     def __init__(self, x: int = 0, y: int = 0, z: int = 0, visibility: float = -1.0) -> None:
@@ -177,9 +168,6 @@ class Layout:
     nchw: typing.ClassVar[Layout]  # value = <Layout.nchw: 1>
     nhwc: typing.ClassVar[Layout]  # value = <Layout.nhwc: 2>
     none: typing.ClassVar[Layout]  # value = <Layout.none: 0>
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __eq__(self, other: typing.Any) -> bool:
         ...
     def __getstate__(self) -> int:
@@ -215,9 +203,6 @@ class Mask:
             :ivar int height: The height of the mask.
             
     """
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __bool__(self) -> bool:
         ...
     def __init__(self, width: int, height: int) -> None:
@@ -265,9 +250,6 @@ class Rect:
             
     """
     __hash__: typing.ClassVar[None] = None
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __eq__(self, arg0: Rect) -> bool:
         ...
     @typing.overload
@@ -314,9 +296,6 @@ class Shape:
             
     """
     __hash__: typing.ClassVar[None] = None
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __eq__(self, arg0: Shape) -> bool:
         ...
     def __getitem__(self, arg0: int) -> int:
@@ -342,8 +321,7 @@ class Shape:
                 :rtype: bool
         """
 class SynapVersion:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
+    def __init__(self) -> None:
         ...
     def __repr__(self) -> str:
         ...

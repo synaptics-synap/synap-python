@@ -10,9 +10,6 @@ import synap.types
 import typing
 __all__ = ['Classifier', 'ClassifierResult', 'ClassifierResultItem', 'ClassifierResultItems', 'Detector', 'DetectorResult', 'DetectorResultItem', 'DetectorResultItems']
 class Classifier:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self, top_count: int = 1) -> None:
         ...
     def process(self, outputs: synap.Tensors) -> ClassifierResult:
@@ -20,9 +17,6 @@ class Classifier:
         Perform classification on network outputs
         """
 class ClassifierResult:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self) -> None:
         ...
     @property
@@ -32,9 +26,6 @@ class ClassifierResult:
     def success(self) -> bool:
         ...
 class ClassifierResultItem:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self) -> None:
         ...
     @property
@@ -44,9 +35,6 @@ class ClassifierResultItem:
     def confidence(self) -> float:
         ...
 class ClassifierResultItems:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __getitem__(self, arg0: int) -> ClassifierResultItem:
         """
         get item by index
@@ -62,9 +50,6 @@ class ClassifierResultItems:
         get items size
         """
 class Detector:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self, score_threshold: float = 0.5, n_max: int = 0, nms: bool = True, iou_threshold: float = 0.5, iou_with_min: bool = False) -> None:
         ...
     def process(self, outputs: synap.Tensors, assigned_rect: synap.types.Rect) -> DetectorResult:
@@ -72,9 +57,6 @@ class Detector:
         Perform detection on network outputs
         """
 class DetectorResult:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self) -> None:
         ...
     @property
@@ -84,9 +66,6 @@ class DetectorResult:
     def success(self) -> bool:
         ...
 class DetectorResultItem:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __init__(self) -> None:
         ...
     @property
@@ -105,9 +84,6 @@ class DetectorResultItem:
     def mask(self) -> synap.types.Mask:
         ...
 class DetectorResultItems:
-    @staticmethod
-    def _pybind11_conduit_v1_(*args, **kwargs):
-        ...
     def __getitem__(self, arg0: int) -> DetectorResultItem:
         """
         get item by index
