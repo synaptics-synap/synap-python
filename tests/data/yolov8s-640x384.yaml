@@ -1,0 +1,16 @@
+inputs:
+  - name: inputs_0
+    shape: [1, 384, 640, 3]
+    scale: 255
+    format: rgb
+
+outputs:
+  - name: Identity
+    format: yolov8 bb_normalized=1
+
+quantization:
+    data_type:
+      '*' : uint8
+    scheme: asymmetric_affine
+    dataset:
+      - ../../sample3/*.jpg
