@@ -1,0 +1,90 @@
+name: Buid synap-python pip wheel for draft release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag of the draft release to upload to'
+        required: true
+
+permissions:
+  packages: write
+  contents: write
+
+jobs:
+  build-aarch64:
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_DEV_URL: "https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-3.10.15-aarch64-rpi3-linux-gnu.tar.gz"
+      TOOLCHAIN_URL: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+
+      ROOT_DIR: ${{ github.workspace }}
+      BUILD_DIR: ${{ github.workspace }}/build
+      PYTHON_DEV_DIR: ${{ github.workspace }}/build/python-dev
+      TOOLCHAIN_DIR: ${{ github.workspace }}/build/toolchain
+      VENV_DIR: ${{ github.workspace }}/.venv
+      BUILD_CONFIG: ${{ github.workspace }}/build/aarch64-linux-gnu.python3.10.py-build-cmake.cross.toml
+      BUILD_CACHE: ${{ github.workspace }}/.py-build-cmake_cache/cp310-cp310-linux_aarch64-aarch64-linux-gnu
+      DIST_DIR: ${{ github.workspace }}/dist
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -U pip
+          pip install build wheel
+
+      # - name: Install system packages
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y wget tar xz-utils cmake make build-essential \
+      #                            patchelf
+
+      - name: Set up toolchain
+        run: |
+          mkdir -p "${BUILD_DIR}"
+          cd "${BUILD_DIR}"
+
+          if [ ! -d "${PYTHON_DEV_DIR}" ]; then
+            mkdir -p "${PYTHON_DEV_DIR}"
+            wget -O temp.tar.gz "${PYTHON_DEV_URL}"
+            tar -C "${PYTHON_DEV_DIR}" -xvf temp.tar.gz --strip-components=1
+            rm temp.tar.gz
+          fi
+
+          if [ ! -d "${TOOLCHAIN_DIR}" ]; then
+            mkdir -p "${TOOLCHAIN_DIR}"
+            wget -O temp.tar.xz "${TOOLCHAIN_URL}"
+            tar -C "${TOOLCHAIN_DIR}" -xvf temp.tar.xz --strip-components=1
+            rm temp.tar.xz
+          fi
+
+      - name: Build Python extension wheel
+        run: python -m build -w . -C "cross=${BUILD_CONFIG}"
+
+      - name: Get wheel file name
+        run: |
+          WHEEL_FILE=$(ls dist/*.whl)
+          if [ -z "$WHEEL_FILE" ]; then
+            echo "No wheel file found"
+            exit 1
+          fi
+          echo "WHEEL_FILE=$(basename $WHEEL_FILE)" >> $GITHUB_ENV
+
+      - name: Upload wheel as asset
+        run: |
+          gh release upload ${{ github.event.inputs.tag_name }} \
+            dist/${{ env.WHEEL_FILE }} \
+              --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
