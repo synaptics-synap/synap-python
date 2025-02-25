@@ -143,6 +143,11 @@ static void export_tensors(py::module_& m)
         "Get tensor name"
     )
     .def_property_readonly(
+        "is_scalar",
+        &Tensor::is_scalar,
+        "Check if tensor is a scalar"
+    )
+    .def_property_readonly(
         "layout",
         &Tensor::layout,
         "Get tensor layout"
