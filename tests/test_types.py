@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from synap.types import (
     Dim2d,
     DataType,
@@ -53,15 +54,15 @@ def test_data_type_enum():
     assert DataType.float16.name == "float16"
     assert DataType.float32.name == "float32"
 
-    assert DataType.byte.np_type().name == "uint8"
-    assert DataType.int8.np_type().name == "int8"
-    assert DataType.uint8.np_type().name == "uint8"
-    assert DataType.int16.np_type().name == "int16"
-    assert DataType.uint16.np_type().name == "uint16"
-    assert DataType.int32.np_type().name == "int32"
-    assert DataType.uint32.np_type().name == "uint32"
-    assert DataType.float16.np_type().name == "float16"
-    assert DataType.float32.np_type().name == "float32"
+    assert DataType.byte.np_type() == np.dtype("uint8")
+    assert DataType.int8.np_type() == np.dtype("int8")
+    assert DataType.uint8.np_type() == np.dtype("uint8")
+    assert DataType.int16.np_type() == np.dtype("int16")
+    assert DataType.uint16.np_type() == np.dtype("uint16")
+    assert DataType.int32.np_type() == np.dtype("int32")
+    assert DataType.uint32.np_type() == np.dtype("uint32")
+    assert DataType.float16.np_type() == np.dtype("float16")
+    assert DataType.float32.np_type() == np.dtype("float32")
 
     with pytest.raises(ValueError):
         DataType.invalid.np_type()

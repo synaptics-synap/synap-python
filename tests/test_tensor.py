@@ -2,20 +2,21 @@ import pytest
 import re
 import subprocess
 import numpy as np
-from math import prod
 
 import synap
-from synap.types import DataType, Layout, Shape, SynapVersion
+from synap.types import SynapVersion
+
+from .utils import get_model_metadata, get_random_numpy_data, get_tensor_items_and_size
 
 
-def _get_tensor_items_and_size(tensor_shape: Shape, tensor_dtype: DataType):
-    n_items = prod(tensor_shape)
-    if tensor_dtype in (DataType.byte, DataType.int8, DataType.uint8):
-        return n_items, 1 * n_items
-    elif tensor_dtype in (DataType.int16, DataType.uint16, DataType.float16):
-        return n_items, 2 * n_items
-    elif tensor_dtype in (DataType.int32, DataType.uint32, DataType.float32):
-        return n_items, 4 * n_items
+def _validate_tensor_props(tensor: synap.Tensor, props: dict):
+    n_items, size = get_tensor_items_and_size(props["shape"], props["data_type"])
+    assert tensor.data_type == props["data_type"]
+    assert tensor.layout == props["layout"]
+    assert tensor.item_count == n_items
+    assert tensor.name == props["name"]
+    assert tensor.shape == props["shape"]
+    assert tensor.size == size
 
 def _validate_model_output(model: synap.Network, out_props: list):
     for i, out in enumerate(model.outputs):
@@ -25,78 +26,42 @@ def _validate_model_output(model: synap.Network, out_props: list):
         assert np.array_equal(out.to_numpy(), data)
 
 def _validate_model_props(model: synap.Network, props: dict):
-
-    def assert_props(tensor, props):
-        assert tensor.data_type == props["data_type"]
-        assert tensor.layout == props["layout"]
-        assert tensor.name == props["name"]
-        assert tensor.shape == props["shape"]
-
     assert len(model.inputs) == len(props["inputs"])
     assert len(model.outputs) == len(props["outputs"])
     for i, inp in enumerate(model.inputs):
-        assert_props(inp, props["inputs"][i])
+        _validate_tensor_props(inp, props["inputs"][i])
     for i, out in enumerate(model.outputs):
-        assert_props(out, props["outputs"][i])
-
-def _validate_tensor_props(tensor: synap.Tensor, props: dict):
-    n_items, size = _get_tensor_items_and_size(props["shape"], props["data_type"])
-    assert tensor.data_type == props["data_type"]
-    assert tensor.layout == props["layout"]
-    assert tensor.item_count == n_items
-    assert tensor.name == props["name"]
-    assert tensor.shape == props["shape"]
-    assert tensor.size == size
-
-@pytest.fixture
-def valid_float16_model_path():
-    return "tests/data/yolov8n-640x480-float16.synap"
+        _validate_tensor_props(out, props["outputs"][i])
 
 @pytest.fixture
 def valid_uint8_model_path():
     return "tests/data/yolov8s-640x384-uint8.synap"
 
 @pytest.fixture
-def valid_float16_model_props():
-    return {
-        "inputs": [
-            {
-                "data_type": DataType.float16,
-                "layout": Layout.nhwc,
-                "name": "inputs_0",
-                "shape": Shape([1, 480, 640, 3]),
-            },
-        ],
-        "outputs": [
-            {
-                "data_type": DataType.float32,
-                "layout": Layout.nhwc,
-                "name": "Identity",
-                "shape": Shape([1, 84, 6300]),
-            },
-        ]
-    }
+def valid_uint8_model_props(valid_uint8_model_path):
+    return get_model_metadata(valid_uint8_model_path)
 
 @pytest.fixture
-def valid_uint8_model_props():
-    return {
-        "inputs": [
-            {
-                "data_type": DataType.uint8,
-                "layout": Layout.nhwc,
-                "name": "inputs_0",
-                "shape": Shape([1, 384, 640, 3]),
-            },
-        ],
-        "outputs": [
-            {
-                "data_type": DataType.uint8,
-                "layout": Layout.nhwc,
-                "name": "Identity",
-                "shape": Shape([1, 84, 5040]),
-            },
-        ]
-    }
+def sample_uint8_network(valid_uint8_model_path):
+    net = synap.Network(valid_uint8_model_path)
+    return net
+
+@pytest.fixture
+def sample_uint8_tensors(sample_uint8_network):
+    return sample_uint8_network.inputs
+
+@pytest.fixture
+def sample_uint8_tensor(sample_uint8_tensors):
+    return sample_uint8_tensors[0]
+
+@pytest.fixture
+def sample_uint8_tensor_props(valid_uint8_model_path):
+    return get_model_metadata(valid_uint8_model_path)["inputs"][0]
+
+@pytest.fixture
+def sample_uint8_data(sample_uint8_tensor, sample_uint8_tensor_props):
+    quant_info = sample_uint8_tensor_props["quant_info"]
+    return get_random_numpy_data(sample_uint8_tensor.shape, sample_uint8_tensor.data_type, quant_info["scale"], quant_info["zero_point"])
 
 @pytest.fixture
 def curr_synap_version():
@@ -104,66 +69,96 @@ def curr_synap_version():
     ver_str = re.search(r"(\d+\.\d+\.\d+)", ver_str).group(1)
     return ver_str
 
+
 # ------------------------synap.synap_version------------------------ #
 
-@pytest.mark.parametrize("version_type", [SynapVersion])
-def test_synap_version(version_type, curr_synap_version):
+def test_synap_version(curr_synap_version):
     """
     Test synap_version function
     """
     ver = synap.synap_version()
-    assert isinstance(ver, version_type)
+    assert isinstance(ver, SynapVersion)
     assert str(ver) == curr_synap_version
 
 
 # ------------------------synap.Tensor------------------------ #
 
-def test_tensor_constructor_from_tensor(valid_uint8_model_path, valid_uint8_model_props):
+def test_tensor_constructor_from_tensor(sample_uint8_tensor, sample_uint8_tensor_props):
     """
     Test Tensor constructor from another Tensor
     """
-    net = synap.Network(valid_uint8_model_path)
-    tensor_1 = net.inputs[0]
+    tensor_1 = sample_uint8_tensor
     tensor_2 = synap.Tensor(tensor_1)
     # verify that tensor_2 is an alias of tensor_1
     assert tensor_1.buffer() is tensor_2.buffer()
-    _validate_tensor_props(tensor_1, valid_uint8_model_props["inputs"][0])
-    _validate_tensor_props(tensor_2, valid_uint8_model_props["inputs"][0])
+    _validate_tensor_props(tensor_1, sample_uint8_tensor_props)
+    _validate_tensor_props(tensor_2, sample_uint8_tensor_props)
 
-def test_tensor_assign_bytes(valid_uint8_model_path, valid_uint8_model_props):
+def test_tensor_buffer(sample_uint8_tensor, sample_uint8_data):
+    """
+    Test Tensor buffer getter
+    """
+    data, _ = sample_uint8_data
+    sample_uint8_tensor.assign(data)
+    _, size = get_tensor_items_and_size(sample_uint8_tensor.shape, sample_uint8_tensor.data_type)
+    assert isinstance(sample_uint8_tensor.buffer(), synap.Buffer)
+    assert sample_uint8_tensor.buffer().size == size
+
+def test_tensor_to_numpy(sample_uint8_tensor, sample_uint8_data):
+    """
+    Test Tensor to_numpy method
+    """
+    data, deq_data = sample_uint8_data
+    sample_uint8_tensor.assign(data)
+    res = sample_uint8_tensor.to_numpy()
+    assert isinstance(res, np.ndarray)
+    assert np.array_equal(res, deq_data)
+
+def test_tensor_assign_bytes(sample_uint8_tensor, sample_uint8_tensor_props, sample_uint8_data):
     """
     Test Tensor assign with bytes data
     """
-    net = synap.Network(valid_uint8_model_path)
-    sample_tensor = net.inputs[0]
-    data = np.zeros(sample_tensor.size, dtype=sample_tensor.data_type.np_type()).tobytes()
-    sample_tensor.assign(data)
-    expected = np.frombuffer(data, dtype=np.uint8).reshape(sample_tensor.shape)
-    assert np.array_equal(sample_tensor.to_numpy().astype(np.uint8), expected)
-    _validate_tensor_props(sample_tensor, valid_uint8_model_props["inputs"][0])
+    data, deq_data = sample_uint8_data
+    sample_uint8_tensor.assign(data.tobytes())
+    assert np.array_equal(sample_uint8_tensor.to_numpy(), deq_data)
+    _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
 
-def test_tensor_assign_numpy(valid_float16_model_path, valid_float16_model_props):
+def test_tensor_assign_numpy(sample_uint8_tensor, sample_uint8_tensor_props, sample_uint8_data):
     """
     Test Tensor assign with numpy data
     """
-    net = synap.Network(valid_float16_model_path)
-    sample_tensor = net.outputs[0]
-    data = np.random.rand(*sample_tensor.shape).astype(sample_tensor.data_type.np_type())
-    sample_tensor.assign(data)
-    assert np.array_equal(sample_tensor.to_numpy(), data.astype(np.float32))
-    _validate_tensor_props(sample_tensor, valid_float16_model_props["outputs"][0])
+    data, deq_data = sample_uint8_data
+    sample_uint8_tensor.assign(data)
+    assert np.array_equal(sample_uint8_tensor.to_numpy(), deq_data)
+    _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
 
-def test_tensor_assign_scalar(valid_uint8_model_path, valid_uint8_model_props):
+def test_tensor_assign_scalar(sample_uint8_tensor, sample_uint8_tensor_props):
     """
     Test Tensor assign with scalar value
     """
-    net = synap.Network(valid_uint8_model_path)
-    sample_tensor = net.inputs[0]
-    if sample_tensor.is_scalar:
+    if sample_uint8_tensor.is_scalar:
         rand_int = np.random.randint(0, 255)
-        sample_tensor.assign(rand_int)
-        assert np.array_equal(sample_tensor.to_numpy(), np.full(sample_tensor.shape, rand_int))
-        _validate_tensor_props(sample_tensor, valid_uint8_model_props["inputs"][0])
+        deq_rand_int = (rand_int - sample_uint8_tensor_props["quant_info"]["zero_point"]) * sample_uint8_tensor_props["quant_info"]["scale"]
+        sample_uint8_tensor.assign(rand_int)
+        assert np.array_equal(sample_uint8_tensor.to_numpy(), np.full(sample_uint8_tensor.shape, deq_rand_int))
+        _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
+
+
+# ------------------------synap.Tensors------------------------ #
+
+def test_tensors_size(sample_uint8_tensors):
+    assert len(sample_uint8_tensors) == 1
+    assert len(sample_uint8_tensors) == sample_uint8_tensors.size
+
+def test_tensors_getitem(sample_uint8_tensors, sample_uint8_tensor, sample_uint8_tensor_props):
+    assert isinstance(sample_uint8_tensors[0], synap.Tensor)
+    assert sample_uint8_tensors[0] is sample_uint8_tensor
+    _validate_tensor_props(sample_uint8_tensors[0], sample_uint8_tensor_props)
+
+def test_tensors_iter(sample_uint8_tensors):
+    for i, tensor in enumerate(sample_uint8_tensors):
+        assert isinstance(tensor, synap.Tensor)
+        assert tensor is sample_uint8_tensors[i]
 
 
 # ------------------------synap.Network------------------------ #
