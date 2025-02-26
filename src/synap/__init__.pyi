@@ -106,6 +106,11 @@ class Tensor:
         Get number of items in tensor
         """
     @property
+    def is_scalar(self) -> bool:
+        """
+        Check if tensor is scalar
+        """
+    @property
     def layout(self) -> types.Layout:
         """
         Get tensor layout
