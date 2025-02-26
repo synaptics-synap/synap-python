@@ -257,15 +257,12 @@ static void export_tensors(py::module_& m)
 
             return np_array.reshape(self.shape());
         },
-        "Get tensor data as NumPy array"
+        "Get dequantized tensor data as NumPy array"
     )
     ;
 
     /* Tensors */
     py::class_<Tensors>(m, "Tensors")
-    .def(
-        py::init<vector<Tensor> &>()
-    )
     .def_property_readonly(
         "size", &Tensors::size, "Get tensors size"
     )
@@ -290,9 +287,8 @@ static void export_tensors(py::module_& m)
     .def(
         "__iter__",
         [](Tensors& ts) -> py::iterator {
-            return py::make_iterator(ts.begin(), ts.end());
+            return py::make_iterator(ts.begin(), ts.end(), py::return_value_policy::reference);
         },
-        py::return_value_policy::reference,
         "Iterate over tensors"
     )
     ;
