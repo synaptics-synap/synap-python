@@ -257,7 +257,7 @@ static void export_tensors(py::module_& m)
 
             return np_array.reshape(self.shape());
         },
-        "Get tensor data as NumPy array"
+        "Get dequantized tensor data as NumPy array"
     )
     ;
 
