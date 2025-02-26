@@ -263,9 +263,6 @@ static void export_tensors(py::module_& m)
 
     /* Tensors */
     py::class_<Tensors>(m, "Tensors")
-    .def(
-        py::init<vector<Tensor> &>()
-    )
     .def_property_readonly(
         "size", &Tensors::size, "Get tensors size"
     )
