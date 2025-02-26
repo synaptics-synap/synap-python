@@ -20,6 +20,7 @@ using namespace synaptics::synap;
 
 
 PYBIND11_MAKE_OPAQUE(vector<Detector::Result::Item>);
+PYBIND11_MAKE_OPAQUE(vector<Classifier::Result::Item>);
 
 static void export_postprocessor(py::module_& m)
 {
