@@ -39,13 +39,46 @@ def _validate_model_props(model: synap.Network, props: dict):
     for i, out in enumerate(model.outputs):
         assert_props(out, props["outputs"][i])
 
+def _validate_tensor_props(tensor: synap.Tensor, props: dict):
+    n_items, size = _get_tensor_items_and_size(props["shape"], props["data_type"])
+    assert tensor.data_type == props["data_type"]
+    assert tensor.layout == props["layout"]
+    assert tensor.item_count == n_items
+    assert tensor.name == props["name"]
+    assert tensor.shape == props["shape"]
+    assert tensor.size == size
 
 @pytest.fixture
-def valid_model_path():
-    return "tests/data/yolov8s-640x384.synap"
+def valid_float16_model_path():
+    return "tests/data/yolov8n-640x480-float16.synap"
 
 @pytest.fixture
-def valid_model_props():
+def valid_uint8_model_path():
+    return "tests/data/yolov8s-640x384-uint8.synap"
+
+@pytest.fixture
+def valid_float16_model_props():
+    return {
+        "inputs": [
+            {
+                "data_type": DataType.float16,
+                "layout": Layout.nhwc,
+                "name": "inputs_0",
+                "shape": Shape([1, 480, 640, 3]),
+            },
+        ],
+        "outputs": [
+            {
+                "data_type": DataType.float32,
+                "layout": Layout.nhwc,
+                "name": "Identity",
+                "shape": Shape([1, 84, 6300]),
+            },
+        ]
+    }
+
+@pytest.fixture
+def valid_uint8_model_props():
     return {
         "inputs": [
             {
@@ -85,42 +118,52 @@ def test_synap_version(version_type, curr_synap_version):
 
 # ------------------------synap.Tensor------------------------ #
 
-def test_tensor_assign_bytes(valid_model_path):
+def test_tensor_constructor_from_tensor(valid_uint8_model_path, valid_uint8_model_props):
+    """
+    Test Tensor constructor from another Tensor
+    """
+    net = synap.Network(valid_uint8_model_path)
+    tensor_1 = net.inputs[0]
+    tensor_2 = synap.Tensor(tensor_1)
+    # verify that tensor_2 is an alias of tensor_1
+    assert tensor_1.buffer() is tensor_2.buffer()
+    _validate_tensor_props(tensor_1, valid_uint8_model_props["inputs"][0])
+    _validate_tensor_props(tensor_2, valid_uint8_model_props["inputs"][0])
+
+def test_tensor_assign_bytes(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test Tensor assign with bytes data
     """
-    net = synap.Network(valid_model_path)
+    net = synap.Network(valid_uint8_model_path)
     sample_tensor = net.inputs[0]
     data = np.zeros(sample_tensor.size, dtype=sample_tensor.data_type.np_type()).tobytes()
     sample_tensor.assign(data)
     expected = np.frombuffer(data, dtype=np.uint8).reshape(sample_tensor.shape)
     assert np.array_equal(sample_tensor.to_numpy().astype(np.uint8), expected)
+    _validate_tensor_props(sample_tensor, valid_uint8_model_props["inputs"][0])
 
-def test_tensor_assign_scalar(valid_model_path):
+def test_tensor_assign_numpy(valid_float16_model_path, valid_float16_model_props):
+    """
+    Test Tensor assign with numpy data
+    """
+    net = synap.Network(valid_float16_model_path)
+    sample_tensor = net.outputs[0]
+    data = np.random.rand(*sample_tensor.shape).astype(sample_tensor.data_type.np_type())
+    sample_tensor.assign(data)
+    assert np.array_equal(sample_tensor.to_numpy(), data.astype(np.float32))
+    _validate_tensor_props(sample_tensor, valid_float16_model_props["outputs"][0])
+
+def test_tensor_assign_scalar(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test Tensor assign with scalar value
     """
-    net = synap.Network(valid_model_path)
+    net = synap.Network(valid_uint8_model_path)
     sample_tensor = net.inputs[0]
     if sample_tensor.is_scalar:
         rand_int = np.random.randint(0, 255)
         sample_tensor.assign(rand_int)
         assert np.array_equal(sample_tensor.to_numpy(), np.full(sample_tensor.shape, rand_int))
-
-def test_tensor_props(valid_model_path, valid_model_props):
-    """
-    Test Tensor class properties
-    """
-    net = synap.Network(valid_model_path)
-    tensor = net.inputs[0]
-    inp_props = valid_model_props["inputs"]
-    n_items, size = _get_tensor_items_and_size(inp_props[0]["shape"], inp_props[0]["data_type"])
-    assert tensor.data_type == inp_props[0]["data_type"]
-    assert tensor.layout == inp_props[0]["layout"]
-    assert tensor.item_count == n_items
-    assert tensor.name == inp_props[0]["name"]
-    assert tensor.shape == inp_props[0]["shape"]
-    assert tensor.size == size
+        _validate_tensor_props(sample_tensor, valid_uint8_model_props["inputs"][0])
 
 
 # ------------------------synap.Network------------------------ #
@@ -135,14 +178,14 @@ def test_network_constructor_no_args():
     assert len(net.inputs) == 0
     assert len(net.outputs) == 0
 
-def test_network_constructor_with_model(valid_model_path, valid_model_props):
+def test_network_constructor_with_model(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test Network class constructor model loading
     """
-    net = synap.Network(valid_model_path)
-    _validate_model_props(net, valid_model_props)
+    net = synap.Network(valid_uint8_model_path)
+    _validate_model_props(net, valid_uint8_model_props)
 
-def test_network_load_from_file(valid_model_path, valid_model_props):
+def test_network_load_from_file(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test loading synap model from file
     """
@@ -151,14 +194,14 @@ def test_network_load_from_file(valid_model_path, valid_model_props):
     with pytest.raises(RuntimeError, match="Unable to load model from file"):
         net.load_model("non_existent_model.synap")
 
-    net.load_model(valid_model_path)
-    _validate_model_props(net, valid_model_props)
+    net.load_model(valid_uint8_model_path)
+    _validate_model_props(net, valid_uint8_model_props)
 
-def test_network_load_from_memory(valid_model_path, valid_model_props):
+def test_network_load_from_memory(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test loading synap model from memory
     """
-    with open(valid_model_path, "rb") as f:
+    with open(valid_uint8_model_path, "rb") as f:
         model_data = f.read()
     net = synap.Network()
     # test loading invalid model data
@@ -166,29 +209,29 @@ def test_network_load_from_memory(valid_model_path, valid_model_props):
         net.load_model(b"Invalid model data")
 
     net.load_model(model_data)
-    _validate_model_props(net, valid_model_props)
+    _validate_model_props(net, valid_uint8_model_props)
 
-def test_network_predict_no_args(valid_model_path, valid_model_props):
+def test_network_predict_no_args(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test network predict with pre-assigned input tensor
     """
-    net = synap.Network(valid_model_path)
+    net = synap.Network(valid_uint8_model_path)
     # test predict without setting input tensor
     with pytest.raises(RuntimeError, match="Failed to predict"):
         net.predict()
     
-    inp_props = valid_model_props["inputs"]
+    inp_props = valid_uint8_model_props["inputs"]
     for i, inp in enumerate(net.inputs):
         inp.assign(np.zeros(inp_props[i]["shape"]).astype(np.uint8))
     net.predict()
-    _validate_model_output(net, valid_model_props["outputs"])
+    _validate_model_output(net, valid_uint8_model_props["outputs"])
 
-def test_network_predict_with_input(valid_model_path, valid_model_props):
+def test_network_predict_with_input(valid_uint8_model_path, valid_uint8_model_props):
     """
     Test network predict with input data
     """
-    net = synap.Network(valid_model_path)
-    inp_props = valid_model_props["inputs"]
+    net = synap.Network(valid_uint8_model_path)
+    inp_props = valid_uint8_model_props["inputs"]
     inputs = [np.zeros(inp_props[i]["shape"]).astype(np.uint8) for i in range(len(net.inputs))]
     net.predict(inputs)
-    _validate_model_output(net, valid_model_props["outputs"])
+    _validate_model_output(net, valid_uint8_model_props["outputs"])
