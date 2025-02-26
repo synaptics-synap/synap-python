@@ -287,9 +287,8 @@ static void export_tensors(py::module_& m)
     .def(
         "__iter__",
         [](Tensors& ts) -> py::iterator {
-            return py::make_iterator(ts.begin(), ts.end());
+            return py::make_iterator(ts.begin(), ts.end(), py::return_value_policy::reference);
         },
-        py::return_value_policy::reference,
         "Iterate over tensors"
     )
     ;
