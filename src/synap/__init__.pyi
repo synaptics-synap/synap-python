@@ -93,7 +93,7 @@ class Tensor:
         """
     def to_numpy(self) -> numpy.ndarray:
         """
-        Get tensor data as NumPy array
+        Get dequantized tensor data as NumPy array
         """
     @property
     def data_type(self) -> types.DataType:
@@ -101,14 +101,14 @@ class Tensor:
         Get tensor data type
         """
     @property
+    def is_scalar(self) -> bool:
+        """
+        Check if tensor is a scalar
+        """
+    @property
     def item_count(self) -> int:
         """
         Get number of items in tensor
-        """
-    @property
-    def is_scalar(self) -> bool:
-        """
-        Check if tensor is scalar
         """
     @property
     def layout(self) -> types.Layout:
@@ -135,9 +135,7 @@ class Tensors:
         """
         Access tensor by index
         """
-    def __init__(self, arg0: list[Tensor]) -> None:
-        ...
-    def __iter__(self) -> typing.Iterator[Tensor]:
+    def __iter__(self) -> typing.Iterator:
         """
         Iterate over tensors
         """
@@ -154,4 +152,4 @@ def synap_version() -> types.SynapVersion:
     """
     Get SyNAP framework version
     """
-__version__: str = '0.0.1'
+__version__: str = '0.0.2'

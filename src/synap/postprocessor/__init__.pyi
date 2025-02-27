@@ -20,7 +20,7 @@ class ClassifierResult:
     def __init__(self) -> None:
         ...
     @property
-    def items(self) -> list[ClassifierResultItem]:
+    def items(self) -> ClassifierResultItems:
         ...
     @property
     def success(self) -> bool:
