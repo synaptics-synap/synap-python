@@ -74,13 +74,11 @@ python3.10 -m venv venv
 source venv/bin/activate
 ```
 
-To build the package for Astra (AArch64), run:
+### Build the package for Astra (AArch64):
 ```sh
 ./build.sh 
 ```
 Use `--verbose` for detailed build steps and `--clean` for a clean build.
-
-### **Expected Output**
 
 The build process generates a wheel file stored in the dist folder. The output should resemble the following:
 
