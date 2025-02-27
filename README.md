@@ -6,7 +6,7 @@ SyNAP-Python-API
 
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://developer.synaptics.com/)
 [![python](https://img.shields.io/badge/python-3.10-brightgreen)](https://www.python.org/downloads/release/python-3123/)
-[![version](https://img.shields.io/badge/release-0.0.1.preview-yellow)](https://github.com/synaptics-synap/synap-python/releases)
+[![version](https://img.shields.io/badge/release-0.0.2.preview-yellow)](https://github.com/synaptics-synap/synap-python/releases)
 [![license](https://img.shields.io/badge/license-Apache%202-blue)](./LICENSE)
 
 [Hardware](https://www.synaptics.com/products/embedded-processors/astra-machina-foundation-series)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Models](https://developer.synaptics.com/models?operator=AND)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Documentation](https://developer.synaptics.com/)
@@ -73,18 +73,6 @@ Create and activate a virtual environment to manage dependencies.
 python3.10 -m venv venv
 source venv/bin/activate
 ```
-
-
-### **Linux Build**
-> [!IMPORTANT]  
-> Linux x86_64 builds require the x86_64 version of the [core SyNAP framework](https://github.com/synaptics-synap/runtime/tree/wip/framework-port) to be available in the local user libraries.
-
-
-To build the package for x86_64, run:
-```sh
-./build.sh --local
-```
-### **Astra Build**
 
 To build the package for Astra (AArch64), run:
 ```sh
