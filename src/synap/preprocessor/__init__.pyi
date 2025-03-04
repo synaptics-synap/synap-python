@@ -5,15 +5,19 @@
 SyNAP preprocessor
 """
 from __future__ import annotations
-import ctypes
 import numpy
 import synap
 import synap.types
 import typing
 __all__ = ['InputData', 'InputType', 'Preprocessor']
 class InputData:
+    @staticmethod
+    def input_type(filename: str) -> tuple:
+        """
+        get input type from file name
+        """
     @typing.overload
-    def __init__(self, arg0: str) -> None:
+    def __init__(self, filename: str) -> None:
         """
         load input data from file
         """
@@ -22,17 +26,43 @@ class InputData:
         """
         create input data from buffer
         """
-    def data(self) -> ctypes.c_void_p:
+    def data(self) -> numpy.ndarray:
         """
-        get pointer to data
+        get data as numpy array
         """
     def empty(self) -> bool:
         """
         check if data present or not
         """
+    @property
+    def dimensions(self) -> synap.types.Dimensions:
+        """
+        get data dimensions
+        """
+    @property
+    def format(self) -> str:
+        """
+        get data format
+        """
+    @property
+    def layout(self) -> synap.types.Layout:
+        """
+        get data layout
+        """
+    @property
+    def shape(self) -> synap.types.Shape:
+        """
+        get data shape
+        """
+    @property
     def size(self) -> int:
         """
         get data size in bytes
+        """
+    @property
+    def type(self) -> InputType:
+        """
+        get data type
         """
 class InputType:
     """
@@ -44,12 +74,15 @@ class InputType:
     
       encoded_image
     
+      image_8bits
+    
       nv12
     
       nv21
     """
-    __members__: typing.ClassVar[dict[str, InputType]]  # value = {'invalid': <InputType.invalid: 0>, 'raw': <InputType.raw: 1>, 'encoded_image': <InputType.encoded_image: 2>, 'nv12': <InputType.nv12: 4>, 'nv21': <InputType.nv21: 5>}
+    __members__: typing.ClassVar[dict[str, InputType]]  # value = {'invalid': <InputType.invalid: 0>, 'raw': <InputType.raw: 1>, 'encoded_image': <InputType.encoded_image: 2>, 'image_8bits': <InputType.image_8bits: 3>, 'nv12': <InputType.nv12: 4>, 'nv21': <InputType.nv21: 5>}
     encoded_image: typing.ClassVar[InputType]  # value = <InputType.encoded_image: 2>
+    image_8bits: typing.ClassVar[InputType]  # value = <InputType.image_8bits: 3>
     invalid: typing.ClassVar[InputType]  # value = <InputType.invalid: 0>
     nv12: typing.ClassVar[InputType]  # value = <InputType.nv12: 4>
     nv21: typing.ClassVar[InputType]  # value = <InputType.nv21: 5>

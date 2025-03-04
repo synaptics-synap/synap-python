@@ -70,15 +70,32 @@ static void export_preprocessor(py::module_& m)
     .value("invalid", InputType::invalid)
     .value("raw", InputType::raw)
     .value("encoded_image", InputType::encoded_image)
+    .value("image_8bits", InputType::image_8bits)
     .value("nv12", InputType::nv12)
     .value("nv21", InputType::nv21)
     ;
 
     /* InputData */
     py::class_<InputData>(preprocessor, "InputData")
-    .def(py::init<const string &>(), "load input data from file")
     .def(
-        py::init<vector<uint8_t>&&, InputType, Shape, Layout>(),
+        py::init([](const std::string& filename) {
+            InputData data(filename);
+            if (data.empty()) {
+                throw std::invalid_argument("Failed to load input data from file: " + filename);
+            }
+            return data;
+        }),
+        py::arg("filename"),
+        "load input data from file"
+    )
+    .def(
+        py::init([](std::vector<uint8_t>&& buffer, InputType type, Shape shape, Layout layout) {
+            InputData data(std::move(buffer), type, shape, layout);
+            if (data.empty()) {
+                throw std::invalid_argument("Invalid buffer provided for InputData.");
+            }
+            return data;
+        }),
         py::arg("buffer"),
         py::arg("type"),
         py::arg("shape") = Shape(),
@@ -86,8 +103,44 @@ static void export_preprocessor(py::module_& m)
         "create input data from buffer"
     )
     .def("empty", &InputData::empty, "check if data present or not")
-    .def("data", &InputData::data, py::return_value_policy::reference, "get pointer to data")
-    .def("size", &InputData::size, "get data size in bytes")
+    .def(
+        "data",
+        [](const InputData& self) -> py::array {
+            if (self.empty()) {
+                return py::array_t<uint8_t>(0);
+            }
+            auto data = static_cast<const uint8_t*>(self.data());
+            auto np_array = py::array_t<uint8_t>(
+                self.size(),
+                data,
+                py::capsule(data, [](void *v) { /* no-op destructor */ })
+            );
+            auto shape = self.shape();
+            if (shape.empty()) {
+                return np_array;
+            }
+            return np_array.reshape(shape);
+        },
+        py::return_value_policy::reference,
+        "get data as numpy array"
+    )
+    .def_property_readonly("size", &InputData::size, "get data size in bytes")
+    .def_property_readonly("type", &InputData::type, "get data type")
+    .def_property_readonly("layout", &InputData::layout, "get data layout")
+    .def_property_readonly("shape", &InputData::shape, "get data shape")
+    .def_property_readonly("dimensions", &InputData::dimensions, "get data dimensions")
+    .def_property_readonly("format", &InputData::format, "get data format")
+    .def_static(
+        "input_type",
+        [](const std::string& filename) -> py::tuple {
+            std::string fmt;
+            float channels;
+            InputType type = InputData::input_type(filename, &fmt, &channels);
+            return py::make_tuple(type, fmt, channels);
+        },
+        py::arg("filename"),
+        "get input type from file name"
+    )
     ;
 
     /* Preprocessor */
