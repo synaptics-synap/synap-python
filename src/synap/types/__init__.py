@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from .._synap.types import (
     Dim2d,
+    Dimensions,
     DataType,
     Landmark,
     Layout,
@@ -16,6 +17,7 @@ from .._synap.types import (
 
 __all__ = [
     "Dim2d",
+    "Dimensions",
     "DataType",
     "Landmark",
     "Layout",

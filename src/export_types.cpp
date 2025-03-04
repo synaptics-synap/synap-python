@@ -397,4 +397,51 @@ static void export_types(py::module_& m)
         }
     )
     ;
+
+    /* Dimensions */
+    py::class_<Dimensions>(types, "Dimensions", R"doc(
+        Represents tensor dimensions as named fields for 4D tensors.
+
+        :ivar int n: The number of elements in the batch.
+        :ivar int h: The height of the tensor.
+        :ivar int w: The width of the tensor.
+        :ivar int c: The number of channels in the tensor.
+        )doc"
+    )
+    .def(
+        py::init<int32_t, int32_t, int32_t, int32_t>(),
+        py::arg("n") = 0,
+        py::arg("h") = 0,
+        py::arg("w") = 0,
+        py::arg("c") = 0
+    )
+    .def(
+        py::init<Shape, Layout>(),
+        py::arg("shape"),
+        py::arg("layout")
+    )
+    .def_readwrite("n", &Dimensions::n)
+    .def_readwrite("h", &Dimensions::h)
+    .def_readwrite("w", &Dimensions::w)
+    .def_readwrite("c", &Dimensions::c)
+    .def("__eq__", &Dimensions::operator==)
+    .def("__ne__", &Dimensions::operator!=)
+    .def("__repr__",
+        [](const Dimensions &self) {
+            std::ostringstream oss;
+            oss << "Dimensions(n=" << self.n << ", h=" << self.h << ", w=" << self.w << ", c=" << self.c << ")";
+            return oss.str();
+        }
+    )
+    .def(
+        "empty",
+        &Dimensions::empty,
+        R"doc(
+        Check if the dimensions are empty.
+
+        :return: True if the dimensions are empty, False otherwise.
+        :rtype: bool
+        )doc"
+    )
+    ;
 }
