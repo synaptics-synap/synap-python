@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
 
+#include <memory>
 #include <string>
 #include "synap/input_data.hpp"
 #include "synap/preprocessor.hpp"
@@ -76,27 +77,29 @@ static void export_preprocessor(py::module_& m)
     ;
 
     /* InputData */
-    py::class_<InputData>(preprocessor, "InputData")
+    py::class_<InputData, std::shared_ptr<InputData>>(preprocessor, "InputData")
     .def(
         py::init([](const std::string& filename) {
-            InputData data(filename);
-            if (data.empty()) {
+            auto ptr = std::make_shared<InputData>(filename);
+            if (ptr->empty()) {
                 throw std::invalid_argument("Failed to load input data from file: " + filename);
             }
-            return data;
+            return ptr;
         }),
         py::arg("filename"),
         "load input data from file"
     )
     .def(
-        py::init([](std::vector<uint8_t>&& buffer, InputType type, Shape shape, Layout layout) {
-            InputData data(std::move(buffer), type, shape, layout);
-            if (data.empty()) {
+        py::init([](py::bytes bytes, InputType type, Shape shape, Layout layout) {
+            std::string temp = bytes;
+            std::vector<uint8_t> buffer(temp.begin(), temp.end());
+            auto ptr = std::make_shared<InputData>(std::move(buffer), type, shape, layout);
+            if (ptr->empty()) {
                 throw std::invalid_argument("Invalid buffer provided for InputData.");
             }
-            return data;
+            return ptr;
         }),
-        py::arg("buffer"),
+        py::arg("bytes"),
         py::arg("type"),
         py::arg("shape") = Shape(),
         py::arg("layout") = Layout::none,
@@ -105,23 +108,30 @@ static void export_preprocessor(py::module_& m)
     .def("empty", &InputData::empty, "check if data present or not")
     .def(
         "data",
-        [](const InputData& self) -> py::array {
-            if (self.empty()) {
+        [](std::shared_ptr<InputData> self) -> py::array {
+            if (self->empty()) {
                 return py::array_t<uint8_t>(0);
             }
-            auto data = static_cast<const uint8_t*>(self.data());
-            auto np_array = py::array_t<uint8_t>(
-                self.size(),
-                data,
-                py::capsule(data, [](void *v) { /* no-op destructor */ })
+            auto data = static_cast<const uint8_t*>(self->data());
+            auto n_bytes = self->size();
+            auto capsule = py::capsule(
+                new std::shared_ptr<InputData>(self),
+                [](void *p) {
+                    // capsule destructor: cast back and delete the shared_ptr
+                    delete static_cast<std::shared_ptr<InputData>*>(p);
+                }
             );
-            auto shape = self.shape();
+            auto np_array = py::array_t<uint8_t>(
+                self->size(),
+                data,
+                capsule
+            );
+            auto shape = self->shape();
             if (shape.empty()) {
                 return np_array;
             }
             return np_array.reshape(shape);
         },
-        py::return_value_policy::reference,
         "get data as numpy array"
     )
     .def_property_readonly("size", &InputData::size, "get data size in bytes")
