@@ -2,12 +2,14 @@
 // SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
 
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <sstream>
 #include <string>
 #include "synap/tensor.hpp"
 #include "synap/network.hpp"
 #include "synap/buffer.hpp"
+#include "export_tensor.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -133,49 +135,65 @@ static void export_tensors(py::module_& m)
     ;
 
     /* Tensor */
-    py::class_<Tensor>(m, "Tensor")
+    py::class_<TensorWrapper>(m, "Tensor")
     .def(
-        py::init<const Tensor &>()
+        py::init([](const TensorWrapper& other) {
+            return TensorWrapper {other.network, other.tensor};
+        })
     )
     .def_property_readonly(
         "name",
-        &Tensor::name,
+        [](const TensorWrapper& self) -> string {
+            return self.tensor->name();
+        },
         "Get tensor name"
     )
     .def_property_readonly(
         "is_scalar",
-        &Tensor::is_scalar,
+        [](const TensorWrapper& self) -> bool {
+            return self.tensor->is_scalar();
+        },
         "Check if tensor is a scalar"
     )
     .def_property_readonly(
         "layout",
-        &Tensor::layout,
+        [](const TensorWrapper& self) -> Layout {
+            return self.tensor->layout();
+        },
         "Get tensor layout"
     )
     .def_property_readonly(
         "shape",
-        &Tensor::shape,
+        [](const TensorWrapper& self) -> Shape {
+            return self.tensor->shape();
+        },
         "Get tensor shape"
     )
     .def_property_readonly(
         "item_count",
-        &Tensor::item_count,
+        [](const TensorWrapper& self) -> size_t {
+            return self.tensor->item_count();
+        },
         "Get number of items in tensor"
     )
     .def_property_readonly(
         "size",
-        &Tensor::size,
+        [](const TensorWrapper& self) -> size_t {
+            return self.tensor->size();
+        },
         "Get size of tensor in bytes"
     )
     .def_property_readonly(
         "data_type",
-        &Tensor::data_type,
+        [](const TensorWrapper& self) -> DataType {
+            return self.tensor->data_type();
+        },
         "Get tensor data type"
     )
     .def(
         "assign",
-        [](Tensor& self, const Tensor& src) {
-            if (!self.assign(src)) {
+        [](const TensorWrapper& self, const TensorWrapper& src) {
+            if (!self.tensor->assign(*src.tensor)) {
                 throw std::runtime_error("Failed to assign tensor data to tensor");
             }
         },
@@ -184,8 +202,8 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "assign",
-        [](Tensor& self, int32_t value) {
-            if (!self.assign(value)) {
+        [](const TensorWrapper& self, int32_t value) {
+            if (!self.tensor->assign(value)) {
                 throw std::runtime_error("Failed to assign scalar data to tensor");
             }
         },
@@ -194,16 +212,16 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "assign",
-        [](Tensor& self, py::bytes data) {
+        [](const TensorWrapper& self, py::bytes data) {
             py::buffer_info data_info(py::buffer(data).request());
             const auto& data_size = data_info.size; 
-            const auto& tensor_size = self.size();
+            const auto& tensor_size = self.tensor->size();
             if (data_size != tensor_size) {
                 std::ostringstream err;
                 err << "Size mismatch: expected " << tensor_size << " bytes, got " << data_size << " bytes";
                 throw std::invalid_argument(err.str());
             }
-            if (!self.assign(static_cast<const void*>(data_info.ptr), data_size)) {
+            if (!self.tensor->assign(static_cast<const void*>(data_info.ptr), data_size)) {
                 throw std::runtime_error("Failed to assign raw data to tensor");
             }
         },
@@ -212,16 +230,16 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "assign",
-        [](Tensor &self, py::array data) {
-            assign_tensor(self, data);
+        [](const TensorWrapper& self, py::array data) {
+            assign_tensor(*self.tensor, data);
         },
         py::arg("data"),
         "Assign NumPy array to tensor"
     )
     .def(
         "buffer",
-        [](Tensor& self) -> Buffer* {
-            Buffer* buf = self.buffer();
+        [](const TensorWrapper& self) -> Buffer* {
+            Buffer* buf = self.tensor->buffer();
             if (!buf) {
                 throw std::invalid_argument("Invalid tensor buffer");
             }
@@ -232,8 +250,8 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "set_buffer",
-        [](Tensor& self, Buffer* buffer) {
-            if (!self.set_buffer(buffer)) {
+        [](const TensorWrapper& self, Buffer* buffer) {
+            if (!self.tensor->set_buffer(buffer)) {
                 throw std::runtime_error("Failed to assign buffer to tensor");
             }
         },
@@ -242,9 +260,9 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "to_numpy",
-        [](const Tensor &self) -> py::array {
-            auto size = self.item_count();
-            auto data = self.as_float();
+        [](const TensorWrapper& self) -> py::array {
+            auto size = self.tensor->item_count();
+            auto data = self.tensor->as_float();
             if (!data) {
                 throw std::runtime_error("Tensor data is null");
             }
@@ -255,41 +273,46 @@ static void export_tensors(py::module_& m)
                 py::capsule(data, [](void *v) { /* no-op destructor */ })
             );
 
-            return np_array.reshape(self.shape());
+            return np_array.reshape(self.tensor->shape());
         },
         "Get dequantized tensor data as NumPy array"
+    )
+    .def_static(
+        "is_same",
+        [](const TensorWrapper& t1, const TensorWrapper& t2) -> bool {
+            return t1.tensor == t2.tensor;
+        },
+        py::arg("t1"),
+        py::arg("t2"),
+        "Check if two tensors are the same objects in memory"
     )
     ;
 
     /* Tensors */
-    py::class_<Tensors>(m, "Tensors")
+    py::class_<TensorsWrapper>(m, "Tensors")
     .def_property_readonly(
-        "size", &Tensors::size, "Get tensors size"
+        "size",
+        [](const TensorsWrapper& self) -> size_t {
+            return self.tensors->size();
+        },
+        "Get tensors size"
     )
     .def(
         "__len__",
-        [](Tensors& ts) -> size_t {
-            return ts.size();
+        [](const TensorsWrapper& self) -> size_t {
+            return self.tensors->size();
         },
         "Get tensors size"
     )
     .def(
         "__getitem__",
-        [](Tensors& ts, size_t index) -> Tensor& {
-            if (index >= ts.size()) {
-                throw std::out_of_range("Index out of bounds");
+        [](const TensorsWrapper& self, size_t index) -> TensorWrapper {
+            if (index >= self.tensors->size()) {
+                throw py::index_error("Index out of bounds");
             }
-            return ts[index];
+            return TensorWrapper {self.network, &(*self.tensors)[index]};
         },
-        py::return_value_policy::reference,
         "Access tensor by index"
-    )
-    .def(
-        "__iter__",
-        [](Tensors& ts) -> py::iterator {
-            return py::make_iterator(ts.begin(), ts.end(), py::return_value_policy::reference);
-        },
-        "Iterate over tensors"
     )
     ;
 
@@ -342,32 +365,39 @@ static void export_tensors(py::module_& m)
             if (!self->predict()) {
                 throw std::runtime_error("Failed to predict");
             }
-            return self.outputs;
+            return TensorsWrapper {self, &self->outputs};
         },
-        py::return_value_policy::reference,
         "run inference"
     )
     .def(
         "predict",
-        [](Network& self, py::list input_data) -> Tensors&  {
-            predict_from(self, input_data);
-            return self.outputs;
+        [](std::shared_ptr<Network> self, py::list input_data) -> TensorsWrapper  {
+            predict_from(*self, input_data);
+            return TensorsWrapper {self, &self->outputs};
         },
-        py::return_value_policy::reference,
         py::arg("input_data"),
         "run inference"
     )
     .def(
         "predict",
-        [](Network& self, py::args input_data) -> Tensors&  {
-            predict_from(self, input_data);
-            return self.outputs;
+        [](std::shared_ptr<Network> self, py::args input_data) -> TensorsWrapper  {
+            predict_from(*self, input_data);
+            return TensorsWrapper {self, &self->outputs};
         },
-        py::return_value_policy::reference,
         "run inference"
     )
-    .def_readonly("inputs", &Network::inputs)
-    .def_readonly("outputs", &Network::outputs)
+    .def_property_readonly(
+        "inputs",
+        [](std::shared_ptr<Network> self) {
+            return TensorsWrapper {self, &self->inputs};
+        }
+    )
+    .def_property_readonly(
+        "outputs",
+        [](std::shared_ptr<Network> self) {
+            return TensorsWrapper {self, &self->outputs};
+        }
+    )
     ;
 
     /* Synap framework version */
