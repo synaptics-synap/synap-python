@@ -294,11 +294,15 @@ static void export_tensors(py::module_& m)
     ;
 
     /* Network */
-    py::class_<Network>(m, "Network")
-    .def(py::init())
+    py::class_<Network, std::shared_ptr<Network>>(m, "Network")
+    .def(
+        py::init([](){
+            return std::make_shared<Network>();
+        })
+    )
     .def(
        py::init([](const string& model_file, const string& meta_file = ""){
-            auto network = std::make_unique<Network>();
+            auto network = std::make_shared<Network>();
             if (!network->load_model(model_file, meta_file)) {
                 throw std::runtime_error("Unable to load model from file");
             }
@@ -308,9 +312,13 @@ static void export_tensors(py::module_& m)
        py::arg("meta_file") = ""
     )
     .def("load_model",
-        [](Network& self, py::bytes model_data, const string& meta_data) {
+        [](std::shared_ptr<Network> self, py::bytes model_data, const string& meta_data) {
             py::buffer_info model_info(py::buffer(model_data).request());
-            if (!self.load_model(static_cast<const void*>(model_info.ptr), model_info.size, meta_data.empty() ? nullptr : meta_data.c_str())) {
+            if (!self->load_model(
+                    static_cast<const void*>(model_info.ptr),
+                    model_info.size,
+                    meta_data.empty() ? nullptr : meta_data.c_str()
+            )) {
                 throw std::runtime_error("Unable to load model from memory");
             }
         },
@@ -319,8 +327,8 @@ static void export_tensors(py::module_& m)
         "Load model from memory"
     )
     .def("load_model",
-        [](Network& self, const string& model_file, const string& meta_file = "") {
-            if (!self.load_model(model_file, meta_file)) {
+        [](std::shared_ptr<Network> self, const string& model_file, const string& meta_file = "") {
+            if (!self->load_model(model_file, meta_file)) {
                 throw std::runtime_error("Unable to load model from file");
             }
         },
@@ -330,8 +338,8 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "predict",
-        [](Network& self) -> Tensors&  {
-            if (!self.predict()) {
+        [](std::shared_ptr<Network> self) -> TensorsWrapper  {
+            if (!self->predict()) {
                 throw std::runtime_error("Failed to predict");
             }
             return self.outputs;
