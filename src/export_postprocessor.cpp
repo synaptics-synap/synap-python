@@ -8,6 +8,7 @@
 #include "synap/tensor.hpp"
 #include "synap/network.hpp"
 #include "synap/types.hpp"
+#include "export_tensor.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl_bind.h>
@@ -64,7 +65,9 @@ static void export_postprocessor(py::module_& m)
     )
     .def(
         "process",
-        &Classifier::process,
+        [](Classifier& self, const TensorsWrapper& tw) -> Classifier::Result {
+            return self.process(*tw.tensors);
+        },
         py::arg("outputs"),
         "Perform classification on network outputs")
     ;
@@ -114,7 +117,9 @@ static void export_postprocessor(py::module_& m)
     )
     .def(
         "process",
-        &Detector::process,
+        [](Detector& self, const TensorsWrapper& tw, const Rect& assigned_rect) -> Detector::Result {
+            return self.process(*tw.tensors, assigned_rect);
+        },
         py::arg("outputs"),
         py::arg("assigned_rect"),
         "Perform detection on network outputs")

@@ -7,6 +7,7 @@
 #include "synap/preprocessor.hpp"
 #include "synap/tensor.hpp"
 #include "synap/types.hpp"
+#include "export_tensor.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -158,7 +159,9 @@ static void export_preprocessor(py::module_& m)
     .def(py::init<>())
     .def(
         "assign",
-        static_cast<Rect (PreprocessorWrapper::*)(Tensors&, const InputData&, size_t) const>(&PreprocessorWrapper::assign),
+        [](const PreprocessorWrapper& self, const TensorsWrapper& tw, const InputData& input_data, size_t input_index) -> Rect {
+            return self.assign(*tw.tensors, input_data, input_index);
+        },
         py::arg("inputs"),
         py::arg("input_data"),
         py::arg("input_index") = 0,
@@ -166,7 +169,9 @@ static void export_preprocessor(py::module_& m)
     )
     .def(
         "assign",
-        static_cast<Rect (PreprocessorWrapper::*)(Tensors&, const std::string&, size_t) const>(&PreprocessorWrapper::assign),
+        [](const PreprocessorWrapper& self, const TensorsWrapper& tw, const std::string& filename, size_t input_index) -> Rect {
+            return self.assign(*tw.tensors, filename, input_index);
+        },
         py::arg("inputs"),
         py::arg("filename"),
         py::arg("input_index") = 0,
@@ -174,11 +179,11 @@ static void export_preprocessor(py::module_& m)
     )
     .def(
         "assign",
-        [](const PreprocessorWrapper& self, Tensors& inputs, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
+        [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
             py::buffer_info info = data.request();
             const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
             size_t buffer_size = info.size;
-            return self.assign(inputs, buffer, buffer_size, shape, layout, input_index);
+            return self.assign(*tw.tensors, buffer, buffer_size, shape, layout, input_index);
         },
         py::arg("inputs"),
         py::arg("data"),
