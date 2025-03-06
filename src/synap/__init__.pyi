@@ -61,6 +61,11 @@ class Network:
     def outputs(self) -> Tensors:
         ...
 class Tensor:
+    @staticmethod
+    def is_same(t1: Tensor, t2: Tensor) -> bool:
+        """
+        Check if two tensors are the same objects in memory
+        """
     def __init__(self, arg0: Tensor) -> None:
         ...
     @typing.overload
@@ -134,10 +139,6 @@ class Tensors:
     def __getitem__(self, arg0: int) -> Tensor:
         """
         Access tensor by index
-        """
-    def __iter__(self) -> typing.Iterator:
-        """
-        Iterate over tensors
         """
     def __len__(self) -> int:
         """
