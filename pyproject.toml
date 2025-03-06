@@ -19,7 +19,7 @@ name = "synap"
 directory = "src"
 
 [tool.py-build-cmake.sdist]
-include = ["CMakeLists.txt", "src/*.cpp", "extern/framework/lib/*"]
+include = ["CMakeLists.txt", "src/*.cpp", "src/include/*.hpp", "extern/framework/lib/*"]
 exclude = []
 
 [tool.py-build-cmake.cmake]
