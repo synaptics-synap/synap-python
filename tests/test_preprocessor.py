@@ -2,12 +2,12 @@ import cv2
 import pytest
 import numpy as np
 
+from synap import Network
 from synap.preprocessor import (
     InputType,
     InputData,
     Preprocessor
 )
-
 from synap.types import Dimensions, Layout, Shape
 
 
@@ -56,6 +56,11 @@ def sample_image_props(sample_image_jpg):
         "shape": Shape([1, *img.shape]),
         "type": InputType.image_8bits
     }
+
+@pytest.fixture
+def sample_network():
+    net = Network("tests/data/yolov8s-640x384-uint8.synap")
+    return net
 
 
 # ------------------------synap.preprocessor.InputType------------------------ #
@@ -150,3 +155,40 @@ def test_input_data_input_type():
     assert type == InputType.image_8bits
     assert format == "bgra"
     assert channels == 4.0
+
+
+# ------------------------synap.preprocessor.Preprocessor------------------------ #
+
+def test_preprocessor_constructor():
+    """Test Preprocessor constructor"""
+    preprocessor = Preprocessor()
+    assert isinstance(preprocessor, Preprocessor) # sanity check
+
+def test_preprocessor_assign_input_data(sample_network, sample_image_jpg):
+    """Test Preprocessor assign with InputData"""
+    inp = sample_network.inputs[0]
+    inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
+    init_data = inp.to_numpy().copy()
+    preprocessor = Preprocessor()
+    data = InputData(sample_image_jpg)
+    preprocessor.assign(sample_network.inputs, data)
+    assert not np.allclose(inp.to_numpy(), init_data)
+
+def test_preprocessor_assign_image(sample_network, sample_image_jpg):
+    """Test Preprocessor assign with image file"""
+    inp = sample_network.inputs[0]
+    inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
+    init_data = inp.to_numpy().copy()
+    preprocessor = Preprocessor()
+    preprocessor.assign(sample_network.inputs, sample_image_jpg)
+    assert not np.allclose(inp.to_numpy(), init_data)
+
+def test_preprocessor_assign_numpy(sample_network, sample_image_jpg, sample_image_props):
+    """Test Preprocessor assign with numpy array"""
+    inp = sample_network.inputs[0]
+    inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
+    init_data = inp.to_numpy().copy()
+    preprocessor = Preprocessor()
+    image = cv2.imread(sample_image_jpg)
+    preprocessor.assign(sample_network.inputs, image, sample_image_props["shape"], sample_image_props["layout"])
+    assert not np.allclose(inp.to_numpy(), init_data)
