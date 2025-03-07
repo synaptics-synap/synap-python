@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
 
+#include <algorithm>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -259,21 +260,51 @@ static void export_tensors(py::module_& m)
         "Set/unset tensor's current data buffer"
     )
     .def(
+        "view",
+        [](const TensorWrapper& self) -> py::array {
+            /* 
+            * The array returned here is a view of the tensor data, not a copy.
+            * Memory efficient but might cause unexpected data changes if the tensor is modified.
+            */
+            auto size = self.tensor->item_count();
+            auto data = self.tensor->as_float();
+            auto shape = self.tensor->shape();
+            if (!data) {
+                throw std::runtime_error("Tensor data is null");
+            }
+            if (shape.empty()) {
+                shape = {static_cast<int32_t>(size)};
+            }
+
+            auto np_array = py::array_t<float>(
+                shape,
+                data,
+                py::capsule(data, [](void *v) { /* no-op destructor */ })
+            );
+            return np_array;
+        },
+        "View dequantized tensor data as read-only NumPy array"
+    )
+    .def(
         "to_numpy",
         [](const TensorWrapper& self) -> py::array {
+            /*
+            * The array returned here is a copy of the tensor data.
+            * Safe to use but might be memory inefficient for large tensors.
+            */
             auto size = self.tensor->item_count();
+            auto shape = self.tensor->shape();
             auto data = self.tensor->as_float();
             if (!data) {
                 throw std::runtime_error("Tensor data is null");
             }
-
-            auto np_array = py::array_t<float>(
-                size,
-                data,
-                py::capsule(data, [](void *v) { /* no-op destructor */ })
-            );
-
-            return np_array.reshape(self.tensor->shape());
+            if (shape.empty()) {
+                shape = {static_cast<int32_t>(size)};
+            }
+            py::array_t<float> np_array(shape);
+            auto buf = np_array.request();
+            std::copy(data, data + size, static_cast<float*>(buf.ptr));
+            return np_array;
         },
         "Get dequantized tensor data as NumPy array"
     )

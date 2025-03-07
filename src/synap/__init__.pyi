@@ -100,6 +100,10 @@ class Tensor:
         """
         Get dequantized tensor data as NumPy array
         """
+    def view(self) -> numpy.ndarray:
+        """
+        View dequantized tensor data as read-only NumPy array
+        """
     @property
     def data_type(self) -> types.DataType:
         """
