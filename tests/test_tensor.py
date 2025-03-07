@@ -105,6 +105,17 @@ def test_tensor_buffer(sample_uint8_tensor, sample_uint8_data):
     assert isinstance(sample_uint8_tensor.buffer(), synap.Buffer)
     assert sample_uint8_tensor.buffer().size == size
 
+def test_tensor_view(sample_uint8_tensor, sample_uint8_data):
+    """
+    Test Tensor view method
+    """
+    data, deq_data = sample_uint8_data
+    sample_uint8_tensor.assign(data)
+    view = sample_uint8_tensor.view()
+    assert isinstance(view, np.ndarray)
+    assert np.array_equal(view, deq_data)
+    assert not view.flags.owndata
+
 def test_tensor_to_numpy(sample_uint8_tensor, sample_uint8_data):
     """
     Test Tensor to_numpy method
@@ -114,6 +125,7 @@ def test_tensor_to_numpy(sample_uint8_tensor, sample_uint8_data):
     res = sample_uint8_tensor.to_numpy()
     assert isinstance(res, np.ndarray)
     assert np.array_equal(res, deq_data)
+    assert res.flags.owndata
 
 def test_tensor_assign_bytes(sample_uint8_tensor, sample_uint8_tensor_props, sample_uint8_data):
     """
