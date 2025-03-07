@@ -168,7 +168,7 @@ def test_preprocessor_assign_input_data(sample_network, sample_image_jpg):
     """Test Preprocessor assign with InputData"""
     inp = sample_network.inputs[0]
     inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
-    init_data = inp.to_numpy().copy()
+    init_data = inp.to_numpy()
     preprocessor = Preprocessor()
     data = InputData(sample_image_jpg)
     preprocessor.assign(sample_network.inputs, data)
@@ -178,7 +178,7 @@ def test_preprocessor_assign_image(sample_network, sample_image_jpg):
     """Test Preprocessor assign with image file"""
     inp = sample_network.inputs[0]
     inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
-    init_data = inp.to_numpy().copy()
+    init_data = inp.to_numpy()
     preprocessor = Preprocessor()
     preprocessor.assign(sample_network.inputs, sample_image_jpg)
     assert not np.allclose(inp.to_numpy(), init_data)
@@ -187,7 +187,7 @@ def test_preprocessor_assign_numpy(sample_network, sample_image_jpg, sample_imag
     """Test Preprocessor assign with numpy array"""
     inp = sample_network.inputs[0]
     inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
-    init_data = inp.to_numpy().copy()
+    init_data = inp.to_numpy()
     preprocessor = Preprocessor()
     image = cv2.imread(sample_image_jpg)
     preprocessor.assign(sample_network.inputs, image, sample_image_props["shape"], sample_image_props["layout"])
