@@ -28,7 +28,7 @@ class InputData:
         """
     def data(self) -> numpy.ndarray:
         """
-        get data as numpy array
+        view data as numpy array
         """
     def empty(self) -> bool:
         """

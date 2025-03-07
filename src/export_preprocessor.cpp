@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
 
+#include <algorithm>
 #include <memory>
 #include <string>
 #include "synap/input_data.hpp"
@@ -115,6 +116,10 @@ static void export_preprocessor(py::module_& m)
             }
             auto data = static_cast<const uint8_t*>(self->data());
             auto n_bytes = self->size();
+            auto shape = self->shape();
+            if (shape.empty()) {
+                shape = {static_cast<int32_t>(n_bytes)};
+            }
             auto capsule = py::capsule(
                 new std::shared_ptr<InputData>(self),
                 [](void *p) {
@@ -123,17 +128,13 @@ static void export_preprocessor(py::module_& m)
                 }
             );
             auto np_array = py::array_t<uint8_t>(
-                self->size(),
+                shape,
                 data,
                 capsule
             );
-            auto shape = self->shape();
-            if (shape.empty()) {
-                return np_array;
-            }
-            return np_array.reshape(shape);
+            return np_array;
         },
-        "get data as numpy array"
+        "view data as numpy array"
     )
     .def_property_readonly("size", &InputData::size, "get data size in bytes")
     .def_property_readonly("type", &InputData::type, "get data type")
