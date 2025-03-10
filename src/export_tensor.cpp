@@ -283,7 +283,7 @@ static void export_tensors(py::module_& m)
             );
             return np_array;
         },
-        "View dequantized tensor data as read-only NumPy array"
+        "View dequantized tensor data as NumPy array"
     )
     .def(
         "to_numpy",
