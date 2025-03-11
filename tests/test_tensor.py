@@ -35,7 +35,7 @@ def _validate_model_props(model: synap.Network, props: dict):
 
 @pytest.fixture
 def valid_uint8_model_path():
-    return "tests/data/yolov8s-640x384-uint8.synap"
+    return "tests/data/models/yolov8s-640x384-uint8.synap"
 
 @pytest.fixture
 def valid_uint8_model_props(valid_uint8_model_path):

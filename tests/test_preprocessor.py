@@ -59,7 +59,7 @@ def sample_image_props(sample_image_jpg):
 
 @pytest.fixture
 def sample_network():
-    net = Network("tests/data/yolov8s-640x384-uint8.synap")
+    net = Network("tests/data/models/yolov8s-640x384-uint8.synap")
     return net
 
 
