@@ -24,11 +24,11 @@ OD_MODELS = sorted(glob.glob("tests/data/models/*yolov8s*.synap"))
 OD_IMAGES = sorted(glob.glob("tests/data/images/coco8/*.jpg"))
 
 
-def _validate_classifier_result_item(item: ClassifierResultItem, expected: dict):
+def validate_classifier_result_item(item: ClassifierResultItem, expected: dict):
     assert item.class_index == expected["class_index"]
     assert item.confidence == expected["confidence"]
 
-def _validate_detector_result_item(item: DetectorResultItem, expected: dict):
+def validate_detector_result_item(item: DetectorResultItem, expected: dict):
     assert item.class_index == expected["class_index"]
     assert item.confidence == expected["confidence"]
     expected_bbox = Rect(
@@ -149,7 +149,7 @@ def test_classifier_result_items_iter(sample_ic_result, expected_ic_result):
     for i, item in enumerate(sample_ic_result.items):
         assert isinstance(item, ClassifierResultItem)
         assert item is sample_ic_result.items[i]
-        _validate_classifier_result_item(item, expected[i])
+        validate_classifier_result_item(item, expected[i])
 
 
 # ------------------------synap.postprocessor.ClassifierResultItem-------------- #
@@ -165,7 +165,7 @@ def test_classifier_result_item_properties(sample_ic_result, expected_ic_result)
     """Test ClassifierResultItem properties"""
     item = sample_ic_result.items[0]
     expected = json.loads(expected_ic_result)["items"][0]
-    _validate_classifier_result_item(item, expected)
+    validate_classifier_result_item(item, expected)
 
 
 # ------------------------synap.postprocessor.Detector-------------------------- #
@@ -215,4 +215,4 @@ def test_detector_result_items_iter(sample_od_result, expected_od_result):
     for i, item in enumerate(sample_od_result.items):
         assert isinstance(item, DetectorResultItem)
         assert item is sample_od_result.items[i]
-        _validate_detector_result_item(item, expected[i])
+        validate_detector_result_item(item, expected[i])
