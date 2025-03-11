@@ -18,7 +18,7 @@ from synap.postprocessor import (
 )
 from synap.types import Landmark, Rect
 
-from .utils import get_synap_cli_results
+from ..utils import get_synap_cli_results
 
 OD_MODELS = sorted(glob.glob("tests/data/models/*yolov8s*.synap"))
 OD_IMAGES = sorted(glob.glob("tests/data/images/coco8/*.jpg"))

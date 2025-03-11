@@ -6,7 +6,7 @@ import numpy as np
 import synap
 from synap.types import SynapVersion
 
-from .utils import get_model_metadata, get_random_numpy_data, get_tensor_items_and_size
+from ..utils import get_model_metadata, get_random_numpy_data, get_tensor_items_and_size
 
 
 def _validate_tensor_props(tensor: synap.Tensor, props: dict):

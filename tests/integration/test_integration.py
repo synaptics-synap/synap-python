@@ -6,10 +6,9 @@ import pytest
 from synap import Network
 from synap.preprocessor import Preprocessor
 from synap.postprocessor import Classifier, ClassifierResult, ClassifierResultItem, Detector, DetectorResult, DetectorResultItem
-from tests.test_postprocessor import OD_IMAGES
 
-from .utils import get_synap_cli_results
-from .test_postprocessor import validate_classifier_result_item, validate_detector_result_item
+from ..utils import get_synap_cli_results
+from ..unit.test_postprocessor import validate_classifier_result_item, validate_detector_result_item
 
 IC_MODELS = ["tests/data/models/mobilenet_v2_1.0_224_quant.synap"]
 IC_IMAGES = ["tests/data/images/sample.jpg"]
@@ -61,7 +60,7 @@ def expected_od_result(od_model, od_image):
         od_image
     )
 
-
+@pytest.mark.integration
 def test_inference_ic(ic_model, ic_image, expected_ic_result):
     net = Network(ic_model)
     pre = Preprocessor()
@@ -74,7 +73,7 @@ def test_inference_ic(ic_model, ic_image, expected_ic_result):
 
     _validate_inference_result(result, expected)
 
-
+@pytest.mark.integration
 def test_inference_od(od_model, od_image, expected_od_result):
     net = Network(od_model)
     pre = Preprocessor()
