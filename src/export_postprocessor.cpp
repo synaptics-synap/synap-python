@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
 
 #include <memory>
+#include <string>
 #include <vector>
 #include "synap/classifier.hpp"
 #include "synap/detector.hpp"
@@ -124,4 +125,16 @@ static void export_postprocessor(py::module_& m)
         py::arg("assigned_rect"),
         "Perform detection on network outputs")
     ;
+
+    /* to_json_str */
+    postprocessor.def(
+        "to_json_str",
+        static_cast<std::string(*)(const Classifier::Result&)>(&to_json_str),
+        "Get ClassifierResult as a JSON string"
+    );
+    postprocessor.def(
+        "to_json_str",
+        static_cast<std::string(*)(const Detector::Result&)>(&to_json_str),
+        "Get DetectorResult as a JSON string"
+    );
 }
