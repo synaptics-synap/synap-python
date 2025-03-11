@@ -6,7 +6,7 @@ import numpy as np
 import synap
 from synap.types import SynapVersion
 
-from .utils import get_model_metadata, get_random_numpy_data, get_tensor_items_and_size
+from ..utils import get_model_metadata, get_random_numpy_data, get_tensor_items_and_size
 
 
 def _validate_tensor_props(tensor: synap.Tensor, props: dict):
@@ -35,7 +35,7 @@ def _validate_model_props(model: synap.Network, props: dict):
 
 @pytest.fixture
 def valid_uint8_model_path():
-    return "tests/data/yolov8s-640x384-uint8.synap"
+    return "tests/data/models/yolov8s-640x384-uint8.synap"
 
 @pytest.fixture
 def valid_uint8_model_props(valid_uint8_model_path):
@@ -90,6 +90,7 @@ def test_tensor_constructor_from_tensor(sample_uint8_tensor, sample_uint8_tensor
     tensor_1 = sample_uint8_tensor
     tensor_2 = synap.Tensor(tensor_1)
     # verify that tensor_2 is an alias of tensor_1
+    assert synap.Tensor.is_same(tensor_1, tensor_2)
     assert tensor_1.buffer() is tensor_2.buffer()
     _validate_tensor_props(tensor_1, sample_uint8_tensor_props)
     _validate_tensor_props(tensor_2, sample_uint8_tensor_props)
@@ -104,6 +105,17 @@ def test_tensor_buffer(sample_uint8_tensor, sample_uint8_data):
     assert isinstance(sample_uint8_tensor.buffer(), synap.Buffer)
     assert sample_uint8_tensor.buffer().size == size
 
+def test_tensor_view(sample_uint8_tensor, sample_uint8_data):
+    """
+    Test Tensor view method
+    """
+    data, deq_data = sample_uint8_data
+    sample_uint8_tensor.assign(data)
+    view = sample_uint8_tensor.view()
+    assert isinstance(view, np.ndarray)
+    assert np.array_equal(view, deq_data)
+    assert not view.flags.owndata
+
 def test_tensor_to_numpy(sample_uint8_tensor, sample_uint8_data):
     """
     Test Tensor to_numpy method
@@ -113,6 +125,7 @@ def test_tensor_to_numpy(sample_uint8_tensor, sample_uint8_data):
     res = sample_uint8_tensor.to_numpy()
     assert isinstance(res, np.ndarray)
     assert np.array_equal(res, deq_data)
+    assert res.flags.owndata
 
 def test_tensor_assign_bytes(sample_uint8_tensor, sample_uint8_tensor_props, sample_uint8_data):
     """
@@ -152,13 +165,13 @@ def test_tensors_size(sample_uint8_tensors):
 
 def test_tensors_getitem(sample_uint8_tensors, sample_uint8_tensor, sample_uint8_tensor_props):
     assert isinstance(sample_uint8_tensors[0], synap.Tensor)
-    assert sample_uint8_tensors[0] is sample_uint8_tensor
+    assert synap.Tensor.is_same(sample_uint8_tensors[0], sample_uint8_tensor)
     _validate_tensor_props(sample_uint8_tensors[0], sample_uint8_tensor_props)
 
 def test_tensors_iter(sample_uint8_tensors):
     for i, tensor in enumerate(sample_uint8_tensors):
         assert isinstance(tensor, synap.Tensor)
-        assert tensor is sample_uint8_tensors[i]
+        assert synap.Tensor.is_same(tensor, sample_uint8_tensors[i])
 
 
 # ------------------------synap.Network------------------------ #

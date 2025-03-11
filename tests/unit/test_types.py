@@ -3,6 +3,7 @@ import numpy as np
 from synap.types import (
     Dim2d,
     DataType,
+    Dimensions,
     Landmark,
     Layout,
     Mask,
@@ -66,6 +67,38 @@ def test_data_type_enum():
 
     with pytest.raises(ValueError):
         DataType.invalid.np_type()
+
+
+def test_dimensions():
+    """Test Dimensions class"""
+    # Default constructor
+    dims = Dimensions()
+    assert dims.n == 0
+    assert dims.h == 0
+    assert dims.w == 0
+    assert dims.c == 0
+    assert dims.empty()
+
+    # Parametrized constructor
+    dims2 = Dimensions(1, 2, 3, 4)
+    assert dims2.n == 1
+    assert dims2.h == 2
+    assert dims2.w == 3
+    assert dims2.c == 4
+
+    # Parametrized constructor (Shape + Layout)
+    dims3 = Dimensions(Shape([1, 4, 2, 3]), Layout.nchw)
+    assert dims3.n == 1
+    assert dims3.h == 2
+    assert dims3.w == 3
+    assert dims3.c == 4
+
+    # Equality
+    assert dims != dims2
+    assert dims2 == dims3
+
+    # __repr__
+    assert repr(dims3) == "Dimensions(n=1, h=2, w=3, c=4)"
 
 
 def test_landmark():

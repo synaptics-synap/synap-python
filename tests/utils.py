@@ -1,6 +1,10 @@
 import json
+import os
+import subprocess
+import tempfile
 import zipfile
 from math import prod
+from typing import Any, Literal
 
 import numpy as np
 
@@ -56,7 +60,7 @@ def _parse_tensor_info(tensor_info: dict) -> dict:
     parsed_info["shape"] = Shape(tensor_info["shape"])
     return parsed_info
 
-def get_model_metadata(model: str) -> tuple[dict, dict]:
+def get_model_metadata(model: str) -> dict[str, Any]:
     try:
         model_metadata: dict[str, list] = {"inputs": [], "outputs": []}
         with zipfile.ZipFile(model, "r") as mod_info:
@@ -91,8 +95,35 @@ def get_tensor_items_and_size(tensor_shape: Shape, tensor_dtype: DataType):
         return n_items, 2 * n_items
     elif tensor_dtype in (DataType.int32, DataType.uint32, DataType.float32):
         return n_items, 4 * n_items
+    
+def get_synap_cli_results(cmd: Literal["synap_cli_ic", "synap_cli_od"], model: str, image: str, **infer_kwargs) -> str:
+    synap_cli_cmd = [cmd, "-m", model]
+    for k, v in infer_kwargs.items():
+        synap_cli_cmd.append(f"--{k.replace('_', '-')}")
+        if not isinstance(v, bool):
+            synap_cli_cmd.append(str(v))
+    synap_cli_cmd.append(image)
+    with tempfile.NamedTemporaryFile(mode="w+", delete=False) as temp:
+        temp_path = temp.name
+        try:
+            subprocess.run(
+                synap_cli_cmd,
+                stdout=temp,
+                check=True,
+                text=True
+            )
+        except subprocess.CalledProcessError as e:
+            os.remove(temp_path)
+            raise RuntimeError(f"Failed to run {cmd}, {e}")
+    with open(temp_path, "r") as results:
+        content = results.read()
+        os.remove(temp_path)
+    json_start = content.find("{")
+    if json_start == -1:
+        raise ValueError("No valid JSON found")
+    json_content = content[json_start:]
+    return json_content
 
 
 if __name__ == "__main__":
-    print(json.dumps(get_model_metadata("tests/data/yolov8n-640x480-float16.synap"), indent=4, default=str))
-    print(json.dumps(get_model_metadata("tests/data/yolov8s-640x384-uint8.synap"), indent=4, default=str))
+    pass
