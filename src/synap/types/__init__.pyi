@@ -7,7 +7,7 @@ SyNAP types
 from __future__ import annotations
 import numpy
 import typing
-__all__ = ['DataType', 'Dim2d', 'Landmark', 'Layout', 'Mask', 'Rect', 'Shape', 'SynapVersion']
+__all__ = ['DataType', 'Dim2d', 'Dimensions', 'Landmark', 'Layout', 'Mask', 'Rect', 'Shape', 'SynapVersion']
 class DataType:
     """
     
@@ -124,6 +124,41 @@ class Dim2d:
     @y.setter
     def y(self, arg0: int) -> None:
         ...
+class Dimensions:
+    """
+    
+            Represents tensor dimensions as named fields for 4D tensors.
+    
+            :ivar int n: The number of elements in the batch.
+            :ivar int h: The height of the tensor.
+            :ivar int w: The width of the tensor.
+            :ivar int c: The number of channels in the tensor.
+            
+    """
+    __hash__: typing.ClassVar[None] = None
+    c: int
+    h: int
+    n: int
+    w: int
+    def __eq__(self, arg0: Dimensions) -> bool:
+        ...
+    @typing.overload
+    def __init__(self, n: int = 0, h: int = 0, w: int = 0, c: int = 0) -> None:
+        ...
+    @typing.overload
+    def __init__(self, shape: Shape, layout: Layout) -> None:
+        ...
+    def __ne__(self, arg0: Dimensions) -> bool:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def empty(self) -> bool:
+        """
+                Check if the dimensions are empty.
+        
+                :return: True if the dimensions are empty, False otherwise.
+                :rtype: bool
+        """
 class Landmark:
     """
     

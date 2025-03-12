@@ -3,7 +3,7 @@
 
 [project]
 name = "synap-python"
-version = "0.0.2"
+version = "0.0.3"
 requires-python = ">=3.10"
 authors = [{ "name" = "Sauryadeep Pal", "email" = "sauryadeep.pal@synaptics.com" }]
 description = "Python bindings for SyNAP"
@@ -19,7 +19,7 @@ name = "synap"
 directory = "src"
 
 [tool.py-build-cmake.sdist]
-include = ["CMakeLists.txt", "src/*.cpp", "extern/framework/lib/*"]
+include = ["CMakeLists.txt", "src/*.cpp", "src/include/*.hpp", "extern/framework/lib/*"]
 exclude = []
 
 [tool.py-build-cmake.cmake]

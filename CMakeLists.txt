@@ -41,6 +41,7 @@ set(EXPORT_SRC
 include(cmake/FindPybind11.cmake)
 find_pybind11_python_first()
 pybind11_add_module(${TARGET_NAME} ${EXPORT_SRC})
+target_include_directories(${TARGET_NAME} PRIVATE src/include)
 
 # add debug identifiers
 set_target_properties(${TARGET_NAME} PROPERTIES

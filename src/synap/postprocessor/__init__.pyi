@@ -8,7 +8,7 @@ from __future__ import annotations
 import synap
 import synap.types
 import typing
-__all__ = ['Classifier', 'ClassifierResult', 'ClassifierResultItem', 'ClassifierResultItems', 'Detector', 'DetectorResult', 'DetectorResultItem', 'DetectorResultItems']
+__all__ = ['Classifier', 'ClassifierResult', 'ClassifierResultItem', 'ClassifierResultItems', 'Detector', 'DetectorResult', 'DetectorResultItem', 'DetectorResultItems', 'to_json_str']
 class Classifier:
     def __init__(self, top_count: int = 1) -> None:
         ...
@@ -98,3 +98,13 @@ class DetectorResultItems:
         """
         get items size
         """
+@typing.overload
+def to_json_str(arg0: ClassifierResult) -> str:
+    """
+    Get ClassifierResult as a JSON string
+    """
+@typing.overload
+def to_json_str(arg0: DetectorResult) -> str:
+    """
+    Get DetectorResult as a JSON string
+    """

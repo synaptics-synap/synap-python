@@ -61,6 +61,11 @@ class Network:
     def outputs(self) -> Tensors:
         ...
 class Tensor:
+    @staticmethod
+    def is_same(t1: Tensor, t2: Tensor) -> bool:
+        """
+        Check if two tensors are the same objects in memory
+        """
     def __init__(self, arg0: Tensor) -> None:
         ...
     @typing.overload
@@ -94,6 +99,10 @@ class Tensor:
     def to_numpy(self) -> numpy.ndarray:
         """
         Get dequantized tensor data as NumPy array
+        """
+    def view(self) -> numpy.ndarray:
+        """
+        View dequantized tensor data as NumPy array
         """
     @property
     def data_type(self) -> types.DataType:
@@ -135,10 +144,6 @@ class Tensors:
         """
         Access tensor by index
         """
-    def __iter__(self) -> typing.Iterator:
-        """
-        Iterate over tensors
-        """
     def __len__(self) -> int:
         """
         Get tensors size
@@ -152,4 +157,4 @@ def synap_version() -> types.SynapVersion:
     """
     Get SyNAP framework version
     """
-__version__: str = '0.0.2'
+__version__: str = '0.0.3'

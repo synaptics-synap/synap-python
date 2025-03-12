@@ -12,6 +12,7 @@ from .._synap.postprocessor import (
     DetectorResult,
     DetectorResultItem,
     DetectorResultItems,
+    to_json_str,
 )
 
 __all__ = [
@@ -23,4 +24,5 @@ __all__ = [
     "DetectorResult",
     "DetectorResultItem",
     "DetectorResultItems",
+    "to_json_str",
 ]
