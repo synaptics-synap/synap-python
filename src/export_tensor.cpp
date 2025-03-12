@@ -136,60 +136,82 @@ static void export_tensors(py::module_& m)
     ;
 
     /* Tensor */
-    py::class_<TensorWrapper>(m, "Tensor")
+    py::class_<TensorWrapper>(m, "Tensor", R"doc(
+        Represents a Synap data tensor.
+
+        Creating tensors outside a `Network` is not supported,
+        users can only access tensors created by the `Network` instance itself.
+
+        :ivar str name: The tensor name.
+        :ivar bool is_scalar: Whether the tensor is a scalar.
+        :ivar Layout layout: The tensor layout.
+        :ivar Shape shape: The tensor shape.
+        :ivar int item_count: The number of items in the tensor.
+        :ivar int size: The size of the tensor in bytes.
+        :ivar DataType data_type: The tensor data type.
+        )doc"
+    )
     .def(
         py::init([](const TensorWrapper& other) {
             return TensorWrapper {other.network, other.tensor};
-        })
+        }),
+        R"doc(
+        Creates a new tensor as an alias of an existing tensor.
+
+        This operation does not create a copy. Instead, the new tensor shares the same 
+        data buffer as the original tensor.
+
+        :param Tensor other: The existing tensor to alias.
+        )doc"
     )
     .def_property_readonly(
         "name",
         [](const TensorWrapper& self) -> string {
             return self.tensor->name();
         },
-        "Get tensor name"
+        "The tensor name."
     )
     .def_property_readonly(
         "is_scalar",
         [](const TensorWrapper& self) -> bool {
             return self.tensor->is_scalar();
         },
-        "Check if tensor is a scalar"
+        "Whether the tensor is a scalar."
     )
     .def_property_readonly(
         "layout",
         [](const TensorWrapper& self) -> Layout {
             return self.tensor->layout();
         },
-        "Get tensor layout"
+        "The tensor layout."
     )
     .def_property_readonly(
         "shape",
         [](const TensorWrapper& self) -> Shape {
             return self.tensor->shape();
         },
-        "Get tensor shape"
+        "The tensor shape."
     )
     .def_property_readonly(
         "item_count",
         [](const TensorWrapper& self) -> size_t {
             return self.tensor->item_count();
         },
-        "Get number of items in tensor"
+        "The number of items in the tensor."
     )
     .def_property_readonly(
         "size",
         [](const TensorWrapper& self) -> size_t {
             return self.tensor->size();
         },
-        "Get size of tensor in bytes"
+        "The size of the tensor in bytes."
     )
     .def_property_readonly(
         "data_type",
         [](const TensorWrapper& self) -> DataType {
             return self.tensor->data_type();
         },
-        "Get tensor data type"
+        "The tensor data type."
     )
     .def(
         "assign",
@@ -199,7 +221,15 @@ static void export_tensors(py::module_& m)
             }
         },
         py::arg("src"),
-        "Assign the contents of another tensor to this tensor"
+        R"doc(
+        Copies the contents of another tensor into this tensor.
+
+        No normalization or data conversion is performed. The source and destination 
+        tensors must have the same data type and size.
+
+        :param Tensor src: The source tensor.
+        :raises RuntimeError: If the copy operation fails.
+        )doc"
     )
     .def(
         "assign",
@@ -209,7 +239,16 @@ static void export_tensors(py::module_& m)
             }
         },
         py::arg("value"),
-        "Assign scalar value to tensor"
+        R"doc(
+        Assigns a scalar value to the tensor.
+
+        This operation is only valid if the tensor is a scalar. The value is converted 
+        to the tensor's data type (8, 16, or 32-bit integer) and rescaled if required, 
+        based on the tensor format attributes, before being written to the data buffer.
+
+        :param int value: The scalar value to assign.
+        :raises RuntimeError: If the assignment fails.
+        )doc"
     )
     .def(
         "assign",
@@ -227,7 +266,17 @@ static void export_tensors(py::module_& m)
             }
         },
         py::arg("data"),
-        "Assign raw bytes to tensor"
+        R"doc(
+        Copies raw data into the tensor's data buffer.
+
+        The provided data is treated as raw bytes, meaning no normalization or data 
+        conversion is performed, regardless of the tensor's actual data type. The 
+        data size must match the tensor's `size`.
+
+        :param bytes data: The raw data to assign.
+        :raises ValueError: If the data size does not match the tensor size.
+        :raises RuntimeError: If the assignment fails.
+        )doc"
     )
     .def(
         "assign",
@@ -235,7 +284,17 @@ static void export_tensors(py::module_& m)
             assign_tensor(*self.tensor, data);
         },
         py::arg("data"),
-        "Assign NumPy array to tensor"
+        R"doc(
+        Assigns a NumPy array to the tensor.
+
+        The NumPy array does not need to include the outermost batch dimension, but its 
+        remaining shape must match the tensor's shape. Currently, only `uint8`, `int16`, 
+        and `float` data types are supported.
+
+        :param numpy.ndarray data: The NumPy array to assign.
+        :raises ValueError: If the array size or shape does not match the tensor, or if it has an unsupported data type.
+        :raises RuntimeError: If the assignment fails.
+        )doc"
     )
     .def(
         "buffer",
@@ -247,7 +306,16 @@ static void export_tensors(py::module_& m)
             return buf;
         },
         py::return_value_policy::reference,
-        "Get tensor's current data buffer"
+        R"doc(
+        Returns the tensor's current data buffer.
+
+        This is the tensor's default buffer unless a different buffer has been assigned 
+        using `set_buffer()`.
+
+        :return: The current data buffer.
+        :rtype: Buffer
+        :raises ValueError: If the tensor has no valid buffer.
+        )doc"
     )
     .def(
         "set_buffer",
@@ -257,7 +325,15 @@ static void export_tensors(py::module_& m)
             }
         },
         py::arg("buffer").none(true),
-        "Set/unset tensor's current data buffer"
+        R"doc(
+        Sets the tensor's data buffer.
+
+        The buffer size must be either 0 or match the tensor size; otherwise, it will be rejected. 
+        Empty buffers are automatically resized to match the tensor size.
+
+        :param Buffer buffer: The buffer to be used for this tensor.
+        :raises RuntimeError: If the buffer assignment fails.
+        )doc"
     )
     .def(
         "view",
@@ -283,7 +359,17 @@ static void export_tensors(py::module_& m)
             );
             return np_array;
         },
-        "View dequantized tensor data as NumPy array"
+        R"doc(
+        Returns a NumPy view of the tensor's dequantized data.
+
+        The returned NumPy array is a **view**, not a copy, meaning it shares memory with the tensor.
+        This makes it memory efficient but also means modifying the tensor will affect the array, 
+        and vice versa.
+
+        :return: A NumPy view of the tensor data.
+        :rtype: numpy.ndarray
+        :raises RuntimeError: If the tensor has no valid data.
+        )doc"
     )
     .def(
         "to_numpy",
@@ -306,7 +392,16 @@ static void export_tensors(py::module_& m)
             std::copy(data, data + size, static_cast<float*>(buf.ptr));
             return np_array;
         },
-        "Get dequantized tensor data as NumPy array"
+        R"doc(
+        Returns a NumPy copy of the tensor's dequantized data.
+
+        The returned NumPy array contains a **copy** of the tensor data, ensuring safety
+        from unintended modifications. However, copying may be memory inefficient for large tensors.
+
+        :return: A NumPy array containing a copy of the tensor data.
+        :rtype: numpy.ndarray
+        :raises RuntimeError: If the tensor has no valid data.
+        )doc"
     )
     .def_static(
         "is_same",
@@ -315,25 +410,51 @@ static void export_tensors(py::module_& m)
         },
         py::arg("t1"),
         py::arg("t2"),
-        "Check if two tensors are the same objects in memory"
+        R"doc(
+        Checks if two tensors reference the same underlying object in memory.
+
+        This returns `True` if both tensors share the same internal data buffer.
+
+        :param Tensor t1: The first tensor.
+        :param Tensor t2: The second tensor.
+        :return: `True` if both tensors reference the same object, otherwise `False`.
+        :rtype: bool
+        )doc"
     )
     ;
 
     /* Tensors */
-    py::class_<TensorsWrapper>(m, "Tensors")
+    py::class_<TensorsWrapper>(m, "Tensors", R"doc(
+        Represents a collection of tensors.
+
+        This class provides a convenient way to access multiple tensors in a `Network`.
+
+        :ivar int size: The number of tensors in the collection.
+        )doc"
+    )
     .def_property_readonly(
         "size",
         [](const TensorsWrapper& self) -> size_t {
             return self.tensors->size();
         },
-        "Get tensors size"
+        R"doc(
+        Returns the number of tensors in the collection.
+
+        :return: The number of Tensor objects in the collection.
+        :rtype: int
+        )doc"
     )
     .def(
         "__len__",
         [](const TensorsWrapper& self) -> size_t {
             return self.tensors->size();
         },
-        "Get tensors size"
+        R"doc(
+        Returns the number of tensors in the collection.
+
+        :return: The number of Tensor objects in the collection.
+        :rtype: int
+        )doc"
     )
     .def(
         "__getitem__",
@@ -343,27 +464,59 @@ static void export_tensors(py::module_& m)
             }
             return TensorWrapper {self.network, &(*self.tensors)[index]};
         },
-        "Access tensor by index"
+        R"doc(
+        Retrieves a tensor by index.
+
+        Supports indexing with `tensors[i]`.
+
+        :param int index: The index of the tensor to retrieve.
+        :return: The Tensor at the given index.
+        :rtype: Tensor
+        :raises IndexError: If the index is out of bounds.
+        )doc"
     )
     ;
 
     /* Network */
-    py::class_<Network, std::shared_ptr<Network>>(m, "Network")
+    py::class_<Network, std::shared_ptr<Network>>(m, "Network", R"doc(
+        Represents a Synap Neural Network.
+
+        This class provides enables loading a model and running inference on the NPU accelerator.
+
+        :ivar Tensors inputs: The input tensors of the network.
+        :ivar Tensors outputs: The output tensors of the network.
+        )doc"
+    )
     .def(
         py::init([](){
             return std::make_shared<Network>();
-        })
+        }),
+        R"doc(
+        Creates a new network instance with no model.
+
+        The network will have empty input and output `Tensors`. A model must be 
+        loaded using `load_model()` before inference can be run.
+        )doc"
     )
     .def(
-       py::init([](const string& model_file, const string& meta_file = ""){
+        py::init([](const string& model_file, const string& meta_file = ""){
             auto network = std::make_shared<Network>();
             if (!network->load_model(model_file, meta_file)) {
                 throw std::runtime_error("Unable to load model from file");
             }
             return network;
-       }),
-       py::arg("model_file"),
-       py::arg("meta_file") = ""
+        }),
+        py::arg("model_file"),
+        py::arg("meta_file") = "",
+        R"doc(
+        Creates a new network instance and loads a model from a file.
+
+        :param str model_file: The path to a `.synap` model file. Legacy `.nb` model 
+                                files are also supported.
+        :param str meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+                                Required for legacy `.nb` models, otherwise should be an empty string.
+        :raises RuntimeError: If the model cannot be loaded.
+        )doc"
     )
     .def("load_model",
         [](std::shared_ptr<Network> self, py::bytes model_data, const string& meta_data) {
@@ -378,7 +531,17 @@ static void export_tensors(py::module_& m)
         },
         py::arg("model_data"),
         py::arg("meta_data") = "",
-        "Load model from memory"
+        R"doc(
+        Loads a model from memory.
+
+        If another model was previously loaded, it is automatically disposed before 
+        loading the new one.
+
+        :param bytes model_data: The binary model data.
+        :param str meta_data: (Optional) The path to the model metadata file (JSON-formatted). 
+                                Required for legacy `.nb` models, otherwise should be an empty string.
+        :raises RuntimeError: If the model cannot be loaded.
+        )doc"
     )
     .def("load_model",
         [](std::shared_ptr<Network> self, const string& model_file, const string& meta_file = "") {
@@ -388,7 +551,18 @@ static void export_tensors(py::module_& m)
         },
         py::arg("model_file"),
         py::arg("meta_file") = "",
-        "Load model from file"
+        R"doc(
+        Loads a model from a file.
+
+        If another model was previously loaded, it is automatically disposed before 
+        loading the new one.
+    
+        :param str model_file: The path to a `.synap` model file. Legacy `.nb` model 
+                                files are also supported.
+        :param str meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+                                Required for legacy `.nb` models, otherwise should be an empty string.
+        :raises RuntimeError: If the model cannot be loaded.
+        )doc"
     )
     .def(
         "predict",
@@ -398,7 +572,18 @@ static void export_tensors(py::module_& m)
             }
             return TensorsWrapper {self, &self->outputs};
         },
-        "run inference"
+        R"doc(
+        Runs inference using the provided input data as variadic arguments.
+
+        Each argument must be a NumPy array. The number of provided inputs must match 
+        the number of model inputs. The inference results are stored in `Network.outputs` 
+        and also returned by this function.
+
+        :param numpy.ndarray input_data: One or more NumPy arrays representing the input data.
+        :return: The output `Tensors` collection.
+        :rtype: Tensors
+        :raises RuntimeError: If inference fails.
+        )doc"
     )
     .def(
         "predict",
@@ -407,7 +592,21 @@ static void export_tensors(py::module_& m)
             return TensorsWrapper {self, &self->outputs};
         },
         py::arg("input_data"),
-        "run inference"
+        R"doc(
+        Runs inference using the provided list of input data.
+
+        Each element in the list must be a NumPy array. Currently, only `uint8`, `int16`, 
+        and `float` data types are supported. The length of the list must 
+        match the number of model inputs. The inference results are stored in 
+        `Network.outputs` and also returned by this function.
+
+        :param list input_data: A list of NumPy arrays representing the input data.
+        :return: The output `Tensors` collection.
+        :rtype: Tensors
+        :raises ValueError: If the length of the list does not match the number of model inputs.
+        :raises TypeError: If any element in the list is not a valid NumPy array.
+        :raises RuntimeError: If inference fails.
+        )doc"
     )
     .def(
         "predict",
@@ -415,19 +614,51 @@ static void export_tensors(py::module_& m)
             predict_from(*self, input_data);
             return TensorsWrapper {self, &self->outputs};
         },
-        "run inference"
+        R"doc(
+        Runs inference using the provided input data.
+
+        Each argument must be a NumPy array. Currently, only `uint8`, `int16`, 
+        and `float` data types are supported. The number of provided inputs must match 
+        the number of model inputs. The inference results are stored in `Network.outputs` 
+        and also returned by this function.
+
+        :param numpy.ndarray input_data: One or more NumPy arrays representing the input data.
+        :return: The output `Tensors` collection.
+        :rtype: Tensors
+        :raises ValueError: If the number of input data does not match the number of model inputs.
+        :raises TypeError: If any element in the list is not a valid NumPy array.
+        :raises RuntimeError: If inference fails.
+        )doc"
     )
     .def_property_readonly(
         "inputs",
         [](std::shared_ptr<Network> self) {
             return TensorsWrapper {self, &self->inputs};
-        }
+        },
+        R"doc(
+        The input tensors of the network.
+
+        These tensors must be set before running inference. The number and shape of 
+        the input tensors depend on the loaded model.
+
+        :return: The collection of input `Tensors`.
+        :rtype: Tensors
+        )doc"
     )
     .def_property_readonly(
         "outputs",
         [](std::shared_ptr<Network> self) {
             return TensorsWrapper {self, &self->outputs};
-        }
+        },
+        R"doc(
+        The output tensors of the network.
+
+        These tensors hold the results after running inference. The number and shape 
+        of the output tensors depend on the loaded model.
+
+        :return: The collection of output `Tensors`.
+        :rtype: Tensors
+        )doc"
     )
     ;
 
@@ -435,7 +666,12 @@ static void export_tensors(py::module_& m)
     m.def(
         "synap_version",
         &synap_version,
-        "Get SyNAP framework version"
+        R"doc(
+        Returns the version of the SyNAP framework.
+
+        :return: The SyNAP framework version.
+        :rtype: SynapVersion
+        )doc"
     )
     ;
 }
