@@ -53,6 +53,7 @@ PYTHONPATH="$STUBGEN_DIR:$PYTHONPATH" pybind11-stubgen "$SYNAP_MODULE" \
     --enum-class-locations \
         InputType:synap._synap.preprocessor
 find "$STUBS_DIR" -type f -name "*.pyi" -exec sed -i "s/synap\._synap/synap/g" {} +
+find "$STUBS_DIR" -type f -name "*.pyi" -exec sed -i "1s|^|# SPDX-License-Identifier: Apache-2.0\n# SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.\n\n|" {} +
 cp "$STUBS_DIR/__init__.pyi" "$SRC_DIR/__init__.pyi"
 cp "$STUBS_DIR/preprocessor.pyi" "$SRC_DIR/preprocessor/__init__.pyi"
 cp "$STUBS_DIR/postprocessor.pyi" "$SRC_DIR/postprocessor/__init__.pyi"
