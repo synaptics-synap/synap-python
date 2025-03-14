@@ -36,16 +36,22 @@ echo "Installing pip packages..."
 pip install --upgrade pip
 pip install pybind11 pybind11-stubgen py-build-cmake typing-extensions numpy
 
-if [ ! -f "$BUILD_CACHE/CMakeCache.txt" ]; then
-    echo "Configuring build..."
-    py-build-cmake --local "$BUILD_CONFIG" configure
-fi
+rm -rf $BUILD_CACHE
+echo "Configuring build..."
+py-build-cmake --local "$BUILD_CONFIG" configure
 echo "Building extension..."
 py-build-cmake --local "$BUILD_CONFIG" build
 
 mkdir -p "$STUBGEN_DIR/synap"
 cp "$BUILD_CACHE/_synap.cpython-310-x86_64-linux-gnu.so" "$STUBGEN_DIR/synap/"
-PYTHONPATH="$STUBGEN_DIR:$PYTHONPATH" pybind11-stubgen "$SYNAP_MODULE" -o "$OUTPUT_DIR"
+PYTHONPATH="$STUBGEN_DIR:$PYTHONPATH" pybind11-stubgen "$SYNAP_MODULE" \
+    -o "$OUTPUT_DIR" \
+    --enum-class-locations \
+        Layout:synap._synap.types \
+    --enum-class-locations \
+        DataType:synap._synap.types \
+    --enum-class-locations \
+        InputType:synap._synap.preprocessor
 find "$STUBS_DIR" -type f -name "*.pyi" -exec sed -i "s/synap\._synap/synap/g" {} +
 cp "$STUBS_DIR/__init__.pyi" "$SRC_DIR/__init__.pyi"
 cp "$STUBS_DIR/preprocessor.pyi" "$SRC_DIR/preprocessor/__init__.pyi"

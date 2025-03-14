@@ -82,13 +82,11 @@ class Network:
     @typing.overload
     def predict(self) -> Tensors:
         """
-                Runs inference using the provided input data as variadic arguments.
-        
-                Each argument must be a NumPy array. The number of provided inputs must match 
-                the number of model inputs. The inference results are stored in `Network.outputs` 
-                and also returned by this function.
-        
-                :param numpy.ndarray input_data: One or more NumPy arrays representing the input data.
+                Runs inference using the current input tensors.
+            
+                Input data must be set beforehand via `Network.inputs`. The inference results 
+                are stored in `Network.outputs` and also returned by this function.
+            
                 :return: The output `Tensors` collection.
                 :rtype: Tensors
                 :raises RuntimeError: If inference fails.

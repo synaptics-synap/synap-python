@@ -22,7 +22,7 @@ class InputData:
         load input data from file
         """
     @typing.overload
-    def __init__(self, bytes: bytes, type: InputType, shape: synap.types.Shape = ..., layout: synap.types.Layout = ...) -> None:
+    def __init__(self, bytes: bytes, type: InputType, shape: synap.types.Shape = ..., layout: synap.types.Layout = synap.types.Layout.none) -> None:
         """
         create input data from buffer
         """
