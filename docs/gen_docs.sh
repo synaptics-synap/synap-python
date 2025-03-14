@@ -9,6 +9,7 @@ SYNAP_VERSION="0.0.3"
 SYNAP_RELEASE="preview"
 DOCS_ROOT="$PWD"
 VENV_DIR="$DOCS_ROOT/.docs"
+DIST_DIR="$DOCS_ROOT/../dist"
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
@@ -37,7 +38,21 @@ if [ -z "$VIRTUAL_ENV" ]; then
 fi
 
 echo "Installing latest SyNAP Python API wheel..."
-pip install --force-reinstall "https://github.com/synaptics-synap/synap-python/releases/download/v$SYNAP_VERSION-$SYNAP_RELEASE/synap_python-$SYNAP_VERSION-cp310-cp310-linux_aarch64.whl"
+arch=$(uname -m)
+if [ "$arch" = "x86_64" ]; then
+    wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_x86_64.whl"
+elif [ "$arch" = "aarch64" ]; then
+    wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_aarch64.whl"
+else
+    echo "Error: Unsupported architecture '$arch'."
+    exit 1
+fi
+
+if [ ! -f "$wheel" ]; then
+    echo "Error: SyNAP Python API wheel not found at '$wheel'."
+    exit 1
+fi
+pip install --force-reinstall "$wheel"
 
 echo "Building documentation..."
 mkdir -p source/_static
