@@ -73,30 +73,19 @@ static void export_types(py::module_& m)
 
     /* DataType */
     py::enum_<DataType>(types, "DataType", R"doc(
-        Represents the data type of a tensor.
-
-        :cvar invalid: Invalid data type.
-        :cvar byte: 8-bit signed integer.
-        :cvar int8: 8-bit signed integer.
-        :cvar uint8: 8-bit unsigned integer.
-        :cvar int16: 16-bit signed integer.
-        :cvar uint16: 16-bit unsigned integer.
-        :cvar int32: 32-bit signed integer.
-        :cvar uint32: 32-bit unsigned integer.
-        :cvar float16: 16-bit floating point.
-        :cvar float32: 32-bit floating point.
+        **Enum** Represents the data type of a tensor.
         )doc"
     )
-    .value("invalid", DataType::invalid)
-    .value("byte", DataType::byte)
-    .value("int8", DataType::int8)
-    .value("uint8", DataType::uint8)
-    .value("int16", DataType::int16)
-    .value("uint16", DataType::uint16)
-    .value("int32", DataType::int32)
-    .value("uint32", DataType::uint32)
-    .value("float16", DataType::float16)
-    .value("float32", DataType::float32)
+    .value("invalid", DataType::invalid, "Invalid data type")
+    .value("byte", DataType::byte, "Raw binary values")
+    .value("int8", DataType::int8, "8-bit signed integer")
+    .value("uint8", DataType::uint8, "8-bit unsigned integer")
+    .value("int16", DataType::int16, "16-bit signed integer")
+    .value("uint16", DataType::uint16, "16-bit unsigned integer")
+    .value("int32", DataType::int32, "32-bit signed integer")
+    .value("uint32", DataType::uint32, "32-bit unsigned integer")
+    .value("float16", DataType::float16, "16-bit floating point")
+    .value("float32", DataType::float32, "32-bit floating point")
     .def(
         "np_type",
         [](const DataType& dtype) {
@@ -133,10 +122,14 @@ static void export_types(py::module_& m)
         py::arg("z") = 0,
         py::arg("visibility") = -1.0f
     )
-    .def_readwrite("x", &Landmark::x)
-    .def_readwrite("y", &Landmark::y)
-    .def_readwrite("z", &Landmark::z)
-    .def_readwrite("visibility", &Landmark::visibility)
+    .def_readwrite("x", &Landmark::x, "The x-coordinate.")
+    .def_readwrite("y", &Landmark::y, "The y-coordinate.")
+    .def_readwrite("z", &Landmark::z, "The z-coordinate.")
+    .def_readwrite(
+        "visibility",
+        &Landmark::visibility,
+        "The visibility of the landmark."
+    )
     .def(
         "__eq__",
         [](const Landmark& self, const Landmark& other) {
@@ -157,16 +150,12 @@ static void export_types(py::module_& m)
 
     /* Layout */
     py::enum_<Layout>(types, "Layout", R"doc(
-        Represents valid SyNAP data layouts.
-
-        :cvar none: No layout (invalid).
-        :cvar nchw: NCHW layout.
-        :cvar nhwc: NHWC layout.
+        **Enum** Represents valid SyNAP data layouts.
         )doc"
     )
-    .value("none", Layout::none)
-    .value("nchw", Layout::nchw)
-    .value("nhwc", Layout::nhwc)
+    .value("none", Layout::none, "No layout (invalid)")
+    .value("nchw", Layout::nchw, "NCHW layout")
+    .value("nhwc", Layout::nhwc, "NHWC layout")
     ;
 
     /* Segment mask */
@@ -420,10 +409,10 @@ static void export_types(py::module_& m)
         py::arg("shape"),
         py::arg("layout")
     )
-    .def_readwrite("n", &Dimensions::n)
-    .def_readwrite("h", &Dimensions::h)
-    .def_readwrite("w", &Dimensions::w)
-    .def_readwrite("c", &Dimensions::c)
+    .def_readwrite("n", &Dimensions::n, "The number of elements in the batch.")
+    .def_readwrite("h", &Dimensions::h, "The height of the tensor.")
+    .def_readwrite("w", &Dimensions::w, "The width of the tensor.")
+    .def_readwrite("c", &Dimensions::c, "The number of channels in the tensor.")
     .def("__eq__", &Dimensions::operator==)
     .def("__ne__", &Dimensions::operator!=)
     .def("__repr__",

@@ -11,41 +11,30 @@ __all__ = ['DataType', 'Dim2d', 'Dimensions', 'Landmark', 'Layout', 'Mask', 'Rec
 class DataType:
     """
     
-            Represents the data type of a tensor.
-    
-            :cvar invalid: Invalid data type.
-            :cvar byte: 8-bit signed integer.
-            :cvar int8: 8-bit signed integer.
-            :cvar uint8: 8-bit unsigned integer.
-            :cvar int16: 16-bit signed integer.
-            :cvar uint16: 16-bit unsigned integer.
-            :cvar int32: 32-bit signed integer.
-            :cvar uint32: 32-bit unsigned integer.
-            :cvar float16: 16-bit floating point.
-            :cvar float32: 32-bit floating point.
+            **Enum** Represents the data type of a tensor.
             
     
     Members:
     
-      invalid
+      invalid : Invalid data type
     
-      byte
+      byte : Raw binary values
     
-      int8
+      int8 : 8-bit signed integer
     
-      uint8
+      uint8 : 8-bit unsigned integer
     
-      int16
+      int16 : 16-bit signed integer
     
-      uint16
+      uint16 : 16-bit unsigned integer
     
-      int32
+      int32 : 32-bit signed integer
     
-      uint32
+      uint32 : 32-bit unsigned integer
     
-      float16
+      float16 : 16-bit floating point
     
-      float32
+      float32 : 32-bit floating point
     """
     __members__: typing.ClassVar[dict[str, DataType]]  # value = {'invalid': <DataType.invalid: 0>, 'byte': <DataType.byte: 1>, 'int8': <DataType.int8: 2>, 'uint8': <DataType.uint8: 3>, 'int16': <DataType.int16: 4>, 'uint16': <DataType.uint16: 5>, 'int32': <DataType.int32: 6>, 'uint32': <DataType.uint32: 7>, 'float16': <DataType.float16: 8>, 'float32': <DataType.float32: 9>}
     byte: typing.ClassVar[DataType]  # value = <DataType.byte: 1>
@@ -136,10 +125,6 @@ class Dimensions:
             
     """
     __hash__: typing.ClassVar[None] = None
-    c: int
-    h: int
-    n: int
-    w: int
     def __eq__(self, arg0: Dimensions) -> bool:
         ...
     @typing.overload
@@ -159,6 +144,38 @@ class Dimensions:
                 :return: True if the dimensions are empty, False otherwise.
                 :rtype: bool
         """
+    @property
+    def c(self) -> int:
+        """
+        The number of channels in the tensor.
+        """
+    @c.setter
+    def c(self, arg0: int) -> None:
+        ...
+    @property
+    def h(self) -> int:
+        """
+        The height of the tensor.
+        """
+    @h.setter
+    def h(self, arg0: int) -> None:
+        ...
+    @property
+    def n(self) -> int:
+        """
+        The number of elements in the batch.
+        """
+    @n.setter
+    def n(self, arg0: int) -> None:
+        ...
+    @property
+    def w(self) -> int:
+        """
+        The width of the tensor.
+        """
+    @w.setter
+    def w(self, arg0: int) -> None:
+        ...
 class Landmark:
     """
     
@@ -171,33 +188,57 @@ class Landmark:
             
     """
     __hash__: typing.ClassVar[None] = None
-    visibility: float
-    x: int
-    y: int
-    z: int
     def __eq__(self, arg0: Landmark) -> bool:
         ...
     def __init__(self, x: int = 0, y: int = 0, z: int = 0, visibility: float = -1.0) -> None:
         ...
     def __repr__(self) -> str:
         ...
+    @property
+    def visibility(self) -> float:
+        """
+        The visibility of the landmark.
+        """
+    @visibility.setter
+    def visibility(self, arg0: float) -> None:
+        ...
+    @property
+    def x(self) -> int:
+        """
+        The x-coordinate.
+        """
+    @x.setter
+    def x(self, arg0: int) -> None:
+        ...
+    @property
+    def y(self) -> int:
+        """
+        The y-coordinate.
+        """
+    @y.setter
+    def y(self, arg0: int) -> None:
+        ...
+    @property
+    def z(self) -> int:
+        """
+        The z-coordinate.
+        """
+    @z.setter
+    def z(self, arg0: int) -> None:
+        ...
 class Layout:
     """
     
-            Represents valid SyNAP data layouts.
-    
-            :cvar none: No layout (invalid).
-            :cvar nchw: NCHW layout.
-            :cvar nhwc: NHWC layout.
+            **Enum** Represents valid SyNAP data layouts.
             
     
     Members:
     
-      none
+      none : No layout (invalid)
     
-      nchw
+      nchw : NCHW layout
     
-      nhwc
+      nhwc : NHWC layout
     """
     __members__: typing.ClassVar[dict[str, Layout]]  # value = {'none': <Layout.none: 0>, 'nchw': <Layout.nchw: 1>, 'nhwc': <Layout.nhwc: 2>}
     nchw: typing.ClassVar[Layout]  # value = <Layout.nchw: 1>
