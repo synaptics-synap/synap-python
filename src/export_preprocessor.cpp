@@ -69,17 +69,54 @@ static void export_preprocessor(py::module_& m)
     auto preprocessor = m.def_submodule("preprocessor", "SyNAP preprocessor");
 
     /* InputType */
-    py::enum_<InputType>(preprocessor, "InputType")
-    .value("invalid", InputType::invalid)
-    .value("raw", InputType::raw)
-    .value("encoded_image", InputType::encoded_image)
-    .value("image_8bits", InputType::image_8bits)
-    .value("nv12", InputType::nv12)
-    .value("nv21", InputType::nv21)
+    py::enum_<InputType>(preprocessor, "InputType", R"doc(
+        **Enum** Represents valid SyNAP input types.
+        )doc"
+    )
+    .value(
+        "invalid",
+        InputType::invalid,
+        "Unsupported input file type"
+    )
+    .value(
+        "raw",
+        InputType::raw,
+        "Raw binary data"
+    )
+    .value(
+        "encoded_image",
+        InputType::encoded_image,
+        "Encoded image (JPEG, PNG)"
+    )
+    .value(
+        "image_8bits",
+        InputType::image_8bits,
+        "8-bits image (RGB[A], grayscale) interleaved or planar"
+    )
+    .value(
+        "nv12",
+        InputType::nv12,
+        "YUV420semiplanar: YYYY..UVUV..."
+    )
+    .value(
+        "nv21",
+        InputType::nv21,
+        "NV12 with reversed UV order: YYYY..VUVU..."
+    )
     ;
 
     /* InputData */
-    py::class_<InputData, std::shared_ptr<InputData>>(preprocessor, "InputData")
+    py::class_<InputData, std::shared_ptr<InputData>>(preprocessor, "InputData", R"doc(
+        Container for input data.
+
+        :ivar int size: Data size in bytes.
+        :ivar InputType type: Data type.
+        :ivar Layout layout: Data layout.
+        :ivar Shape shape: Data shape.
+        :ivar Dimensions dimensions: Data dimensions.
+        :ivar str format: Data format.
+        )doc"
+    )
     .def(
         py::init([](const std::string& filename) {
             auto ptr = std::make_shared<InputData>(filename);
@@ -89,7 +126,11 @@ static void export_preprocessor(py::module_& m)
             return ptr;
         }),
         py::arg("filename"),
-        "load input data from file"
+        R"doc(
+        Create input data from image file.
+        :param str filename: Filename to load data from.
+        :raises ValueError: If the file is not found or the data is invalid.
+        )doc"
     )
     .def(
         py::init([](py::bytes bytes, InputType type, Shape shape, Layout layout) {
@@ -105,9 +146,27 @@ static void export_preprocessor(py::module_& m)
         py::arg("type"),
         py::arg("shape") = Shape(),
         py::arg("layout") = Layout::none,
-        "create input data from buffer"
+        R"doc(
+        Create input data from a byte buffer.
+        :param bytes: Input data buffer.
+        :param InputType type: Data type.
+        :param Shape shape: (optional) Data shape, not needed for `InputType.encoded_image`. 
+                            The order of elements in `shape` must align with the specified `layout`.  
+                            For example, a 640x480 RGB image with an `Layout.nhwc` layout should have shape `Shape([1, 480, 640, 3])`.
+        :param Layout layout: (optional) Data layout, not needed for `InputType.encoded_image`. 
+                                Use `Layout.nchw` for planar images, and `Layout.nhwc` for interleaved images.
+        :raises ValueError: If the buffer is empty or the data is invalid.
+        )doc"
     )
-    .def("empty", &InputData::empty, "check if data present or not")
+    .def(
+        "empty",
+        &InputData::empty,
+        R"doc(
+        Check if data is present.
+        :return: True if no data is present.
+        :rtype: bool
+        )doc"
+     )
     .def(
         "data",
         [](std::shared_ptr<InputData> self) -> py::array {
@@ -134,14 +193,23 @@ static void export_preprocessor(py::module_& m)
             );
             return np_array;
         },
-        "view data as numpy array"
+        R"doc(
+        Get a NumPy array view of the data.
+
+        The returned NumPy array is a **view**, not a copy, meaning the data is owned 
+        by the `InputData` object. The array will be invalidated if the `InputData` 
+        object is destroyed.
+
+        :return: NumPy array view of the data.
+        :rtype: numpy.ndarray
+        )doc"
     )
-    .def_property_readonly("size", &InputData::size, "get data size in bytes")
-    .def_property_readonly("type", &InputData::type, "get data type")
-    .def_property_readonly("layout", &InputData::layout, "get data layout")
-    .def_property_readonly("shape", &InputData::shape, "get data shape")
-    .def_property_readonly("dimensions", &InputData::dimensions, "get data dimensions")
-    .def_property_readonly("format", &InputData::format, "get data format")
+    .def_property_readonly("size", &InputData::size, "Data size in bytes.")
+    .def_property_readonly("type", &InputData::type, "Data type.")
+    .def_property_readonly("layout", &InputData::layout, "Data layout.")
+    .def_property_readonly("shape", &InputData::shape, "Data shape.")
+    .def_property_readonly("dimensions", &InputData::dimensions, "Data dimensions.")
+    .def_property_readonly("format", &InputData::format, "Data format.")
     .def_static(
         "input_type",
         [](const std::string& filename) -> py::tuple {
@@ -151,7 +219,13 @@ static void export_preprocessor(py::module_& m)
             return py::make_tuple(type, fmt, channels);
         },
         py::arg("filename"),
-        "get input type from file name"
+        R"doc(
+        Parse input type from image file.
+
+        :param str filename: Path to image file.
+        :return: Tuple containing input type, format, and number of channels.
+        :rtype: tuple
+        )doc"
     )
     ;
 
@@ -166,7 +240,16 @@ static void export_preprocessor(py::module_& m)
         py::arg("inputs"),
         py::arg("input_data"),
         py::arg("input_index") = 0,
-        "Write input data to network inputs"
+        R"doc(
+        Write input data to network inputs.
+
+        :param Tensors inputs: Network inputs.
+        :param InputData input_data: Input data.
+        :param int input_index: Index of the input tensor to write to.
+        :return: Assigned rectangle in the input tensor.
+        :rtype: Rect
+        :raises RuntimeError: If an error occurs during preprocessing.
+        )doc"
     )
     .def(
         "assign",
@@ -176,7 +259,17 @@ static void export_preprocessor(py::module_& m)
         py::arg("inputs"),
         py::arg("filename"),
         py::arg("input_index") = 0,
-        "Write image data to network inputs"
+        R"doc(
+        Write image data to network inputs.
+
+        :param Tensors inputs: Network inputs.
+        :param str filename: Path to image file.
+        :param int input_index: Index of the input tensor to write to.
+        :return: Assigned rectangle in the input tensor.
+        :rtype: Rect
+        :raises ValueError: If the image file is not found or the data is invalid.
+        :raises RuntimeError: If an error occurs during preprocessing.
+        )doc"
     )
     .def(
         "assign",
@@ -191,7 +284,20 @@ static void export_preprocessor(py::module_& m)
         py::arg("shape"),
         py::arg("layout"),
         py::arg("input_index") = 0,
-        "Write raw data to network inputs"
+        R"doc(
+        Write raw data to network inputs.
+
+        Data must be provided as a NumPy array of type `uint8`.
+
+        :param Tensors inputs: Network inputs.
+        :param numpy.ndarray data: Raw data buffer.
+        :param Shape shape: Data shape.
+        :param Layout layout: Data layout.
+        :param int input_index: Index of the input tensor to write to.
+        :return: Assigned rectangle in the input tensor.
+        :rtype: Rect
+        :raises RuntimeError: If an error occurs during preprocessing.
+        )doc"
     )
     ;
 }
