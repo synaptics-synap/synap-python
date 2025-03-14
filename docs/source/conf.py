@@ -32,3 +32,14 @@ language = 'en'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+import re
+
+def remove_self_typehint(app, what, name, obj, options, signature, return_annotation):
+    if signature:
+        signature = re.sub(r"\(self: [^,)\s]+", "(self", signature)
+        signature = re.sub(r"\(cls: [^,)\s]+", "(cls", signature)
+    return signature, return_annotation
+
+def setup(app):
+    app.connect("autodoc-process-signature", remove_self_typehint)
