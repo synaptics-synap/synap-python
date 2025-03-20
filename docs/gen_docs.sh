@@ -30,7 +30,7 @@ if [ ! -d "$VENV_DIR" ]; then
     source "$VENV_DIR/bin/activate"
     echo "Installing pip packages..."
     pip install --upgrade pip
-    pip install sphinx sphinx-markdown-builder sphinx-rtd-theme
+    pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel
 fi
 if [ -z "$VIRTUAL_ENV" ]; then
     echo "Activating virtual environment..."
@@ -39,9 +39,12 @@ fi
 
 echo "Installing latest SyNAP Python API wheel..."
 arch=$(uname -m)
+cd "$DOCS_ROOT/.."
 if [ "$arch" = "x86_64" ]; then
+    bash ./build.sh --clean --local
     wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_x86_64.whl"
 elif [ "$arch" = "aarch64" ]; then
+    bash ./build.sh --clean
     wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_aarch64.whl"
 else
     echo "Error: Unsupported architecture '$arch'."
@@ -54,6 +57,7 @@ if [ ! -f "$wheel" ]; then
 fi
 pip install --force-reinstall "$wheel"
 
+cd $DOCS_ROOT
 echo "Building documentation..."
 mkdir -p source/_static
 make clean
