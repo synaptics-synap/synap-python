@@ -157,8 +157,10 @@ class Tensor:
     
             :ivar str name: The tensor name.
             :ivar bool is_scalar: Whether the tensor is a scalar.
+            :ivar dimensions: The tensor dimensions.
             :ivar Layout layout: The tensor layout.
             :ivar Shape shape: The tensor shape.
+            :ivar str format: The tensor format. This is a free-format string whose meaning is application dependent, for example "rgb", "bgr".
             :ivar int item_count: The number of items in the tensor.
             :ivar int size: The size of the tensor in bytes.
             :ivar DataType data_type: The tensor data type.
@@ -282,6 +284,16 @@ class Tensor:
     def data_type(self) -> types.DataType:
         """
         The tensor data type.
+        """
+    @property
+    def dimensions(self) -> types.Dimensions:
+        """
+        The tensor dimensions.
+        """
+    @property
+    def format(self) -> str:
+        """
+        The tensor format. This is a free-format string whose meaning is application dependent, for example "rgb", "bgr".
         """
     @property
     def is_scalar(self) -> bool:

@@ -144,8 +144,10 @@ static void export_tensors(py::module_& m)
 
         :ivar str name: The tensor name.
         :ivar bool is_scalar: Whether the tensor is a scalar.
+        :ivar dimensions: The tensor dimensions.
         :ivar Layout layout: The tensor layout.
         :ivar Shape shape: The tensor shape.
+        :ivar str format: The tensor format. This is a free-format string whose meaning is application dependent, for example "rgb", "bgr".
         :ivar int item_count: The number of items in the tensor.
         :ivar int size: The size of the tensor in bytes.
         :ivar DataType data_type: The tensor data type.
@@ -179,6 +181,13 @@ static void export_tensors(py::module_& m)
         "Whether the tensor is a scalar."
     )
     .def_property_readonly(
+        "dimensions",
+        [](const TensorWrapper& self) -> Dimensions {
+            return self.tensor->dimensions();
+        },
+        "The tensor dimensions."
+    )
+    .def_property_readonly(
         "layout",
         [](const TensorWrapper& self) -> Layout {
             return self.tensor->layout();
@@ -191,6 +200,13 @@ static void export_tensors(py::module_& m)
             return self.tensor->shape();
         },
         "The tensor shape."
+    )
+    .def_property_readonly(
+        "format",
+        [](const TensorWrapper& self) -> std::string {
+            return self.tensor->format();
+        },
+        "The tensor format. This is a free-format string whose meaning is application dependent, for example \"rgb\", \"bgr\"."
     )
     .def_property_readonly(
         "item_count",
