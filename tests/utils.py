@@ -8,7 +8,7 @@ from typing import Any, Literal
 
 import numpy as np
 
-from synap.types import DataType, Layout, Shape
+from synap.types import DataType, Dimensions, Layout, Shape
 
 __all__ = ["get_model_metadata"]
 
@@ -49,6 +49,7 @@ def _parse_tensor_info(tensor_info: dict) -> dict:
         parsed_info["quant_info"] = quant_info
     else:
         parsed_info["data_type"] = _data_types[tensor_info["dtype"]]
+    parsed_info["format"] = tensor_info["data_format"]
     layout = tensor_info["format"]
     if layout == "nhwc":
         parsed_info["layout"] = Layout.nhwc
@@ -58,6 +59,7 @@ def _parse_tensor_info(tensor_info: dict) -> dict:
         parsed_info["layout"] = Layout.none
     parsed_info["name"] = tensor_info.get("name", "")
     parsed_info["shape"] = Shape(tensor_info["shape"])
+    parsed_info["dimensions"] = Dimensions(parsed_info["shape"], parsed_info["layout"])
     return parsed_info
 
 def get_model_metadata(model: str) -> dict[str, Any]:

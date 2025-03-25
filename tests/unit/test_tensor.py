@@ -17,6 +17,8 @@ def _validate_tensor_props(tensor: synap.Tensor, props: dict):
     assert tensor.name == props["name"]
     assert tensor.shape == props["shape"]
     assert tensor.size == size
+    assert tensor.dimensions == props["dimensions"]
+    assert tensor.format == props["format"]
 
 def _validate_model_output(model: synap.Network, out_props: list):
     for i, out in enumerate(model.outputs):
