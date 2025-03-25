@@ -29,37 +29,59 @@ static void export_postprocessor(py::module_& m)
     auto postprocessor = m.def_submodule("postprocessor", "SyNAP postprocessor");
 
     /* Classifier::Result::Item */
-    py::class_<Classifier::Result::Item>(postprocessor, "ClassifierResultItem")
+    py::class_<Classifier::Result::Item>(postprocessor, "ClassifierResultItem", R"doc(
+        Represents a single classification result item.
+
+        :ivar int class_index: The class index.
+        :ivar float confidence: The confidence score.
+        )doc"
+    )
     .def(py::init<>())
-    .def_readonly("class_index", &Classifier::Result::Item::class_index)
-    .def_readonly("confidence", &Classifier::Result::Item::confidence)
+    .def_readonly("class_index", &Classifier::Result::Item::class_index, "The class index.")
+    .def_readonly("confidence", &Classifier::Result::Item::confidence, "The confidence score.")
     ;
 
     /* Classifier::Result::Items */
-    py::class_<vector<Classifier::Result::Item>>(postprocessor, "ClassifierResultItems")
+    py::class_<vector<Classifier::Result::Item>>(postprocessor, "ClassifierResultItems", R"doc(
+        Represents a collection of classification result items.
+        )doc"
+    )
     .def(py::init<>())
     .def("__getitem__", [](vector<Classifier::Result::Item>& self, size_t index)
-        {return &self[index];}, py::return_value_policy::reference, "get item by index")
+        {return &self[index];}, py::return_value_policy::reference, "Get classification result item by index.")
     .def("__len__", [](vector<Classifier::Result::Item>& self)
-        {return self.size();}, "get items size")
+        {return self.size();}, "Number of classification result items in the collection.")
     .def(
         "__iter__",
         [](vector<Classifier::Result::Item>& self) -> py::iterator {
             return py::make_iterator(self.begin(), self.end());
         },
-        "Iterate over results"
+        "Iterate over classification result items."
     )
     ;
 
     /* Classifier::Result */
-    py::class_<Classifier::Result>(postprocessor, "ClassifierResult")
+    py::class_<Classifier::Result>(postprocessor, "ClassifierResult", R"doc(
+        Represents the result of image classification.
+
+        :ivar bool success: True if classification was successful, False otherwise.
+        :ivar ClassifierResultItems items: The classification result items.
+        )doc"
+    )
     .def(py::init<>())
-    .def_readonly("success", &Classifier::Result::success)
-    .def_readonly("items", &Classifier::Result::items)
+    .def_readonly("success", &Classifier::Result::success, "True if classification was successful, False otherwise.")
+    .def_readonly("items", &Classifier::Result::items, "The classification result items.")
     ;
 
     /* Classifier */
-    py::class_<Classifier>(postprocessor, "Classifier")
+    py::class_<Classifier>(postprocessor, "Classifier", R"doc(
+        SyNAP image classification postprocessor.
+
+        Determine the top-N classifications of an image.
+
+        :param int top_count: The number of most probable classifications to return.
+        )doc"
+    )
     .def(
         py::init<size_t>(),
         py::arg("top_count") = 1
@@ -70,44 +92,77 @@ static void export_postprocessor(py::module_& m)
             return self.process(*tw.tensors);
         },
         py::arg("outputs"),
-        "Perform classification on network outputs")
+        "Perform classification on network outputs.")
     ;
 
     /* Detector::Result::Item */
-    py::class_<Detector::Result::Item>(postprocessor, "DetectorResultItem")
+    py::class_<Detector::Result::Item>(postprocessor, "DetectorResultItem", R"doc(
+        Represents a single object detection result item.
+
+        :ivar int class_index: The class index.
+        :ivar float confidence: The confidence score.
+        :ivar Rect bounding_box: The detection bounding box.
+        :ivar list landmarks: The body pose landmarks, if any.
+        :ivar Mask mask: The instance segmentation mask, if any.
+        )doc"
+    )
     .def(py::init<>())
-    .def_readonly("class_index", &Detector::Result::Item::class_index)
-    .def_readonly("confidence", &Detector::Result::Item::confidence)
-    .def_readonly("bounding_box", &Detector::Result::Item::bounding_box)
-    .def_readonly("landmarks", &Detector::Result::Item::landmarks)
-    .def_readonly("mask", &Detector::Result::Item::mask)
+    .def_readonly("class_index", &Detector::Result::Item::class_index, "The class index.")
+    .def_readonly("confidence", &Detector::Result::Item::confidence, "The confidence score.")
+    .def_readonly("bounding_box", &Detector::Result::Item::bounding_box, "The detection bounding box.")
+    .def_readonly("landmarks", &Detector::Result::Item::landmarks, "The body pose landmarks, if any.")
+    .def_readonly("mask", &Detector::Result::Item::mask, "The instance segmentation mask, if any.")
     ;
 
     /* Detector::Result::Items */
-    py::class_<vector<Detector::Result::Item>>(postprocessor, "DetectorResultItems")
+    py::class_<vector<Detector::Result::Item>>(postprocessor, "DetectorResultItems", R"doc(
+        Represents a collection of object detection result items.
+        )doc"
+    )
     .def(py::init<>())
     .def("__getitem__", [](vector<Detector::Result::Item>& self, size_t index)
-        {return &self[index];}, py::return_value_policy::reference, "get item by index")
+        {return &self[index];}, py::return_value_policy::reference, "Get detection result item by index.")
     .def("__len__", [](vector<Detector::Result::Item>& self)
-        {return self.size();}, "get items size")
+        {return self.size();}, "Number of detection result items in the collection.")
     .def(
         "__iter__",
         [](vector<Detector::Result::Item>& self) -> py::iterator {
             return py::make_iterator(self.begin(), self.end());
         },
-        "Iterate over results"
+        "Iterate over detection result items."
     )
     ;
 
     /* Detector::Result */
-    py::class_<Detector::Result>(postprocessor, "DetectorResult")
+    py::class_<Detector::Result>(postprocessor, "DetectorResult", R"doc(
+        Represents the result of object detection.
+
+        :ivar bool success: True if detection was successful, False otherwise.
+        :ivar DetectorResultItems items: The detection result items.
+        )doc"
+    )
     .def(py::init<>())
-    .def_readonly("success", &Detector::Result::success)
-    .def_readonly("items", &Detector::Result::items)
+    .def_readonly("success", &Detector::Result::success, "True if detection was successful, False otherwise.")
+    .def_readonly("items", &Detector::Result::items, "The detection result items.")
     ;
 
     /* Detector */
-    py::class_<Detector>(postprocessor, "Detector")
+    py::class_<Detector>(postprocessor, "Detector", R"doc(
+        SyNAP object detection postprocessor.
+
+        Perform object detection on network outputs.
+
+        The output format of object detection networks depends on the network architecture used. 
+        The format type must be specified in the network's output tensor `format` field in the conversion metafile.
+        This following formats are currently supported: "retinanet_boxes", "tflite_detection_boxes", "yolov5"
+
+        :param float score_threshold: The minimum confidence score to consider a detection.
+        :param int n_max: The maximum number of detections to return (0 to return all).
+        :param bool nms: Whether to apply non-maximum suppression.
+        :param float iou_threshold: The intersection-over-union threshold for non-maximum suppression.
+        :param bool iou_with_min: Whether to use the minimum bounding box area for intersection-over-union.
+        )doc"
+    )
     .def(
         py::init<float, int, bool, float, bool>(),
         py::arg("score_threshold") = 0.5,
@@ -123,18 +178,18 @@ static void export_postprocessor(py::module_& m)
         },
         py::arg("outputs"),
         py::arg("assigned_rect"),
-        "Perform detection on network outputs")
+        "Perform detection on network outputs.")
     ;
 
     /* to_json_str */
     postprocessor.def(
         "to_json_str",
         static_cast<std::string(*)(const Classifier::Result&)>(&to_json_str),
-        "Get ClassifierResult as a JSON string"
+        "Get ClassifierResult as a JSON string."
     );
     postprocessor.def(
         "to_json_str",
         static_cast<std::string(*)(const Detector::Result&)>(&to_json_str),
-        "Get DetectorResult as a JSON string"
+        "Get DetectorResult as a JSON string."
     );
 }
