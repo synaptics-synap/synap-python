@@ -5,7 +5,7 @@
 
 set -e
 
-SYNAP_VERSION="0.0.3"
+SYNAP_VERSION="0.0.4"
 SYNAP_RELEASE="preview"
 DOCS_ROOT="$PWD"
 VENV_DIR="$DOCS_ROOT/.docs"
