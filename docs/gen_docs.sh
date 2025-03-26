@@ -32,16 +32,14 @@ if [ ! -d "$VENV_DIR" ]; then
     pip install --upgrade pip
     pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel
 fi
-if [ -z "$VIRTUAL_ENV" ]; then
-    echo "Activating virtual environment..."
-    source "$VENV_DIR/bin/activate"
-fi
+echo "Activating virtual environment..."
+source "$VENV_DIR/bin/activate"
 
 echo "Installing latest SyNAP Python API wheel..."
 arch=$(uname -m)
 cd "$DOCS_ROOT/.."
 if [ "$arch" = "x86_64" ]; then
-    bash ./build.sh --clean --local
+    bash ./build.sh --clean --x86_64
     wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_x86_64.whl"
 elif [ "$arch" = "aarch64" ]; then
     bash ./build.sh --clean
