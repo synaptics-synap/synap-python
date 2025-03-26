@@ -12,7 +12,6 @@ ROOT_DIR="$PWD"
 PYBIND11_DIR="$ROOT_DIR/extern/pybind11"
 VENV_DIR="$ROOT_DIR/.venv"
 BUILD_DIR="$ROOT_DIR/build"
-TOOLCHAIN_DIR="$BUILD_DIR/toolchain"
 CACHE_DIR="$ROOT_DIR/.py-build-cmake_cache"
 DIST_DIR="$ROOT_DIR/dist"
 
@@ -61,9 +60,11 @@ fi
 
 if [[ "$HOST_ARCH" != "$TARGET_ARCH" && "$x86_64" != true ]]; then
     CROSSCOMPILE=true
-    PYTHON_DEV_DIR="$BUILD_DIR/python-dev/usr/local"
+    TOOLCHAIN_DIR="$BUILD_DIR/toolchain"
+    PYTHON_DEV_DIR="$BUILD_DIR/python-dev"
 else
     CROSSCOMPILE=false
+    TOOLCHAIN_DIR=
     PYTHON_DEV_DIR=
 fi
 
@@ -142,7 +143,7 @@ mkdir -p "$LOG_DIR"
 run_cmd "git submodule update --init --recursive" "Updating submodules" "$LOG_DIR/submodule_update.log"
 
 if $CROSSCOMPILE; then
-    echo "Cross-compiling for aarch64-linux-gnu, toolchain: $TOOLCHAIN_DIR"
+    echo "Cross-compiling for aarch64-linux-gnu, toolchain: $TOOLCHAIN_DIR, python-dev: $PYTHON_DEV_DIR"
     run_cmd "setup_toolchain" "Setting up toolchain" "$LOG_DIR/toolchain_setup.log"
     export TOOLCHAIN_DIR
     export PYTHON_DEV_DIR
