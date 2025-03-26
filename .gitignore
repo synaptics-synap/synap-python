@@ -11,6 +11,7 @@ build/toolchain
 *.old
 *.so
 *.py[cod]
+*.pypirc
 _build
 .pytest_cache
 .vscode
