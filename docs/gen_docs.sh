@@ -8,12 +8,13 @@ set -e
 SYNAP_VERSION="0.0.3"
 SYNAP_RELEASE="preview"
 DOCS_ROOT="$PWD"
+ROOT_DIR="$DOCS_ROOT/.."
 VENV_DIR="$DOCS_ROOT/.docs"
-DIST_DIR="$DOCS_ROOT/../dist"
+DIST_DIR="$ROOT_DIR/dist"
+HOST_ARCH=$(uname -m)
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
-        echo "Deactivating virtual environment..."
         deactivate
     fi
 }
@@ -32,28 +33,22 @@ if [ ! -d "$VENV_DIR" ]; then
     pip install --upgrade pip
     pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel
 fi
-echo "Activating virtual environment..."
 source "$VENV_DIR/bin/activate"
 
 echo "Installing latest SyNAP Python API wheel..."
-arch=$(uname -m)
-cd "$DOCS_ROOT/.."
-if [ "$arch" = "x86_64" ]; then
-    bash ./build.sh --clean --x86_64
-    wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_x86_64.whl"
-elif [ "$arch" = "aarch64" ]; then
-    bash ./build.sh --clean
-    wheel="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_aarch64.whl"
-else
-    echo "Error: Unsupported architecture '$arch'."
+PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
+if [ ! -f "$PY_WHL" ]; then
+    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
+    if [ "$HOST_ARCH" == "x86_64" ]; then
+        echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh --x86_64\033[0m"
+    elif [ "$HOST_ARCH" == "aarch64" ]; then
+        echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh\033[0m"
+    else
+        echo -e "       \033[31mError: Unsupported architecture '$HOST_ARCH'\033[0m"
+    fi
     exit 1
 fi
-
-if [ ! -f "$wheel" ]; then
-    echo "Error: SyNAP Python API wheel not found at '$wheel'."
-    exit 1
-fi
-pip install --force-reinstall "$wheel"
+pip install --force-reinstall "$PY_WHL"
 
 cd $DOCS_ROOT
 echo "Building documentation..."
@@ -61,3 +56,4 @@ mkdir -p source/_static
 make clean
 sphinx-build -b markdown source build/markdown
 find "build/markdown" -type f -name "*.md" -exec sed -i "s/synap\._synap/synap/g" {} +
+echo -e "\033[32mDocs generated successfully\033[0m"
