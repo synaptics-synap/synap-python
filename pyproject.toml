@@ -8,6 +8,7 @@ requires-python = ">=3.10"
 authors = [{ "name" = "Sauryadeep Pal", "email" = "sauryadeep.pal@synaptics.com" }]
 description = "Python bindings for SyNAP"
 license = { "file" = "LICENSE" }
+readme = "README.md"
 dependencies = []
 
 [build-system]
