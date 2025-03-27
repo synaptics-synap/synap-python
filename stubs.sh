@@ -6,20 +6,18 @@
 set -e
 
 ROOT_DIR="$PWD"
-VENV_DIR="$ROOT_DIR/.stubgen"
+VENV_DIR="$ROOT_DIR/.stubs"
+DIST_DIR="$ROOT_DIR/dist"
 SRC_DIR="$ROOT_DIR/src/synap"
-BUILD_CONFIG="$ROOT_DIR/build/x86_64-linux-gnu.python3.10.py-build-cmake.local.toml"
-BUILD_CACHE="$ROOT_DIR/.py-build-cmake_cache/cp310-cp310-linux_x86_64-x86_64-linux-gnu"
 STUBGEN_DIR="$ROOT_DIR/stubgen"
 OUTPUT_DIR="$STUBGEN_DIR/stubs"
 STUBS_DIR="$OUTPUT_DIR/synap/_synap"
-SYNAP_MODULE="synap._synap"
+SYNAP_VERSION="0.0.3"
+HOST_ARCH=$(uname -m)
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
-        echo "Deactivating and removing virtual environment..."
         deactivate
-        rm -rf "$VENV_DIR"
     fi
 }
 trap cleanup EXIT
@@ -36,15 +34,22 @@ echo "Installing pip packages..."
 pip install --upgrade pip
 pip install pybind11 pybind11-stubgen py-build-cmake typing-extensions numpy
 
-rm -rf $BUILD_CACHE
-echo "Configuring build..."
-py-build-cmake --local "$BUILD_CONFIG" configure
-echo "Building extension..."
-py-build-cmake --local "$BUILD_CONFIG" build
+PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
+if [ ! -f "$PY_WHL" ]; then
+    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
+    if [ "$HOST_ARCH" == "x86_64" ]; then
+        echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh --x86_64\033[0m"
+    elif [ "$HOST_ARCH" == "aarch64" ]; then
+        echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh\033[0m"
+    else
+        echo -e "       \033[31mError: Unsupported architecture '$HOST_ARCH'\033[0m"
+    fi
+    exit 1
+fi
+pip install --force-reinstall "$PY_WHL"
 
 mkdir -p "$STUBGEN_DIR/synap"
-cp "$BUILD_CACHE/_synap.cpython-310-x86_64-linux-gnu.so" "$STUBGEN_DIR/synap/"
-PYTHONPATH="$STUBGEN_DIR:$PYTHONPATH" pybind11-stubgen "$SYNAP_MODULE" \
+pybind11-stubgen synap \
     -o "$OUTPUT_DIR" \
     --enum-class-locations \
         Layout:synap._synap.types \
@@ -58,3 +63,4 @@ cp "$STUBS_DIR/__init__.pyi" "$SRC_DIR/__init__.pyi"
 cp "$STUBS_DIR/preprocessor.pyi" "$SRC_DIR/preprocessor/__init__.pyi"
 cp "$STUBS_DIR/postprocessor.pyi" "$SRC_DIR/postprocessor/__init__.pyi"
 cp "$STUBS_DIR/types.pyi" "$SRC_DIR/types/__init__.pyi"
+echo -e "\033[32mStubs generated successfully\033[0m"
