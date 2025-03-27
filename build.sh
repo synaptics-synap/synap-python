@@ -9,11 +9,8 @@ PYTHON_DEV_URL="https://github.com/tttapa/python-dev/releases/download/0.0.7/pyt
 TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
 
 ROOT_DIR="$PWD"
-PYBIND11_DIR="$ROOT_DIR/extern/pybind11"
-VENV_DIR="$ROOT_DIR/.venv"
 BUILD_DIR="$ROOT_DIR/build"
 CACHE_DIR="$ROOT_DIR/.py-build-cmake_cache"
-DIST_DIR="$ROOT_DIR/dist"
 
 VERBOSE=false
 CLEAN=false
@@ -52,6 +49,11 @@ done
 
 TARGET_ARCH="aarch64"
 HOST_ARCH=$(uname -m)
+
+if [[ "$HOST_ARCH" != "x86_64" && "$HOST_ARCH" != "aarch64" ]]; then
+    echo "Error: Unsupported architecture '$HOST_ARCH'."
+    exit 1
+fi
 
 if [[ "$x86_64" == true && "$HOST_ARCH" != "x86_64" ]]; then
     echo "Error: Cannot build for x86_64 on arch $HOST_ARCH"
@@ -136,6 +138,10 @@ build_extensions() {
     fi
 }
 
+generate_stubs() {
+    bash "$ROOT_DIR/stubs.sh"
+}
+
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 LOG_DIR="$ROOT_DIR/logs/$TIMESTAMP"
 mkdir -p "$LOG_DIR"
@@ -172,6 +178,12 @@ else
     fi
 fi
 run_cmd "build_extensions" "Building Python extensions" "$LOG_DIR/build_extensions.log"
+
+if $CROSSCOMPILE; then
+    echo "Skipping stubs generation for cross-compilation"
+else
+    run_cmd "generate_stubs" "Generating stubs" "$LOG_DIR/stubgen.log"
+fi
 
 echo -e "\033[32mBuild completed successfully, wheel located at $ROOT_DIR/dist/\033[0m"
 
