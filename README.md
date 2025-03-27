@@ -53,11 +53,13 @@ The SyNAP Python API provides access to the following classes and functions:
 
 ## Building the Python Wheel
 
-Follow the steps below to set up your development environment and build the Python wheel. You can build this on a `Linux machine` or using `WSL on Windows`.
+Follow the steps below to set up your development environment and build the Python wheel. You can build this on a Linux machine, WSL2, or locally on the Astra board.
 
 ### **Prerequisites**
 
 Ensure you have necessary build dependencies installed:
+
+#### **Linux/WSL2**
 
 ```sh
 sudo apt update
@@ -65,16 +67,24 @@ sudo apt install python3.10 python3.10-venv python3.10-dev
 sudo apt install -y build-essential cmake ninja-build
 ```
 
+#### **Astra**
+
+The `python3-dev` debian package for Astra is required. Once you have the package, install with:
+```sh
+dpkg -i python3-dev_3.10.13-r0_arm64.deb
+```
+
 ### **Setup Virtual Environment**
 
-Create and activate a virtual environment to manage dependencies.
+Create and activate a virtual environment to manage dependencies:
 
 ```sh
 python3.10 -m venv venv
 source venv/bin/activate
 ```
 
-### Build the package for Astra (AArch64):
+### **Build Package**:
+To build the Python wheel, just run:
 ```sh
 ./build.sh 
 ```
@@ -83,7 +93,7 @@ Use `--verbose` for detailed build steps and `--clean` for a clean build.
 The build process generates a wheel file stored in the dist folder. The output should resemble the following:
 
 ```sh
-Successfully built synap_python-0.0.1-cp310-cp310-xxxx.whl
+Successfully built synap_python-0.0.3-cp310-cp310-linux_aarch64.whl
 Building Python extensions ... Success!
 Build completed successfully, wheel located at /home/../synap-python/dist/
 ```

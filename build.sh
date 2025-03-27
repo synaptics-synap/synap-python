@@ -9,17 +9,13 @@ PYTHON_DEV_URL="https://github.com/tttapa/python-dev/releases/download/0.0.7/pyt
 TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
 
 ROOT_DIR="$PWD"
-PYBIND11_DIR="$ROOT_DIR/extern/pybind11"
-VENV_DIR="$ROOT_DIR/.venv"
 BUILD_DIR="$ROOT_DIR/build"
-PYTHON_DEV_DIR="$BUILD_DIR/python-dev"
-TOOLCHAIN_DIR="$BUILD_DIR/toolchain"
 CACHE_DIR="$ROOT_DIR/.py-build-cmake_cache"
-DIST_DIR="$ROOT_DIR/dist"
 
 VERBOSE=false
 CLEAN=false
-LOCAL=false
+x86_64=false
+
 
 if [ -z "$VIRTUAL_ENV" ]; then
     echo -e "\033[33m[Warning]\033[0m Not running in a Python virtual environment, system python installation may be modified"
@@ -40,8 +36,8 @@ while [[ $# -gt 0 ]]; do
             VERBOSE=true
             shift
             ;;
-        --local)
-            LOCAL=true
+        --x86_64)
+            x86_64=true
             shift
             ;;
         *)
@@ -50,6 +46,29 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+TARGET_ARCH="aarch64"
+HOST_ARCH=$(uname -m)
+
+if [[ "$HOST_ARCH" != "x86_64" && "$HOST_ARCH" != "aarch64" ]]; then
+    echo "Error: Unsupported architecture '$HOST_ARCH'."
+    exit 1
+fi
+
+if [[ "$x86_64" == true && "$HOST_ARCH" != "x86_64" ]]; then
+    echo "Error: Cannot build for x86_64 on arch $HOST_ARCH"
+    exit 1
+fi
+
+if [[ "$HOST_ARCH" != "$TARGET_ARCH" && "$x86_64" != true ]]; then
+    CROSSCOMPILE=true
+    TOOLCHAIN_DIR="$BUILD_DIR/toolchain"
+    PYTHON_DEV_DIR="$BUILD_DIR/python-dev"
+else
+    CROSSCOMPILE=false
+    TOOLCHAIN_DIR=
+    PYTHON_DEV_DIR=
+fi
 
 run_cmd() {
     local command=$1
@@ -112,11 +131,15 @@ setup_venv() {
 
 build_extensions() {
     cd $ROOT_DIR
-    if $LOCAL; then
-        python -m build -w . -C "local=$BUILD_CONFIG"
-    else
+    if $CROSSCOMPILE; then
         python -m build -w . -C "cross=$BUILD_CONFIG"
+    else
+        python -m build -w . -C "local=$BUILD_CONFIG"
     fi
+}
+
+generate_stubs() {
+    bash "$ROOT_DIR/stubs.sh"
 }
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
@@ -125,30 +148,42 @@ mkdir -p "$LOG_DIR"
 
 run_cmd "git submodule update --init --recursive" "Updating submodules" "$LOG_DIR/submodule_update.log"
 
-run_cmd "setup_toolchain" "Setting up toolchain" "$LOG_DIR/toolchain_setup.log"
-export PYTHON_DEV_DIR
-export TOOLCHAIN_DIR
+if $CROSSCOMPILE; then
+    echo "Cross-compiling for aarch64-linux-gnu, toolchain: $TOOLCHAIN_DIR, python-dev: $PYTHON_DEV_DIR"
+    run_cmd "setup_toolchain" "Setting up toolchain" "$LOG_DIR/toolchain_setup.log"
+    export TOOLCHAIN_DIR
+    export PYTHON_DEV_DIR
+fi
 
 run_cmd "setup_venv" "Setting up virtual environment" "$LOG_DIR/venv_activation.log"
 
 if $CLEAN; then
-    if $LOCAL; then
+    if $x86_64; then
         rm -rf "$CACHE_DIR/cp310-cp310-linux_x86_64-x86_64-linux-gnu"
-        echo "Cleaned dist directory for fresh build"
     else
         rm -rf "$CACHE_DIR/cp310-cp310-linux_aarch64-aarch64-linux-gnu"
-        echo "Cleaned cache directory for fresh build"
     fi
+    echo "Cleaned cache directory for fresh build"
 fi
 
-if $LOCAL; then
-    echo "Building locally"
+if $x86_64; then
+    echo "Building for x86_64"
     BUILD_CONFIG="$BUILD_DIR/x86_64-linux-gnu.python3.10.py-build-cmake.local.toml"
 else
     echo "Building for aarch64-linux-gnu"
-    BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python3.10.py-build-cmake.cross.toml"
+    if $CROSSCOMPILE; then
+        BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python3.10.py-build-cmake.cross.toml"
+    else
+        BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python3.10.py-build-cmake.local.toml"
+    fi
 fi
 run_cmd "build_extensions" "Building Python extensions" "$LOG_DIR/build_extensions.log"
+
+if $CROSSCOMPILE; then
+    echo "Skipping stubs generation for cross-compilation"
+else
+    run_cmd "generate_stubs" "Generating stubs" "$LOG_DIR/stubgen.log"
+fi
 
 echo -e "\033[32mBuild completed successfully, wheel located at $ROOT_DIR/dist/\033[0m"
 
