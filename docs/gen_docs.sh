@@ -12,6 +12,7 @@ ROOT_DIR="$DOCS_ROOT/.."
 VENV_DIR="$DOCS_ROOT/.docs"
 DIST_DIR="$ROOT_DIR/dist"
 HOST_ARCH=$(uname -m)
+PLAT_TAG="manylinux_2_35"
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
@@ -37,7 +38,7 @@ pip install --upgrade pip > /dev/null
 pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel > /dev/null
 
 echo "Installing latest SyNAP Python API wheel..."
-PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
+PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-${PLAT_TAG}_${HOST_ARCH}.whl"
 if [ ! -f "$PY_WHL" ]; then
     echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
     if [ "$HOST_ARCH" == "x86_64" ]; then

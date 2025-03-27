@@ -93,7 +93,7 @@ Use `--verbose` for detailed build steps and `--clean` for a clean build.
 The build process generates a wheel file stored in the dist folder. The output should resemble the following:
 
 ```sh
-Successfully built synap_python-0.0.4-cp310-cp310-linux_aarch64.whl
+Successfully built synap_python-0.0.4-cp310-cp310-manylinux_2_35_aarch64.whl
 Building Python extensions ... Success!
 Build completed successfully, wheel located at /home/../synap-python/dist/
 ```

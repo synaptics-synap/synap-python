@@ -14,6 +14,7 @@ OUTPUT_DIR="$STUBGEN_DIR/stubs"
 STUBS_DIR="$OUTPUT_DIR/synap/_synap"
 SYNAP_VERSION="0.0.4"
 HOST_ARCH=$(uname -m)
+PLAT_TAG="manylinux_2_35"
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
@@ -35,9 +36,9 @@ echo "Installing pybind11-stubgen and dependencies..."
 pip install --upgrade pip > /dev/null
 pip install pybind11 pybind11-stubgen py-build-cmake typing-extensions numpy > /dev/null
 
-PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
+PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-${PLAT_TAG}_${HOST_ARCH}.whl"
 if [ ! -f "$PY_WHL" ]; then
-    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
+    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found: $PY_WHL\033[0m"
     if [ "$HOST_ARCH" == "x86_64" ]; then
         echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh --x86_64\033[0m"
     elif [ "$HOST_ARCH" == "aarch64" ]; then

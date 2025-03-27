@@ -4,7 +4,6 @@
 implementation = 'cp'
 version = '310'
 abi = 'cp310'
-arch = 'linux_aarch64'
 toolchain_file = '../cmake/aarch64-linux-gnu.python_config.cmake'
 
 [cmake]

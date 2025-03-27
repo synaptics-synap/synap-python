@@ -16,6 +16,8 @@ VERBOSE=false
 CLEAN=false
 x86_64=false
 
+PLAT_TAG="manylinux_2_35"
+
 
 if [ -z "$VIRTUAL_ENV" ]; then
     echo -e "\033[33m[Warning]\033[0m Not running in a Python virtual environment, system python installation may be modified"
@@ -41,7 +43,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            echo "Usage: $0 [--clean] [--verbose]"
+            echo "Usage: $0 [--clean] [--verbose] [--x86_64]"
             exit 1
             ;;
     esac
@@ -132,9 +134,9 @@ setup_venv() {
 build_extensions() {
     cd $ROOT_DIR
     if $CROSSCOMPILE; then
-        python -m build -w . -C "cross=$BUILD_CONFIG"
+        python -m build -w . -C "cross=$BUILD_CONFIG" -C "override=cross.arch=${PLAT_TAG}_${TARGET_ARCH}"
     else
-        python -m build -w . -C "local=$BUILD_CONFIG"
+        python -m build -w . -C "local=$BUILD_CONFIG" -C "override=wheel.platform_tag=${PLAT_TAG}_${HOST_ARCH}"
     fi
 }
 
@@ -159,9 +161,9 @@ run_cmd "setup_venv" "Setting up virtual environment" "$LOG_DIR/venv_activation.
 
 if $CLEAN; then
     if $x86_64; then
-        rm -rf "$CACHE_DIR/cp310-cp310-linux_x86_64-x86_64-linux-gnu"
+        rm -rf "$CACHE_DIR/cp310-cp310-manylinux_2_35_x86_64-x86_64-linux-gnu"
     else
-        rm -rf "$CACHE_DIR/cp310-cp310-linux_aarch64-aarch64-linux-gnu"
+        rm -rf "$CACHE_DIR/cp310-cp310-manylinux_2_35_aarch64-aarch64-linux-gnu"
     fi
     echo "Cleaned cache directory for fresh build"
 fi
