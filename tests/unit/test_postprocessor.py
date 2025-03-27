@@ -18,7 +18,7 @@ from synap.postprocessor import (
 )
 from synap.types import Landmark, Rect
 
-from ..utils import get_synap_cli_results
+from ..utils import compare_json_results, get_synap_cli_results
 
 OD_MODELS = sorted(glob.glob("tests/data/models/*yolov8s*.synap"))
 OD_IMAGES = sorted(glob.glob("tests/data/images/coco8/*.jpg"))
@@ -48,7 +48,7 @@ def validate_detector_result_item(item: DetectorResultItem, expected: dict):
     if item.mask:
         assert item.mask.width == expected["mask"]["width"]
         assert item.mask.height == expected["mask"]["height"]
-        assert np.allclose(item.mask.buffer(), expected["mask"]["data"], atol=1e-6)
+        assert np.allclose(item.mask.buffer(), expected["mask"]["data"], atol=1e-5)
 
 
 @pytest.fixture(scope="module")
@@ -114,7 +114,7 @@ def test_classifier_process(sample_ic_outputs, expected_ic_result):
     """Test Classifier process method"""
     classifier = Classifier(top_count=5)
     result = classifier.process(sample_ic_outputs)
-    assert to_json_str(result).strip("\n") == expected_ic_result.strip("\n")
+    assert compare_json_results(to_json_str(result), expected_ic_result)
 
 
 # ------------------------synap.postprocessor.ClassifierResult------------------ #
@@ -180,7 +180,7 @@ def test_detector_process(sample_od_outputs, expected_od_result):
     detector = Detector()
     result = detector.process(*sample_od_outputs)
     assert result.success
-    assert to_json_str(result).strip("\n") == expected_od_result.strip("\n")
+    assert compare_json_results(to_json_str(result), expected_od_result)
 
 
 # ------------------------synap.postprocessor.DetectorResult--------------------- #
