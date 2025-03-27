@@ -12,7 +12,7 @@ SRC_DIR="$ROOT_DIR/src/synap"
 STUBGEN_DIR="$ROOT_DIR/stubgen"
 OUTPUT_DIR="$STUBGEN_DIR/stubs"
 STUBS_DIR="$OUTPUT_DIR/synap/_synap"
-SYNAP_VERSION="0.0.3"
+SYNAP_VERSION="0.0.4"
 HOST_ARCH=$(uname -m)
 
 cleanup() {
