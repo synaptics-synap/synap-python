@@ -60,6 +60,22 @@ def _parse_tensor_info(tensor_info: dict) -> dict:
     parsed_info["shape"] = Shape(tensor_info["shape"])
     return parsed_info
 
+def compare_json_results(original: str, expected: str, tol: float = 1e-5) -> bool:
+    ori_items: dict = json.loads(original)["items"]
+    exp_items: dict = json.loads(expected)["items"]
+    if len(ori_items) != len(exp_items):
+        return False
+    for i in range(len(ori_items)):
+        ori_item, exp_item = ori_items[i], exp_items[i]
+        for attr in ori_item:
+            if attr == "mask":
+                if not np.allclose(ori_item["mask"]["data"], exp_item["mask"]["data"], atol=tol):
+                    return False
+            else:
+                if ori_item[attr] != exp_item[attr]:
+                    return False
+    return True
+
 def get_model_metadata(model: str) -> dict[str, Any]:
     try:
         model_metadata: dict[str, list] = {"inputs": [], "outputs": []}
