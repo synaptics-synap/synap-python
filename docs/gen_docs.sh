@@ -26,14 +26,15 @@ if [ "$(basename "$DOCS_ROOT")" != "docs" ]; then
     exit 1
 fi
 if [ ! -d "$VENV_DIR" ]; then
-    echo "Creating virtual environment..."
+    echo "Creating virtual environment $VENV_DIR..."
     python3 -m venv "$VENV_DIR"
-    source "$VENV_DIR/bin/activate"
-    echo "Installing pip packages..."
-    pip install --upgrade pip
-    pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel
 fi
 source "$VENV_DIR/bin/activate"
+echo "Generating docs in virtual environment $VENV_DIR"
+
+echo "Installing Sphinx and dependencies..."
+pip install --upgrade pip > /dev/null
+pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel > /dev/null
 
 echo "Installing latest SyNAP Python API wheel..."
 PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
@@ -48,7 +49,7 @@ if [ ! -f "$PY_WHL" ]; then
     fi
     exit 1
 fi
-pip install --force-reinstall "$PY_WHL"
+pip install --force-reinstall "$PY_WHL" > /dev/null
 
 cd $DOCS_ROOT
 echo "Building documentation..."

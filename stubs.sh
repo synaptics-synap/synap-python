@@ -25,14 +25,15 @@ trap cleanup EXIT
 cd "$ROOT_DIR"
 
 if [ ! -d "$VENV_DIR" ]; then
+    echo "Creating virtual environment $VENV_DIR..."
     python3 -m venv "$VENV_DIR"
 fi
 source "$VENV_DIR/bin/activate"
-echo "Generating stubs in isolated environment $VIRTUAL_ENV"
+echo "Generating stubs in virtual environment $VENV_DIR"
 
-echo "Installing pip packages..."
-pip install --upgrade pip
-pip install pybind11 pybind11-stubgen py-build-cmake typing-extensions numpy
+echo "Installing pybind11-stubgen and dependencies..."
+pip install --upgrade pip > /dev/null
+pip install pybind11 pybind11-stubgen py-build-cmake typing-extensions numpy > /dev/null
 
 PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
 if [ ! -f "$PY_WHL" ]; then
@@ -46,8 +47,9 @@ if [ ! -f "$PY_WHL" ]; then
     fi
     exit 1
 fi
-pip install --force-reinstall "$PY_WHL"
+pip install --force-reinstall "$PY_WHL" > /dev/null
 
+echo "Generating stubs..."
 mkdir -p "$STUBGEN_DIR/synap"
 pybind11-stubgen synap \
     -o "$OUTPUT_DIR" \
