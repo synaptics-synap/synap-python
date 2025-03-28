@@ -346,6 +346,16 @@ class Tensors:
                 :rtype: Tensor
                 :raises IndexError: If the index is out of bounds.
         """
+    def __iter__(self) -> typing.Iterator[Tensor]:
+        """
+                Returns an iterator over the tensors in the collection.
+        
+                This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+        
+                :return: An iterator over the tensors in the collection.
+                :rtype: iterator
+                :raises RuntimeError: If the iterator cannot be created.
+        """
     def __len__(self) -> int:
         """
                 Returns the number of tensors in the collection.

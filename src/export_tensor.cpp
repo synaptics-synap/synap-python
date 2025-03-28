@@ -20,6 +20,30 @@ namespace py = pybind11;
 using namespace std;
 using namespace synaptics::synap;
 
+/// A minimal ForwardIterator that yields TensorWrapper
+struct TensorsIterator {
+    TensorsWrapper* wrapper;
+    std::size_t index;
+
+    TensorWrapper operator*() const {
+        return TensorWrapper{
+            wrapper->network,
+            &(*wrapper->tensors)[index]
+        };
+    }
+    TensorsIterator& operator++() {
+        ++index;
+        return *this;
+    }
+    // required for py::make_iterator
+    bool operator==(const TensorsIterator& other) const {
+        return (index == other.index);
+    }
+    bool operator!=(const TensorsIterator& other) const {
+        return (index != other.index);
+    }
+};
+
 static void assign_tensor(Tensor &t, const py::array &data) {
     const auto &shape = t.shape();
     const auto &data_dims = data.ndim();
@@ -489,6 +513,25 @@ static void export_tensors(py::module_& m)
         :return: The Tensor at the given index.
         :rtype: Tensor
         :raises IndexError: If the index is out of bounds.
+        )doc"
+    )
+    .def(
+        "__iter__",
+        [](TensorsWrapper &self) {
+            return py::make_iterator(
+                TensorsIterator {&self, 0},
+                TensorsIterator {&self, self.tensors->size()}
+            );
+        },
+        py::keep_alive<0, 1>(), // keep the TensorsWrapper object alive for as long as python needs it
+        R"doc(
+        Returns an iterator over the tensors in the collection.
+
+        This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+
+        :return: An iterator over the tensors in the collection.
+        :rtype: iterator
+        :raises RuntimeError: If the iterator cannot be created.
         )doc"
     )
     ;
