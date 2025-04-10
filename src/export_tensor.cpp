@@ -106,7 +106,10 @@ static void assign_tensor(Tensor &t, const py::array &data) {
             throw std::runtime_error("Failed to assign NumPy float data to tensor");
         }
     } else {
-        throw std::invalid_argument("Unsupported data type: data must be uint8_t, int16_t, or float.");
+        py::buffer_info data_info = data.request();
+        if (!t.assign(static_cast<const void*>(data_info.ptr), data_size)) {
+            throw std::runtime_error("Failed to assign NumPy raw data to tensor");
+        }
     }
 }
 
