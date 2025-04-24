@@ -56,6 +56,6 @@ cd $DOCS_ROOT
 echo "Building documentation..."
 mkdir -p source/_static
 make clean
-sphinx-build -b markdown source build/markdown
-find "build/markdown" -type f -name "*.md" -exec sed -i "s/synap\._synap/synap/g" {} +
+sphinx-build -b markdown source .
+find -type f -name "*.md" -exec sed -i "s/synap\._synap/synap/g" {} +
 echo -e "\033[32mDocs generated successfully\033[0m"
