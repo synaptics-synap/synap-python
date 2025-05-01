@@ -105,6 +105,22 @@ static void export_types(py::module_& m)
         },
         "Get corresponding NumPy dtype"
     )
+    .def_static(
+        "from_np_type",
+        [](const py::dtype& dt) -> DataType {
+            if (dt.is(py::dtype::of<uint8_t>()))  return DataType::uint8;
+            if (dt.is(py::dtype::of<int8_t>()))   return DataType::int8;
+            if (dt.is(py::dtype::of<uint16_t>())) return DataType::uint16;
+            if (dt.is(py::dtype::of<int16_t>()))  return DataType::int16;
+            if (dt.is(py::dtype::of<uint32_t>())) return DataType::uint32;
+            if (dt.is(py::dtype::of<int32_t>()))  return DataType::int32;
+            if (dt.is(py::dtype::of<float>()))    return DataType::float32;
+            if (dt.kind() == 'f' && dt.itemsize() == 2) return DataType::float16;  // heuristic
+            if (dt.kind() == 'V')                 return DataType::byte; // structured void
+            throw std::invalid_argument("Unsupported NumPy dtype for DataType");
+        },
+        "Convert a NumPy dtype into a DataType"
+    )
     ;
 
     /* Landmark */
