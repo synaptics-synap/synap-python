@@ -91,7 +91,7 @@ static void export_types(py::module_& m)
         "np_type",
         [](const DataType& dtype) {
             switch(dtype) {
-                case DataType::byte:    return py::dtype::of<uint8_t>();
+                case DataType::byte:    return py::dtype("V");
                 case DataType::int8:    return py::dtype::of<int8_t>();
                 case DataType::uint8:   return py::dtype::of<uint8_t>();
                 case DataType::int16:   return py::dtype::of<int16_t>();
