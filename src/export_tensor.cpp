@@ -11,6 +11,7 @@
 #include "synap/network.hpp"
 #include "synap/buffer.hpp"
 #include "export_tensor.hpp"
+#include "export_utils.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -501,11 +502,9 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "__getitem__",
-        [](const TensorsWrapper& self, size_t index) -> TensorWrapper {
-            if (index >= self.tensors->size()) {
-                throw py::index_error("Index out of bounds");
-            }
-            return TensorWrapper {self.network, &(*self.tensors)[index]};
+        [](const TensorsWrapper& self, int index) -> TensorWrapper {
+            size_t cpp_index = export_utils::normalize_index(index, self.tensors->size());
+            return TensorWrapper {self.network, &(*self.tensors)[cpp_index]};
         },
         R"doc(
         Retrieves a tensor by index.

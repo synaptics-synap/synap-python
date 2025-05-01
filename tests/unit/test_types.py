@@ -194,6 +194,9 @@ def test_shape_basic():
     # __getitem__
     assert s[0] == 1
     assert s[3] == 224
+    assert s[-1] == s[3]
+    assert s[-4] == s[0]
+
     # out-of-range
     with pytest.raises(IndexError):
         s[4]

@@ -8,6 +8,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <sstream>
+#include "export_utils.hpp"
 
 namespace py = pybind11;
 
@@ -320,11 +321,9 @@ static void export_types(py::module_& m)
     )
     .def(
         "__getitem__",
-        [](const Shape& self, size_t index) -> int32_t {
-            if (index >= self.size()) {
-                throw std::out_of_range("Shape index out of range");
-            }
-            return self[index];
+        [](const Shape& self, int index) -> int32_t {
+            size_t cpp_index = export_utils::normalize_index(index, self.size());
+            return self[cpp_index];
         }
     )
     .def(

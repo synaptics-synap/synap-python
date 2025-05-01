@@ -168,6 +168,7 @@ def test_tensors_size(sample_uint8_tensors):
 def test_tensors_getitem(sample_uint8_tensors, sample_uint8_tensor, sample_uint8_tensor_props):
     assert isinstance(sample_uint8_tensors[0], synap.Tensor)
     assert synap.Tensor.is_same(sample_uint8_tensors[0], sample_uint8_tensor)
+    assert synap.Tensor.is_same(sample_uint8_tensors[-1], sample_uint8_tensor)
     _validate_tensor_props(sample_uint8_tensors[0], sample_uint8_tensor_props)
 
 def test_tensors_iter(sample_uint8_tensors):

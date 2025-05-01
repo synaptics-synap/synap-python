@@ -10,6 +10,7 @@
 #include "synap/network.hpp"
 #include "synap/types.hpp"
 #include "export_tensor.hpp"
+#include "export_utils.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl_bind.h>
@@ -47,8 +48,8 @@ static void export_postprocessor(py::module_& m)
         )doc"
     )
     .def(py::init<>())
-    .def("__getitem__", [](vector<Classifier::Result::Item>& self, size_t index)
-        {return &self[index];}, py::return_value_policy::reference, "Get classification result item by index.")
+    .def("__getitem__", [](vector<Classifier::Result::Item>& self, int index)
+        {return &self[export_utils::normalize_index(index, self.size())];}, py::return_value_policy::reference, "Get classification result item by index.")
     .def("__len__", [](vector<Classifier::Result::Item>& self)
         {return self.size();}, "Number of classification result items in the collection.")
     .def(
@@ -120,8 +121,8 @@ static void export_postprocessor(py::module_& m)
         )doc"
     )
     .def(py::init<>())
-    .def("__getitem__", [](vector<Detector::Result::Item>& self, size_t index)
-        {return &self[index];}, py::return_value_policy::reference, "Get detection result item by index.")
+    .def("__getitem__", [](vector<Detector::Result::Item>& self, int index)
+        {return &self[export_utils::normalize_index(index, self.size())];}, py::return_value_policy::reference, "Get detection result item by index.")
     .def("__len__", [](vector<Detector::Result::Item>& self)
         {return self.size();}, "Number of detection result items in the collection.")
     .def(

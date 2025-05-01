@@ -145,10 +145,12 @@ def test_classifier_result_items_constructor():
 def test_classifier_result_items_iter(sample_ic_result, expected_ic_result):
     """Test ClassifierResultItems `__len__`, `__iter__`, and `__getitem__` methods"""
     expected = json.loads(expected_ic_result)["items"]
-    assert len(sample_ic_result.items) == len(expected)
+    n_items = len(sample_ic_result.items)
+    assert n_items == len(expected)
     for i, item in enumerate(sample_ic_result.items):
         assert isinstance(item, ClassifierResultItem)
         assert item is sample_ic_result.items[i]
+        assert item is sample_ic_result.items[-(n_items - i)]
         validate_classifier_result_item(item, expected[i])
 
 
@@ -211,8 +213,10 @@ def test_detector_result_items_constructor():
 def test_detector_result_items_iter(sample_od_result, expected_od_result):
     """Test DetectorResultItems `__len__`, `__iter__`, and `__getitem__` methods"""
     expected = json.loads(expected_od_result)["items"]
-    assert len(sample_od_result.items) == len(expected)
+    n_items = len(sample_od_result.items)
+    assert n_items == len(expected)
     for i, item in enumerate(sample_od_result.items):
         assert isinstance(item, DetectorResultItem)
         assert item is sample_od_result.items[i]
+        assert item is sample_od_result.items[-(n_items - i)]
         validate_detector_result_item(item, expected[i])
