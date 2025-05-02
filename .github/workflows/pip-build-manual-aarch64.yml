@@ -19,8 +19,14 @@ jobs:
             python-dev-ver: "3.13.0"
   
     env:
+      TARGET_ARCH: aarch64
+      PLAT_TAG: manylinux_2_35
       BUILD_DIR: ${{ github.workspace }}/build
       DIST_DIR: ${{ github.workspace }}/dist
+      TOOLCHAIN_URL: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+      TOOLCHAIN_DIR:  ${{ github.workspace }}/build/toolchain
+      PYTHON_DEV_URL: "https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-${{ matrix.python-dev-ver }}-aarch64-rpi3-linux-gnu.tar.gz"
+      PYTHON_DEV_DIR:  ${{ github.workspace }}/build/python-${{ matrix.python-dev-ver }}-dev
 
     steps:
       - name: Check out repository
@@ -40,11 +46,6 @@ jobs:
           pip install build wheel
 
       - name: Set up toolchain and python-dev
-        env:
-          TOOLCHAIN_URL: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
-          TOOLCHAIN_DIR: ${{ env.BUILD_DIR }}/toolchain
-          PYTHON_DEV_URL: "https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-${{ matrix.python-dev-ver }}-aarch64-rpi3-linux-gnu.tar.gz"
-          PYTHON_DEV_DIR: ${{ env.BUILD_DIR }}/python-${{ matrix.python-dev-ver }}-dev
         run: |
           mkdir -p "${BUILD_DIR}"
           cd "${BUILD_DIR}"
@@ -83,7 +84,7 @@ jobs:
           echo "BUILD_CONFIG=${OUTPUT}" >> $GITHUB_ENV
 
       - name: Build wheels
-        run: python -m build -w . -C "cross=${{ env.BUILD_CONFIG }}"
+        run: python -m build -w . -C "cross=${{ env.BUILD_CONFIG }}" -C "override=cross.arch=${{ env.PLAT_TAG }}_${{ env.TARGET_ARCH }}"
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
