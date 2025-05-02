@@ -9,6 +9,7 @@ build/*.toml
 *stub*/
 *.egg-info/
 .*/
+!.github/
 *.old
 *.so
 *.py[cod]

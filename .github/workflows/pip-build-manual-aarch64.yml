@@ -1,21 +1,25 @@
-name: Manual pip wheel build for synap-python
+name: Build pip wheel as artifact
 
 on: [workflow_dispatch]
 
 jobs:
   build-aarch64:
     runs-on: ubuntu-latest
-    env:
-      PYTHON_DEV_URL: "https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-3.10.15-aarch64-rpi3-linux-gnu.tar.gz"
-      TOOLCHAIN_URL: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
 
-      ROOT_DIR: ${{ github.workspace }}
+    strategy:
+      matrix:
+        include:
+          - python-ver: "3.10"
+            python-dev-ver: "3.10.15"
+          - python-ver: "3.11"
+            python-dev-ver: "3.11.10"
+          - python-ver: "3.12"
+            python-dev-ver: "3.12.7"
+          - python-ver: "3.13"
+            python-dev-ver: "3.13.0"
+  
+    env:
       BUILD_DIR: ${{ github.workspace }}/build
-      PYTHON_DEV_DIR: ${{ github.workspace }}/build/python-dev
-      TOOLCHAIN_DIR: ${{ github.workspace }}/build/toolchain
-      VENV_DIR: ${{ github.workspace }}/.venv
-      BUILD_CONFIG: ${{ github.workspace }}/build/aarch64-linux-gnu.python3.10.py-build-cmake.cross.toml
-      BUILD_CACHE: ${{ github.workspace }}/.py-build-cmake_cache/cp310-cp310-linux_aarch64-aarch64-linux-gnu
       DIST_DIR: ${{ github.workspace }}/dist
 
     steps:
@@ -24,10 +28,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-ver }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-ver }}
           cache: 'pip'
 
       - name: Install Python dependencies
@@ -35,13 +39,12 @@ jobs:
           pip install -U pip
           pip install build wheel
 
-      # - name: Install system packages
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get install -y wget tar xz-utils cmake make build-essential \
-      #                            patchelf
-
-      - name: Set up toolchain
+      - name: Set up toolchain and python-dev
+        env:
+          TOOLCHAIN_URL: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+          TOOLCHAIN_DIR: ${{ env.BUILD_DIR }}/toolchain
+          PYTHON_DEV_URL: "https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-${{ matrix.python-dev-ver }}-aarch64-rpi3-linux-gnu.tar.gz"
+          PYTHON_DEV_DIR: ${{ env.BUILD_DIR }}/python-${{ matrix.python-dev-ver }}-dev
         run: |
           mkdir -p "${BUILD_DIR}"
           cd "${BUILD_DIR}"
@@ -60,11 +63,31 @@ jobs:
             rm temp.tar.xz
           fi
 
-      - name: Build Python extension wheel
-        run: python -m build -w . -C "cross=${BUILD_CONFIG}"
+      - name: Generate build config
+        run: |
+          PY_MAJOR=$(echo "${{ matrix.python-ver }}" | cut -d. -f1)
+          PY_MINOR=$(echo "${{ matrix.python-ver }}" | cut -d. -f2)
+          PY_VER="${PY_MAJOR}${PY_MINOR}"
+          PY_VER_DOT="${{ matrix.python-ver }}"
+          PY_ABI="cp${PY_VER}"
+
+          TEMPLATE="${ROOT_DIR}/template.toml"
+          OUTPUT="${BUILD_DIR}/aarch64-linux-gnu.python${PY_VER_DOT}.cross.py-build-cmake.toml"
+
+          echo "Building config $OUTPUT from $TEMPLATE"
+          sed -e "s|@PY_VER@|${PY_VER}|g; \
+                  s|@PY_VER_DOT@|${PY_VER_DOT}|g; \
+                  s|@PY_ABI@|${PY_ABI}|g;" \
+              "${TEMPLATE}" > "${OUTPUT}"
+
+          # export for the next step
+          echo "BUILD_CONFIG=${OUTPUT}" >> $GITHUB_ENV
+
+      - name: Build wheel
+        run: python -m build -w . -C "cross=${{ env.BUILD_CONFIG }}"
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: built-wheels
+          name: built-wheels-${{ matrix.python-ver }}
           path: ${{ env.DIST_DIR }}
