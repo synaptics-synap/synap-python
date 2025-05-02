@@ -47,6 +47,11 @@ class DataType:
     uint16: typing.ClassVar[DataType]  # value = <DataType.uint16: 5>
     uint32: typing.ClassVar[DataType]  # value = <DataType.uint32: 7>
     uint8: typing.ClassVar[DataType]  # value = <DataType.uint8: 3>
+    @staticmethod
+    def from_np_type(arg0: numpy.dtype[typing.Any]) -> DataType:
+        """
+        Convert a NumPy dtype into a DataType
+        """
     def __eq__(self, other: typing.Any) -> bool:
         ...
     def __getstate__(self) -> int:

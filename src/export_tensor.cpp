@@ -11,6 +11,7 @@
 #include "synap/network.hpp"
 #include "synap/buffer.hpp"
 #include "export_tensor.hpp"
+#include "export_utils.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -19,6 +20,30 @@ namespace py = pybind11;
 
 using namespace std;
 using namespace synaptics::synap;
+
+/// A minimal ForwardIterator that yields TensorWrapper
+struct TensorsIterator {
+    TensorsWrapper* wrapper;
+    std::size_t index;
+
+    TensorWrapper operator*() const {
+        return TensorWrapper{
+            wrapper->network,
+            &(*wrapper->tensors)[index]
+        };
+    }
+    TensorsIterator& operator++() {
+        ++index;
+        return *this;
+    }
+    // required for py::make_iterator
+    bool operator==(const TensorsIterator& other) const {
+        return (index == other.index);
+    }
+    bool operator!=(const TensorsIterator& other) const {
+        return (index != other.index);
+    }
+};
 
 static void assign_tensor(Tensor &t, const py::array &data) {
     const auto &shape = t.shape();
@@ -82,7 +107,10 @@ static void assign_tensor(Tensor &t, const py::array &data) {
             throw std::runtime_error("Failed to assign NumPy float data to tensor");
         }
     } else {
-        throw std::invalid_argument("Unsupported data type: data must be uint8_t, int16_t, or float.");
+        py::buffer_info data_info = data.request();
+        if (!t.assign(static_cast<const void*>(data_info.ptr), data_size)) {
+            throw std::runtime_error("Failed to assign NumPy raw data to tensor");
+        }
     }
 }
 
@@ -144,8 +172,10 @@ static void export_tensors(py::module_& m)
 
         :ivar str name: The tensor name.
         :ivar bool is_scalar: Whether the tensor is a scalar.
+        :ivar dimensions: The tensor dimensions.
         :ivar Layout layout: The tensor layout.
         :ivar Shape shape: The tensor shape.
+        :ivar str format: The tensor format. This is a free-format string whose meaning is application dependent, for example "rgb", "bgr".
         :ivar int item_count: The number of items in the tensor.
         :ivar int size: The size of the tensor in bytes.
         :ivar DataType data_type: The tensor data type.
@@ -179,6 +209,13 @@ static void export_tensors(py::module_& m)
         "Whether the tensor is a scalar."
     )
     .def_property_readonly(
+        "dimensions",
+        [](const TensorWrapper& self) -> Dimensions {
+            return self.tensor->dimensions();
+        },
+        "The tensor dimensions."
+    )
+    .def_property_readonly(
         "layout",
         [](const TensorWrapper& self) -> Layout {
             return self.tensor->layout();
@@ -191,6 +228,13 @@ static void export_tensors(py::module_& m)
             return self.tensor->shape();
         },
         "The tensor shape."
+    )
+    .def_property_readonly(
+        "format",
+        [](const TensorWrapper& self) -> std::string {
+            return self.tensor->format();
+        },
+        "The tensor format. This is a free-format string whose meaning is application dependent, for example \"rgb\", \"bgr\"."
     )
     .def_property_readonly(
         "item_count",
@@ -458,11 +502,9 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "__getitem__",
-        [](const TensorsWrapper& self, size_t index) -> TensorWrapper {
-            if (index >= self.tensors->size()) {
-                throw py::index_error("Index out of bounds");
-            }
-            return TensorWrapper {self.network, &(*self.tensors)[index]};
+        [](const TensorsWrapper& self, int index) -> TensorWrapper {
+            size_t cpp_index = export_utils::normalize_index(index, self.tensors->size());
+            return TensorWrapper {self.network, &(*self.tensors)[cpp_index]};
         },
         R"doc(
         Retrieves a tensor by index.
@@ -473,6 +515,25 @@ static void export_tensors(py::module_& m)
         :return: The Tensor at the given index.
         :rtype: Tensor
         :raises IndexError: If the index is out of bounds.
+        )doc"
+    )
+    .def(
+        "__iter__",
+        [](TensorsWrapper &self) {
+            return py::make_iterator(
+                TensorsIterator {&self, 0},
+                TensorsIterator {&self, self.tensors->size()}
+            );
+        },
+        py::keep_alive<0, 1>(), // keep the TensorsWrapper object alive for as long as python needs it
+        R"doc(
+        Returns an iterator over the tensors in the collection.
+
+        This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+
+        :return: An iterator over the tensors in the collection.
+        :rtype: iterator
+        :raises RuntimeError: If the iterator cannot be created.
         )doc"
     )
     ;

@@ -10,7 +10,7 @@ project = 'SyNAP Python API'
 copyright = '2025, Synaptics Incorporated'
 author = 'Synaptics Incorporated'
 
-version = '0.0.3'
+version = '0.0.4'
 release = 'preview'
 
 # -- General configuration ---------------------------------------------------

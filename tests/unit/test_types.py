@@ -55,7 +55,7 @@ def test_data_type_enum():
     assert DataType.float16.name == "float16"
     assert DataType.float32.name == "float32"
 
-    assert DataType.byte.np_type() == np.dtype("uint8")
+    assert DataType.byte.np_type() == np.dtype("void")
     assert DataType.int8.np_type() == np.dtype("int8")
     assert DataType.uint8.np_type() == np.dtype("uint8")
     assert DataType.int16.np_type() == np.dtype("int16")
@@ -67,6 +67,16 @@ def test_data_type_enum():
 
     with pytest.raises(ValueError):
         DataType.invalid.np_type()
+
+    assert DataType.from_np_type(np.dtype("void")) == DataType.byte
+    assert DataType.from_np_type(np.dtype("uint8")) == DataType.uint8
+    assert DataType.from_np_type(np.dtype("int8")) == DataType.int8
+    assert DataType.from_np_type(np.dtype("int16")) == DataType.int16
+    assert DataType.from_np_type(np.dtype("uint16")) == DataType.uint16
+    assert DataType.from_np_type(np.dtype("int32")) == DataType.int32
+    assert DataType.from_np_type(np.dtype("uint32")) == DataType.uint32
+    assert DataType.from_np_type(np.dtype("float16")) == DataType.float16
+    assert DataType.from_np_type(np.dtype("float32")) == DataType.float32
 
 
 def test_dimensions():
@@ -194,6 +204,9 @@ def test_shape_basic():
     # __getitem__
     assert s[0] == 1
     assert s[3] == 224
+    assert s[-1] == s[3]
+    assert s[-4] == s[0]
+
     # out-of-range
     with pytest.raises(IndexError):
         s[4]

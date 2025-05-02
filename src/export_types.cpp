@@ -8,6 +8,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <sstream>
+#include "export_utils.hpp"
 
 namespace py = pybind11;
 
@@ -90,7 +91,7 @@ static void export_types(py::module_& m)
         "np_type",
         [](const DataType& dtype) {
             switch(dtype) {
-                case DataType::byte:    return py::dtype::of<uint8_t>();
+                case DataType::byte:    return py::dtype("V");
                 case DataType::int8:    return py::dtype::of<int8_t>();
                 case DataType::uint8:   return py::dtype::of<uint8_t>();
                 case DataType::int16:   return py::dtype::of<int16_t>();
@@ -103,6 +104,22 @@ static void export_types(py::module_& m)
             }
         },
         "Get corresponding NumPy dtype"
+    )
+    .def_static(
+        "from_np_type",
+        [](const py::dtype& dt) -> DataType {
+            if (dt.is(py::dtype::of<uint8_t>()))  return DataType::uint8;
+            if (dt.is(py::dtype::of<int8_t>()))   return DataType::int8;
+            if (dt.is(py::dtype::of<uint16_t>())) return DataType::uint16;
+            if (dt.is(py::dtype::of<int16_t>()))  return DataType::int16;
+            if (dt.is(py::dtype::of<uint32_t>())) return DataType::uint32;
+            if (dt.is(py::dtype::of<int32_t>()))  return DataType::int32;
+            if (dt.is(py::dtype::of<float>()))    return DataType::float32;
+            if (dt.kind() == 'f' && dt.itemsize() == 2) return DataType::float16;  // heuristic
+            if (dt.kind() == 'V')                 return DataType::byte; // structured void
+            throw std::invalid_argument("Unsupported NumPy dtype for DataType");
+        },
+        "Convert a NumPy dtype into a DataType"
     )
     ;
 
@@ -320,11 +337,9 @@ static void export_types(py::module_& m)
     )
     .def(
         "__getitem__",
-        [](const Shape& self, size_t index) -> int32_t {
-            if (index >= self.size()) {
-                throw std::out_of_range("Shape index out of range");
-            }
-            return self[index];
+        [](const Shape& self, int index) -> int32_t {
+            size_t cpp_index = export_utils::normalize_index(index, self.size());
+            return self[cpp_index];
         }
     )
     .def(

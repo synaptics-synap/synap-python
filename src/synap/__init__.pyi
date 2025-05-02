@@ -157,8 +157,10 @@ class Tensor:
     
             :ivar str name: The tensor name.
             :ivar bool is_scalar: Whether the tensor is a scalar.
+            :ivar dimensions: The tensor dimensions.
             :ivar Layout layout: The tensor layout.
             :ivar Shape shape: The tensor shape.
+            :ivar str format: The tensor format. This is a free-format string whose meaning is application dependent, for example "rgb", "bgr".
             :ivar int item_count: The number of items in the tensor.
             :ivar int size: The size of the tensor in bytes.
             :ivar DataType data_type: The tensor data type.
@@ -284,6 +286,16 @@ class Tensor:
         The tensor data type.
         """
     @property
+    def dimensions(self) -> types.Dimensions:
+        """
+        The tensor dimensions.
+        """
+    @property
+    def format(self) -> str:
+        """
+        The tensor format. This is a free-format string whose meaning is application dependent, for example "rgb", "bgr".
+        """
+    @property
     def is_scalar(self) -> bool:
         """
         Whether the tensor is a scalar.
@@ -334,6 +346,16 @@ class Tensors:
                 :rtype: Tensor
                 :raises IndexError: If the index is out of bounds.
         """
+    def __iter__(self) -> typing.Iterator[Tensor]:
+        """
+                Returns an iterator over the tensors in the collection.
+        
+                This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+        
+                :return: An iterator over the tensors in the collection.
+                :rtype: iterator
+                :raises RuntimeError: If the iterator cannot be created.
+        """
     def __len__(self) -> int:
         """
                 Returns the number of tensors in the collection.
@@ -356,4 +378,4 @@ def synap_version() -> types.SynapVersion:
             :return: The SyNAP framework version.
             :rtype: SynapVersion
     """
-__version__: str = '0.0.3'
+__version__: str = '0.0.4'

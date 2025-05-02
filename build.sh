@@ -5,17 +5,23 @@
 
 set -e
 
-PYTHON_DEV_URL="https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-3.10.15-aarch64-rpi3-linux-gnu.tar.gz"
-TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
-
 ROOT_DIR="$PWD"
 BUILD_DIR="$ROOT_DIR/build"
 CACHE_DIR="$ROOT_DIR/.py-build-cmake_cache"
+TEMPLATE_CONFIG="$ROOT_DIR/template.toml"
 
 VERBOSE=false
 CLEAN=false
 x86_64=false
 
+PLAT_TAG="manylinux_2_35"
+PY_MAJOR=$(python -c 'import sys; print(sys.version_info.major)')
+PY_MINOR=$(python -c 'import sys; print(sys.version_info.minor)')
+PY_ABI="cp${PY_MAJOR}${PY_MINOR}"
+PY_VER="${PY_MAJOR}${PY_MINOR}"
+PY_VER_DOT="${PY_MAJOR}.${PY_MINOR}"
+TARGET_ARCH="aarch64"
+HOST_ARCH=$(uname -m)
 
 if [ -z "$VIRTUAL_ENV" ]; then
     echo -e "\033[33m[Warning]\033[0m Not running in a Python virtual environment, system python installation may be modified"
@@ -41,14 +47,11 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            echo "Usage: $0 [--clean] [--verbose]"
+            echo "Usage: $0 [--clean] [--verbose] [--x86_64]"
             exit 1
             ;;
     esac
 done
-
-TARGET_ARCH="aarch64"
-HOST_ARCH=$(uname -m)
 
 if [[ "$HOST_ARCH" != "x86_64" && "$HOST_ARCH" != "aarch64" ]]; then
     echo "Error: Unsupported architecture '$HOST_ARCH'."
@@ -62,8 +65,24 @@ fi
 
 if [[ "$HOST_ARCH" != "$TARGET_ARCH" && "$x86_64" != true ]]; then
     CROSSCOMPILE=true
+
+    if [[ "$PY_VER_DOT" == "3.10" ]]; then
+        PY_DEV_VER="${PY_VER_DOT}.15"
+    elif [[ "$PY_VER_DOT" == "3.11" ]]; then
+        PY_DEV_VER="${PY_VER_DOT}.10"
+    elif [[ "$PY_VER_DOT" == "3.12" ]]; then
+        PY_DEV_VER="${PY_VER_DOT}.7"
+    elif [[ "$PY_VER_DOT" == "3.13" ]]; then
+        PY_DEV_VER="${PY_VER_DOT}.0"
+    else
+        echo "Error: Unsupported python version '$PY_VER_DOT'."
+        exit 1
+    fi
+
+    PYTHON_DEV_URL="https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-${PY_DEV_VER}-aarch64-rpi3-linux-gnu.tar.gz"
+    TOOLCHAIN_URL="https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
     TOOLCHAIN_DIR="$BUILD_DIR/toolchain"
-    PYTHON_DEV_DIR="$BUILD_DIR/python-dev"
+    PYTHON_DEV_DIR="$BUILD_DIR/python-${PY_DEV_VER}-dev"
 else
     CROSSCOMPILE=false
     TOOLCHAIN_DIR=
@@ -129,12 +148,23 @@ setup_venv() {
     pip install build wheel
 }
 
+render_config() {
+    local tmpl=$1 out=$2
+    local sed_script=""
+
+    for v in PY_VER PY_VER_DOT PY_ABI; do
+        sed_script+="s|@${v}@|${!v}|g;"
+    done
+
+    sed -e "$sed_script" "$tmpl" > "$out"
+}
+
 build_extensions() {
     cd $ROOT_DIR
     if $CROSSCOMPILE; then
-        python -m build -w . -C "cross=$BUILD_CONFIG"
+        python -m build -w . -C "cross=$BUILD_CONFIG" -C "override=cross.arch=${PLAT_TAG}_${TARGET_ARCH}"
     else
-        python -m build -w . -C "local=$BUILD_CONFIG"
+        python -m build -w . -C "local=$BUILD_CONFIG" -C "override=wheel.platform_tag=${PLAT_TAG}_${HOST_ARCH}"
     fi
 }
 
@@ -158,26 +188,28 @@ fi
 run_cmd "setup_venv" "Setting up virtual environment" "$LOG_DIR/venv_activation.log"
 
 if $CLEAN; then
-    if $x86_64; then
-        rm -rf "$CACHE_DIR/cp310-cp310-linux_x86_64-x86_64-linux-gnu"
-    else
-        rm -rf "$CACHE_DIR/cp310-cp310-linux_aarch64-aarch64-linux-gnu"
-    fi
-    echo "Cleaned cache directory for fresh build"
+    CACHE_PATH="$CACHE_DIR/${PY_ABI}-${PY_ABI}-${PLAT_TAG}_${TARGET_ARCH}-${TARGET_ARCH}-linux-gnu"
+    rm -rf "$CACHE_PATH"
+    echo "Cleaned cache directory at $CACHE_PATH"
 fi
 
 if $x86_64; then
     echo "Building for x86_64"
-    BUILD_CONFIG="$BUILD_DIR/x86_64-linux-gnu.python3.10.py-build-cmake.local.toml"
+    CONFIG_TEMPLATE="$BUILD_DIR/x86_64-linux-gnu.python3.local.py-build-cmake.toml.in"
+    BUILD_CONFIG="$BUILD_DIR/x86_64-linux-gnu.python${PY_VER_DOT}.local.py-build-cmake.toml"
 else
     echo "Building for aarch64-linux-gnu"
     if $CROSSCOMPILE; then
-        BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python3.10.py-build-cmake.cross.toml"
+        CONFIG_TEMPLATE="$BUILD_DIR/aarch64-linux-gnu.python3.cross.py-build-cmake.toml.in"
+        BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python${PY_VER_DOT}.cross.py-build-cmake.toml"
     else
-        BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python3.10.py-build-cmake.local.toml"
+        CONFIG_TEMPLATE="$BUILD_DIR/aarch64-linux-gnu.python3.local.py-build-cmake.toml.in"
+        BUILD_CONFIG="$BUILD_DIR/aarch64-linux-gnu.python${PY_VER_DOT}.local.py-build-cmake.toml"
     fi
 fi
+render_config "$CONFIG_TEMPLATE" "$BUILD_CONFIG"
 run_cmd "build_extensions" "Building Python extensions" "$LOG_DIR/build_extensions.log"
+rm -f "$BUILD_CONFIG"
 
 if $CROSSCOMPILE; then
     echo "Skipping stubs generation for cross-compilation"

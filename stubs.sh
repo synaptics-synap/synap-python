@@ -5,15 +5,21 @@
 
 set -e
 
+SYNAP_VERSION="0.0.4"
+HOST_ARCH=$(uname -m)
+PLAT_TAG="manylinux_2_35"
+PYTHON_MAJOR=$(python -c 'import sys; print(sys.version_info.major)')
+PYTHON_MINOR=$(python -c 'import sys; print(sys.version_info.minor)')
+PYTHON_VERSION="${PYTHON_MAJOR}.${PYTHON_MINOR}"
+PYTHON_TAG="cp${PYTHON_MAJOR}${PYTHON_MINOR}"
+
 ROOT_DIR="$PWD"
-VENV_DIR="$ROOT_DIR/.stubs"
+VENV_DIR="$ROOT_DIR/.stubs-$PYTHON_VERSION"
 DIST_DIR="$ROOT_DIR/dist"
 SRC_DIR="$ROOT_DIR/src/synap"
 STUBGEN_DIR="$ROOT_DIR/stubgen"
 OUTPUT_DIR="$STUBGEN_DIR/stubs"
 STUBS_DIR="$OUTPUT_DIR/synap/_synap"
-SYNAP_VERSION="0.0.3"
-HOST_ARCH=$(uname -m)
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
@@ -35,9 +41,9 @@ echo "Installing pybind11-stubgen and dependencies..."
 pip install --upgrade pip > /dev/null
 pip install pybind11 pybind11-stubgen py-build-cmake typing-extensions numpy > /dev/null
 
-PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-linux_$HOST_ARCH.whl"
+PY_WHL="$DIST_DIR/synap_python-${SYNAP_VERSION}-${PYTHON_TAG}-${PYTHON_TAG}-${PLAT_TAG}_${HOST_ARCH}.whl"
 if [ ! -f "$PY_WHL" ]; then
-    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
+    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found: $PY_WHL\033[0m"
     if [ "$HOST_ARCH" == "x86_64" ]; then
         echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh --x86_64\033[0m"
     elif [ "$HOST_ARCH" == "aarch64" ]; then

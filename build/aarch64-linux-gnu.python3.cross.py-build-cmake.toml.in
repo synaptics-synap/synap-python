@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
+
+implementation = "cp"
+version        = "@PY_VER@"
+abi            = "@PY_ABI@"
+toolchain_file = "../cmake/aarch64-linux-gnu.python_config.cmake"
+
+[cmake]
+build_path = ".py-build-cmake_cache/{build_config}-aarch64-linux-gnu"
+[cmake.options]
+TOOLCHAIN_PYTHON_VERSION = "@PY_VER_DOT@"
