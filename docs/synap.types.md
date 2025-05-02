@@ -26,6 +26,10 @@ Members:
 
 > float32 : 32-bit floating point
 
+#### *static* from_np_type(arg0: numpy.dtype) → [synap.types.DataType](#synap.types.DataType)
+
+Convert a NumPy dtype into a DataType
+
 #### np_type(self) → numpy.dtype
 
 Get corresponding NumPy dtype
