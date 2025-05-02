@@ -7,9 +7,16 @@ set -e
 
 SYNAP_VERSION="0.0.4"
 SYNAP_RELEASE="preview"
+HOST_ARCH=$(uname -m)
+PLAT_TAG="manylinux_2_35"
+PYTHON_MAJOR=$(python -c 'import sys; print(sys.version_info.major)')
+PYTHON_MINOR=$(python -c 'import sys; print(sys.version_info.minor)')
+PYTHON_VERSION="${PYTHON_MAJOR}.${PYTHON_MINOR}"
+PYTHON_TAG="cp${PYTHON_MAJOR}${PYTHON_MINOR}"
+
 DOCS_ROOT="$PWD"
 ROOT_DIR="$DOCS_ROOT/.."
-VENV_DIR="$DOCS_ROOT/.docs"
+VENV_DIR="$DOCS_ROOT/.docs-$PYTHON_VERSION"
 DIST_DIR="$ROOT_DIR/dist"
 HOST_ARCH=$(uname -m)
 PLAT_TAG="manylinux_2_35"
@@ -38,7 +45,7 @@ pip install --upgrade pip > /dev/null
 pip install build sphinx sphinx-markdown-builder sphinx-rtd-theme wheel > /dev/null
 
 echo "Installing latest SyNAP Python API wheel..."
-PY_WHL="$DIST_DIR/synap_python-$SYNAP_VERSION-cp310-cp310-${PLAT_TAG}_${HOST_ARCH}.whl"
+PY_WHL="$DIST_DIR/synap_python-${SYNAP_VERSION}-${PYTHON_TAG}-${PYTHON_TAG}-${PLAT_TAG}_${HOST_ARCH}.whl"
 if [ ! -f "$PY_WHL" ]; then
     echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
     if [ "$HOST_ARCH" == "x86_64" ]; then

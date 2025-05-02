@@ -2,8 +2,9 @@ __pycache__/
 dist/
 toolchains/
 log*/
-build/python-dev
-build/toolchain
+build/python*
+build/toolchain*
+build/*.toml
 *cache*/
 *stub*/
 *.egg-info/
@@ -17,3 +18,4 @@ _build
 .vscode
 CMakeLists.txt.user
 docs/build
+*TODO*
