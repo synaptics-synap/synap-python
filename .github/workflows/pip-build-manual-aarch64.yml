@@ -1,4 +1,4 @@
-name: Build pip wheel as artifact
+name: Build pip wheels as artifacts
 
 on: [workflow_dispatch]
 
@@ -71,7 +71,7 @@ jobs:
           PY_VER_DOT="${{ matrix.python-ver }}"
           PY_ABI="cp${PY_VER}"
 
-          TEMPLATE="${ROOT_DIR}/template.toml"
+          TEMPLATE="${BUILD_DIR}/aarch64-linux-gnu.python3.cross.py-build-cmake.toml.in"
           OUTPUT="${BUILD_DIR}/aarch64-linux-gnu.python${PY_VER_DOT}.cross.py-build-cmake.toml"
 
           echo "Building config $OUTPUT from $TEMPLATE"
@@ -80,10 +80,9 @@ jobs:
                   s|@PY_ABI@|${PY_ABI}|g;" \
               "${TEMPLATE}" > "${OUTPUT}"
 
-          # export for the next step
           echo "BUILD_CONFIG=${OUTPUT}" >> $GITHUB_ENV
 
-      - name: Build wheel
+      - name: Build wheels
         run: python -m build -w . -C "cross=${{ env.BUILD_CONFIG }}"
 
       - name: Upload wheel artifact
