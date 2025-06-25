@@ -6,7 +6,7 @@ SyNAP-Python-API
 
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://developer.synaptics.com/)
 [![python](https://img.shields.io/badge/python-3.10-brightgreen)](https://www.python.org/downloads/release/python-3123/)
-[![version](https://img.shields.io/badge/release-0.0.4.preview-yellow)](https://github.com/synaptics-synap/synap-python/releases)
+[![version](https://img.shields.io/badge/release-0.1.0.preview-yellow)](https://github.com/synaptics-synap/synap-python/releases)
 [![license](https://img.shields.io/badge/license-Apache%202-blue)](./LICENSE)
 
 [Hardware](https://www.synaptics.com/products/embedded-processors/astra-machina-foundation-series)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Models](https://developer.synaptics.com/models?operator=AND)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Documentation](https://developer.synaptics.com/)
@@ -93,7 +93,7 @@ Use `--verbose` for detailed build steps and `--clean` for a clean build.
 The build process generates a wheel file stored in the dist folder. The output should resemble the following:
 
 ```sh
-Successfully built synap_python-0.0.4-cp310-cp310-manylinux_2_35_aarch64.whl
+Successfully built synap_python-0.1.0-cp310-cp310-manylinux_2_35_aarch64.whl
 Building Python extensions ... Success!
 Build completed successfully, wheel located at /home/../synap-python/dist/
 ```

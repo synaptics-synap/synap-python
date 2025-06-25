@@ -5,7 +5,7 @@
 
 set -e
 
-SYNAP_VERSION="0.0.4"
+SYNAP_VERSION="0.1.0"
 HOST_ARCH=$(uname -m)
 PLAT_TAG="manylinux_2_35"
 PYTHON_MAJOR=$(python -c 'import sys; print(sys.version_info.major)')

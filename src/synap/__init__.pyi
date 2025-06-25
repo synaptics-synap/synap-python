@@ -378,4 +378,4 @@ def synap_version() -> types.SynapVersion:
             :return: The SyNAP framework version.
             :rtype: SynapVersion
     """
-__version__: str = '0.0.4'
+__version__: str = '0.1.0'
