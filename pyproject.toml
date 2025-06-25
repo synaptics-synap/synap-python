@@ -9,7 +9,9 @@ authors = [{ "name" = "Sauryadeep Pal", "email" = "sauryadeep.pal@synaptics.com"
 description = "Python bindings for SyNAP"
 license = { "file" = "LICENSE" }
 readme = "README.md"
-dependencies = []
+dependencies = [
+    "numpy",
+]
 
 [build-system]
 requires = ["py-build-cmake", "pybind11", "pybind11-stubgen"]
