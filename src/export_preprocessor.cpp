@@ -273,7 +273,40 @@ static void export_preprocessor(py::module_& m)
     )
     .def(
         "assign",
+        [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Layout layout, size_t input_index) -> Rect {
+            py::buffer_info info = data.request();
+            const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
+            size_t buffer_size = info.size;
+            Shape buffer_shape(info.shape.begin(), info.shape.end());
+            return self.assign(*tw.tensors, buffer, buffer_size, buffer_shape, layout, input_index);
+        },
+        py::arg("inputs"),
+        py::arg("data"),
+        py::arg("layout"),
+        py::arg("input_index") = 0,
+        R"doc(
+        Write raw data to network inputs.
+
+        Data must be provided as a NumPy array of type `uint8`.
+
+        :param Tensors inputs: Network inputs.
+        :param numpy.ndarray data: Raw data buffer.
+        :param Layout layout: Data layout.
+        :param int input_index: Index of the input tensor to write to.
+        :return: Assigned rectangle in the input tensor.
+        :rtype: Rect
+        :raises RuntimeError: If an error occurs during preprocessing.
+        )doc"
+    )
+    .def(
+        "assign",
         [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
+            PyErr_WarnEx(
+                PyExc_DeprecationWarning,
+                "`assign(..., shape, ...)` is deprecated and will be removed in v0.2.0; "
+                "please omit the `shape` argument and let it be inferred automatically.",
+                1
+            );
             py::buffer_info info = data.request();
             const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
             size_t buffer_size = info.size;
@@ -285,6 +318,8 @@ static void export_preprocessor(py::module_& m)
         py::arg("layout"),
         py::arg("input_index") = 0,
         R"doc(
+        WARNING: This method is deprecated as input shape is inferred instead of being passed explicitly. Please use `assign(inputs, data, layout, input_index)`.
+
         Write raw data to network inputs.
 
         Data must be provided as a NumPy array of type `uint8`.

@@ -181,6 +181,21 @@ class Preprocessor:
                 :raises RuntimeError: If an error occurs during preprocessing.
         """
     @typing.overload
+    def assign(self, inputs: synap.Tensors, data: numpy.ndarray[numpy.uint8], layout: synap.types.Layout, input_index: int = 0) -> synap.types.Rect:
+        """
+                Write raw data to network inputs.
+        
+                Data must be provided as a NumPy array of type `uint8`.
+        
+                :param Tensors inputs: Network inputs.
+                :param numpy.ndarray data: Raw data buffer.
+                :param Layout layout: Data layout.
+                :param int input_index: Index of the input tensor to write to.
+                :return: Assigned rectangle in the input tensor.
+                :rtype: Rect
+                :raises RuntimeError: If an error occurs during preprocessing.
+        """
+    @typing.overload
     def assign(self, inputs: synap.Tensors, data: numpy.ndarray[numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: int = 0) -> synap.types.Rect:
         """
                 Write raw data to network inputs.
