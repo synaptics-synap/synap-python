@@ -305,7 +305,7 @@ static void export_preprocessor(py::module_& m)
                 PyExc_DeprecationWarning,
                 "`assign(..., shape, ...)` is deprecated and will be removed in v0.2.0; "
                 "please omit the `shape` argument and let it be inferred automatically.",
-                2
+                1
             );
             return py::cast(const_cast<PreprocessorWrapper&>(self))
                         .attr("assign")(tw, data, layout, input_index)
