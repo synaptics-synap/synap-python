@@ -5,6 +5,7 @@
 SyNAP postprocessor
 """
 from __future__ import annotations
+import collections.abc
 import synap
 import synap.types
 import typing
@@ -19,7 +20,7 @@ class Classifier:
             :param int top_count: The number of most probable classifications to return.
             
     """
-    def __init__(self, top_count: int = 1) -> None:
+    def __init__(self, top_count: typing.SupportsInt = 1) -> None:
         ...
     def process(self, outputs: synap.Tensors) -> ClassifierResult:
         """
@@ -73,13 +74,13 @@ class ClassifierResultItems:
             Represents a collection of classification result items.
             
     """
-    def __getitem__(self, arg0: int) -> ClassifierResultItem:
+    def __getitem__(self, arg0: typing.SupportsInt) -> ClassifierResultItem:
         """
         Get classification result item by index.
         """
     def __init__(self) -> None:
         ...
-    def __iter__(self) -> typing.Iterator:
+    def __iter__(self) -> collections.abc.Iterator:
         """
         Iterate over classification result items.
         """
@@ -105,7 +106,7 @@ class Detector:
             :param bool iou_with_min: Whether to use the minimum bounding box area for intersection-over-union.
             
     """
-    def __init__(self, score_threshold: float = 0.5, n_max: int = 0, nms: bool = True, iou_threshold: float = 0.5, iou_with_min: bool = False) -> None:
+    def __init__(self, score_threshold: typing.SupportsFloat = 0.5, n_max: typing.SupportsInt = 0, nms: bool = True, iou_threshold: typing.SupportsFloat = 0.5, iou_with_min: bool = False) -> None:
         ...
     def process(self, outputs: synap.Tensors, assigned_rect: synap.types.Rect) -> DetectorResult:
         """
@@ -177,13 +178,13 @@ class DetectorResultItems:
             Represents a collection of object detection result items.
             
     """
-    def __getitem__(self, arg0: int) -> DetectorResultItem:
+    def __getitem__(self, arg0: typing.SupportsInt) -> DetectorResultItem:
         """
         Get detection result item by index.
         """
     def __init__(self) -> None:
         ...
-    def __iter__(self) -> typing.Iterator:
+    def __iter__(self) -> collections.abc.Iterator:
         """
         Iterate over detection result items.
         """

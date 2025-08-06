@@ -5,6 +5,7 @@
 SyNAP Python API
 """
 from __future__ import annotations
+import collections.abc
 import numpy
 import typing
 import typing_extensions
@@ -199,7 +200,7 @@ class Tensor:
                 :raises RuntimeError: If the copy operation fails.
         """
     @typing.overload
-    def assign(self, value: int) -> None:
+    def assign(self, value: typing.SupportsInt) -> None:
         """
                 Assigns a scalar value to the tensor.
         
@@ -335,7 +336,7 @@ class Tensors:
             :ivar int size: The number of tensors in the collection.
             
     """
-    def __getitem__(self, arg0: int) -> Tensor:
+    def __getitem__(self, arg0: typing.SupportsInt) -> Tensor:
         """
                 Retrieves a tensor by index.
         
@@ -346,7 +347,7 @@ class Tensors:
                 :rtype: Tensor
                 :raises IndexError: If the index is out of bounds.
         """
-    def __iter__(self) -> typing.Iterator[Tensor]:
+    def __iter__(self) -> collections.abc.Iterator[Tensor]:
         """
                 Returns an iterator over the tensors in the collection.
         

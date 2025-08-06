@@ -5,6 +5,7 @@
 SyNAP types
 """
 from __future__ import annotations
+import collections.abc
 import numpy
 import typing
 __all__ = ['DataType', 'Dim2d', 'Dimensions', 'Landmark', 'Layout', 'Mask', 'Rect', 'Shape', 'SynapVersion']
@@ -60,7 +61,7 @@ class DataType:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: typing.SupportsInt) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -68,7 +69,7 @@ class DataType:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: int) -> None:
+    def __setstate__(self, state: typing.SupportsInt) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -98,7 +99,7 @@ class Dim2d:
         ...
     def __iadd__(self, arg0: Dim2d) -> Dim2d:
         ...
-    def __init__(self, x: int = 0, y: int = 0) -> None:
+    def __init__(self, x: typing.SupportsInt = 0, y: typing.SupportsInt = 0) -> None:
         ...
     def __repr__(self) -> str:
         ...
@@ -108,7 +109,7 @@ class Dim2d:
         The width or horizontal component.
         """
     @x.setter
-    def x(self, arg0: int) -> None:
+    def x(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def y(self) -> int:
@@ -116,7 +117,7 @@ class Dim2d:
         The height or vertical component.
         """
     @y.setter
-    def y(self, arg0: int) -> None:
+    def y(self, arg0: typing.SupportsInt) -> None:
         ...
 class Dimensions:
     """
@@ -133,7 +134,7 @@ class Dimensions:
     def __eq__(self, arg0: Dimensions) -> bool:
         ...
     @typing.overload
-    def __init__(self, n: int = 0, h: int = 0, w: int = 0, c: int = 0) -> None:
+    def __init__(self, n: typing.SupportsInt = 0, h: typing.SupportsInt = 0, w: typing.SupportsInt = 0, c: typing.SupportsInt = 0) -> None:
         ...
     @typing.overload
     def __init__(self, shape: Shape, layout: Layout) -> None:
@@ -155,7 +156,7 @@ class Dimensions:
         The number of channels in the tensor.
         """
     @c.setter
-    def c(self, arg0: int) -> None:
+    def c(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def h(self) -> int:
@@ -163,7 +164,7 @@ class Dimensions:
         The height of the tensor.
         """
     @h.setter
-    def h(self, arg0: int) -> None:
+    def h(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def n(self) -> int:
@@ -171,7 +172,7 @@ class Dimensions:
         The number of elements in the batch.
         """
     @n.setter
-    def n(self, arg0: int) -> None:
+    def n(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def w(self) -> int:
@@ -179,7 +180,7 @@ class Dimensions:
         The width of the tensor.
         """
     @w.setter
-    def w(self, arg0: int) -> None:
+    def w(self, arg0: typing.SupportsInt) -> None:
         ...
 class Landmark:
     """
@@ -195,7 +196,7 @@ class Landmark:
     __hash__: typing.ClassVar[None] = None
     def __eq__(self, arg0: Landmark) -> bool:
         ...
-    def __init__(self, x: int = 0, y: int = 0, z: int = 0, visibility: float = -1.0) -> None:
+    def __init__(self, x: typing.SupportsInt = 0, y: typing.SupportsInt = 0, z: typing.SupportsInt = 0, visibility: typing.SupportsFloat = -1.0) -> None:
         ...
     def __repr__(self) -> str:
         ...
@@ -205,7 +206,7 @@ class Landmark:
         The visibility of the landmark.
         """
     @visibility.setter
-    def visibility(self, arg0: float) -> None:
+    def visibility(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def x(self) -> int:
@@ -213,7 +214,7 @@ class Landmark:
         The x-coordinate.
         """
     @x.setter
-    def x(self, arg0: int) -> None:
+    def x(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def y(self) -> int:
@@ -221,7 +222,7 @@ class Landmark:
         The y-coordinate.
         """
     @y.setter
-    def y(self, arg0: int) -> None:
+    def y(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def z(self) -> int:
@@ -229,7 +230,7 @@ class Landmark:
         The z-coordinate.
         """
     @z.setter
-    def z(self, arg0: int) -> None:
+    def z(self, arg0: typing.SupportsInt) -> None:
         ...
 class Layout:
     """
@@ -257,7 +258,7 @@ class Layout:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: typing.SupportsInt) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -265,7 +266,7 @@ class Layout:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: int) -> None:
+    def __setstate__(self, state: typing.SupportsInt) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -286,7 +287,7 @@ class Mask:
     """
     def __bool__(self) -> bool:
         ...
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, width: typing.SupportsInt, height: typing.SupportsInt) -> None:
         ...
     def __repr__(self) -> str:
         ...
@@ -297,7 +298,7 @@ class Mask:
                 :return: Mask values as a list.
                 :rtype: list[float]
         """
-    def set_value(self, row: int, col: int, val: float) -> None:
+    def set_value(self, row: typing.SupportsInt, col: typing.SupportsInt, val: typing.SupportsFloat) -> None:
         """
                 Set the value of a pixel in the mask.
         
@@ -379,11 +380,11 @@ class Shape:
     __hash__: typing.ClassVar[None] = None
     def __eq__(self, arg0: Shape) -> bool:
         ...
-    def __getitem__(self, arg0: int) -> int:
+    def __getitem__(self, arg0: typing.SupportsInt) -> int:
         ...
-    def __init__(self, shape: typing.Iterable) -> None:
+    def __init__(self, shape: collections.abc.Iterable) -> None:
         ...
-    def __iter__(self) -> typing.Iterator[int]:
+    def __iter__(self) -> collections.abc.Iterator[int]:
         ...
     def __repr__(self) -> str:
         ...

@@ -6,6 +6,7 @@ SyNAP preprocessor
 """
 from __future__ import annotations
 import numpy
+import numpy.typing
 import synap
 import synap.types
 import typing
@@ -134,7 +135,7 @@ class InputType:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: typing.SupportsInt) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -142,7 +143,7 @@ class InputType:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: int) -> None:
+    def __setstate__(self, state: typing.SupportsInt) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -156,7 +157,7 @@ class Preprocessor:
     def __init__(self) -> None:
         ...
     @typing.overload
-    def assign(self, inputs: synap.Tensors, input_data: InputData, input_index: int = 0) -> synap.types.Rect:
+    def assign(self, inputs: synap.Tensors, input_data: InputData, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
         """
                 Write input data to network inputs.
         
@@ -168,7 +169,7 @@ class Preprocessor:
                 :raises RuntimeError: If an error occurs during preprocessing.
         """
     @typing.overload
-    def assign(self, inputs: synap.Tensors, filename: str, input_index: int = 0) -> synap.types.Rect:
+    def assign(self, inputs: synap.Tensors, filename: str, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
         """
                 Write image data to network inputs.
         
@@ -181,7 +182,7 @@ class Preprocessor:
                 :raises RuntimeError: If an error occurs during preprocessing.
         """
     @typing.overload
-    def assign(self, inputs: synap.Tensors, data: numpy.ndarray[numpy.uint8], layout: synap.types.Layout, input_index: int = 0) -> synap.types.Rect:
+    def assign(self, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
         """
                 Write raw data to network inputs.
         
@@ -196,8 +197,10 @@ class Preprocessor:
                 :raises RuntimeError: If an error occurs during preprocessing.
         """
     @typing.overload
-    def assign(self, inputs: synap.Tensors, data: numpy.ndarray[numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: int = 0) -> synap.types.Rect:
+    def assign(self, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
         """
+                WARNING: This method is deprecated as input shape is inferred instead of being passed explicitly. Please use `assign(inputs, data, layout, input_index)`.
+        
                 Write raw data to network inputs.
         
                 Data must be provided as a NumPy array of type `uint8`.
