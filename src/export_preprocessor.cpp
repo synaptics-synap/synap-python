@@ -305,12 +305,11 @@ static void export_preprocessor(py::module_& m)
                 PyExc_DeprecationWarning,
                 "`assign(..., shape, ...)` is deprecated and will be removed in v0.2.0; "
                 "please omit the `shape` argument and let it be inferred automatically.",
-                1
+                2
             );
-            py::buffer_info info = data.request();
-            const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
-            size_t buffer_size = info.size;
-            return self.assign(*tw.tensors, buffer, buffer_size, shape, layout, input_index);
+            return py::cast(const_cast<PreprocessorWrapper&>(self))
+                        .attr("assign")(tw, data, layout, input_index)
+                        .cast<Rect>();
         },
         py::arg("inputs"),
         py::arg("data"),
