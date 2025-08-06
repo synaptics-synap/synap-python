@@ -2,6 +2,7 @@ import pytest
 import re
 import subprocess
 import numpy as np
+from pathlib import Path
 
 import synap
 from synap.types import SynapVersion
@@ -34,6 +35,14 @@ def _validate_model_props(model: synap.Network, props: dict):
         _validate_tensor_props(inp, props["inputs"][i])
     for i, out in enumerate(model.outputs):
         _validate_tensor_props(out, props["outputs"][i])
+
+@pytest.fixture(params=[
+    Path("tests/data/models/yolov8s-640x384-uint8.synap"),
+    "tests/data/models/yolov8s-640x384-uint8.synap",
+    b"tests/data/models/yolov8s-640x384-uint8.synap",
+])
+def model_path_variant(request):
+    return request.param
 
 @pytest.fixture
 def valid_uint8_model_path():
@@ -189,14 +198,14 @@ def test_network_constructor_no_args():
     assert len(net.inputs) == 0
     assert len(net.outputs) == 0
 
-def test_network_constructor_with_model(valid_uint8_model_path, valid_uint8_model_props):
+def test_network_constructor_with_model(model_path_variant, valid_uint8_model_props):
     """
     Test Network class constructor model loading
     """
-    net = synap.Network(valid_uint8_model_path)
+    net = synap.Network(model_path_variant)
     _validate_model_props(net, valid_uint8_model_props)
 
-def test_network_load_from_file(valid_uint8_model_path, valid_uint8_model_props):
+def test_network_load_from_file(model_path_variant, valid_uint8_model_props):
     """
     Test loading synap model from file
     """
@@ -205,7 +214,7 @@ def test_network_load_from_file(valid_uint8_model_path, valid_uint8_model_props)
     with pytest.raises(RuntimeError, match="Unable to load model from file"):
         net.load_model("non_existent_model.synap")
 
-    net.load_model(valid_uint8_model_path)
+    net.load_model(model_path_variant)
     _validate_model_props(net, valid_uint8_model_props)
 
 def test_network_load_from_memory(valid_uint8_model_path, valid_uint8_model_props):

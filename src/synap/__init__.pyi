@@ -7,6 +7,7 @@ SyNAP Python API
 from __future__ import annotations
 import collections.abc
 import numpy
+import os
 import typing
 import typing_extensions
 from . import postprocessor
@@ -43,26 +44,26 @@ class Network:
                 loaded using `load_model()` before inference can be run.
         """
     @typing.overload
-    def __init__(self, model_file: str, meta_file: str = '') -> None:
+    def __init__(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
         """
                 Creates a new network instance and loads a model from a file.
         
-                :param str model_file: The path to a `.synap` model file. Legacy `.nb` model 
+                :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
                                         files are also supported.
-                :param str meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+                :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                         Required for legacy `.nb` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
-    @typing.overload
-    def load_model(self, model_data: bytes, meta_data: str = '') -> None:
+    def load_model(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
         """
-                Loads a model from memory.
+                Loads a model from a file.
         
                 If another model was previously loaded, it is automatically disposed before 
                 loading the new one.
-        
-                :param bytes model_data: The binary model data.
-                :param str meta_data: (Optional) The path to the model metadata file (JSON-formatted). 
+            
+                :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
+                                        files are also supported.
+                :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                         Required for legacy `.nb` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """

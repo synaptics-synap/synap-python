@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: Copyright © 2019 Synaptics Incorporated.
 
 #include <algorithm>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -15,8 +16,10 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/stl/filesystem.h> 
 
 namespace py = pybind11;
+namespace fs = std::filesystem;
 
 using namespace std;
 using namespace synaptics::synap;
@@ -196,7 +199,7 @@ static void export_tensors(py::module_& m)
     )
     .def_property_readonly(
         "name",
-        [](const TensorWrapper& self) -> string {
+        [](const TensorWrapper& self) -> std::string {
             return self.tensor->name();
         },
         "The tensor name."
@@ -560,9 +563,9 @@ static void export_tensors(py::module_& m)
         )doc"
     )
     .def(
-        py::init([](const string& model_file, const string& meta_file = ""){
+        py::init([](const fs::path& model_file, const fs::path& meta_file = fs::path{}){
             auto network = std::make_shared<Network>();
-            if (!network->load_model(model_file, meta_file)) {
+            if (!network->load_model(model_file.string(), meta_file.string())) {
                 throw std::runtime_error("Unable to load model from file");
             }
             return network;
@@ -572,9 +575,9 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new network instance and loads a model from a file.
 
-        :param str model_file: The path to a `.synap` model file. Legacy `.nb` model 
+        :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
                                 files are also supported.
-        :param str meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                 Required for legacy `.nb` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
@@ -605,8 +608,8 @@ static void export_tensors(py::module_& m)
         )doc"
     )
     .def("load_model",
-        [](std::shared_ptr<Network> self, const string& model_file, const string& meta_file = "") {
-            if (!self->load_model(model_file, meta_file)) {
+        [](std::shared_ptr<Network> self, const fs::path& model_file, const fs::path& meta_file = fs::path{}) {
+            if (!self->load_model(model_file.string(), meta_file.string())) {
                 throw std::runtime_error("Unable to load model from file");
             }
         },
@@ -618,9 +621,9 @@ static void export_tensors(py::module_& m)
         If another model was previously loaded, it is automatically disposed before 
         loading the new one.
     
-        :param str model_file: The path to a `.synap` model file. Legacy `.nb` model 
+        :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
                                 files are also supported.
-        :param str meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                 Required for legacy `.nb` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
