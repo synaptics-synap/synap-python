@@ -90,7 +90,7 @@ Data type.
 
 Overloaded function.
 
-1. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, input_data: synap.preprocessor.InputData, input_index: int = 0) -> synap.types.Rect
+1. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, input_data: synap.preprocessor.InputData, input_index: typing.SupportsInt = 0) -> synap.types.Rect
    > Write input data to network inputs.
    > * **param Tensors inputs:**
    >   Network inputs.
@@ -104,7 +104,7 @@ Overloaded function.
    >   Rect
    > * **raises RuntimeError:**
    >   If an error occurs during preprocessing.
-2. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, filename: str, input_index: int = 0) -> synap.types.Rect
+2. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, filename: str, input_index: typing.SupportsInt = 0) -> synap.types.Rect
    > Write image data to network inputs.
    > * **param Tensors inputs:**
    >   Network inputs.
@@ -120,7 +120,27 @@ Overloaded function.
    >   If the image file is not found or the data is invalid.
    > * **raises RuntimeError:**
    >   If an error occurs during preprocessing.
-3. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, data: numpy.ndarray[numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: int = 0) -> synap.types.Rect
+3. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect
+   > Write raw data to network inputs.
+
+   > Data must be provided as a NumPy array of type uint8.
+   > * **param Tensors inputs:**
+   >   Network inputs.
+   > * **param numpy.ndarray data:**
+   >   Raw data buffer.
+   > * **param Layout layout:**
+   >   Data layout.
+   > * **param int input_index:**
+   >   Index of the input tensor to write to.
+   > * **return:**
+   >   Assigned rectangle in the input tensor.
+   > * **rtype:**
+   >   Rect
+   > * **raises RuntimeError:**
+   >   If an error occurs during preprocessing.
+4. assign(self: synap.preprocessor.Preprocessor, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect
+   > WARNING: This method is deprecated as input shape is inferred instead of being passed explicitly. Please use assign(inputs, data, layout, input_index).
+
    > Write raw data to network inputs.
 
    > Data must be provided as a NumPy array of type uint8.

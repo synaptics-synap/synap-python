@@ -149,7 +149,7 @@ Get mask height in pixels.
 * **Return type:**
   int
 
-#### set_value(self, row: int, col: int, val: float) → None
+#### set_value(self, row: SupportsInt, col: SupportsInt, val: SupportsFloat) → None
 
 Set the value of a pixel in the mask.
 

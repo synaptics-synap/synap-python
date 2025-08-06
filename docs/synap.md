@@ -167,7 +167,7 @@ Overloaded function.
    >   The source tensor.
    > * **raises RuntimeError:**
    >   If the copy operation fails.
-2. assign(self: synap.Tensor, value: int) -> None
+2. assign(self: synap.Tensor, value: typing.SupportsInt) -> None
    > Assigns a scalar value to the tensor.
 
    > This operation is only valid if the tensor is a scalar. The value is converted
