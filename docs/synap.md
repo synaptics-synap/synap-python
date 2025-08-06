@@ -34,35 +34,34 @@ the input tensors depend on the loaded model.
 * **Return type:**
   [Tensors](#synap.Tensors)
 
-#### load_model(\*args, \*\*kwargs)
+#### load_model(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') → None
 
-Overloaded function.
+Loads a model from a file.
 
-1. load_model(self: synap.Network, model_data: bytes, meta_data: str = ‘’) -> None
-   > Loads a model from memory.
+If another model was previously loaded, it is automatically disposed before
+loading the new one.
 
-   > If another model was previously loaded, it is automatically disposed before
-   > loading the new one.
-   > * **param bytes model_data:**
-   >   The binary model data.
-   > * **param str meta_data:**
-   >   (Optional) The path to the model metadata file (JSON-formatted).
-   >   Required for legacy .nb models, otherwise should be an empty string.
-   > * **raises RuntimeError:**
-   >   If the model cannot be loaded.
-2. load_model(self: synap.Network, model_file: str, meta_file: str = ‘’) -> None
-   > Loads a model from a file.
+* **Parameters:**
+  * **model_file** (*os.Pathlike* *or* *str* *or* *bytes*) – The path to a .synap model file. Legacy .nb model
+    files are also supported.
+  * **meta_file** (*os.Pathlike* *or* *str* *or* *bytes*) – (Optional) The path to the model metadata file (JSON-formatted).
+    Required for legacy .nb models, otherwise should be an empty string.
+* **Raises:**
+  **RuntimeError** – If the model cannot be loaded.
 
-   > If another model was previously loaded, it is automatically disposed before
-   > loading the new one.
-   > * **param str model_file:**
-   >   The path to a .synap model file. Legacy .nb model
-   >   files are also supported.
-   > * **param str meta_file:**
-   >   (Optional) The path to the model metadata file (JSON-formatted).
-   >   Required for legacy .nb models, otherwise should be an empty string.
-   > * **raises RuntimeError:**
-   >   If the model cannot be loaded.
+#### load_model_from_memory(self, model_data: bytes, meta_file: os.PathLike | str | bytes = '') → None
+
+Loads a model from memory.
+
+If another model was previously loaded, it is automatically disposed before
+loading the new one.
+
+* **Parameters:**
+  * **model_data** (*bytes*) – The binary model data.
+  * **meta_file** (*os.Pathlike* *or* *str* *or* *bytes*) – (Optional) The path to the model metadata file (JSON-formatted).
+    Required for legacy .nb models, otherwise should be an empty string.
+* **Raises:**
+  **RuntimeError** – If the model cannot be loaded.
 
 #### *property* outputs
 
