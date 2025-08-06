@@ -226,9 +226,9 @@ def test_network_load_from_memory(valid_uint8_model_path, valid_uint8_model_prop
     net = synap.Network()
     # test loading invalid model data
     with pytest.raises(RuntimeError, match="Unable to load model from memory"):
-        net.load_model(b"Invalid model data")
+        net.load_model_from_memory(b"Invalid model data")
 
-    net.load_model(model_data)
+    net.load_model_from_memory(model_data)
     _validate_model_props(net, valid_uint8_model_props)
 
 def test_network_predict_no_args(valid_uint8_model_path, valid_uint8_model_props):

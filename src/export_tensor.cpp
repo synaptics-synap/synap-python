@@ -582,19 +582,19 @@ static void export_tensors(py::module_& m)
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
-    .def("load_model",
-        [](std::shared_ptr<Network> self, py::bytes model_data, const string& meta_data) {
+    .def("load_model_from_memory",
+        [](std::shared_ptr<Network> self, py::bytes model_data, const fs::path& meta_file = fs::path{}) {
             py::buffer_info model_info(py::buffer(model_data).request());
             if (!self->load_model(
                     static_cast<const void*>(model_info.ptr),
                     model_info.size,
-                    meta_data.empty() ? nullptr : meta_data.c_str()
+                    meta_file.empty() ? nullptr : meta_file.c_str()
             )) {
                 throw std::runtime_error("Unable to load model from memory");
             }
         },
         py::arg("model_data"),
-        py::arg("meta_data") = "",
+        py::arg("meta_file") = "",
         R"doc(
         Loads a model from memory.
 
@@ -602,7 +602,7 @@ static void export_tensors(py::module_& m)
         loading the new one.
 
         :param bytes model_data: The binary model data.
-        :param str meta_data: (Optional) The path to the model metadata file (JSON-formatted). 
+        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                 Required for legacy `.nb` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"

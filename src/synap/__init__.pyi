@@ -67,17 +67,15 @@ class Network:
                                         Required for legacy `.nb` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
-    @typing.overload
-    def load_model(self, model_file: str, meta_file: str = '') -> None:
+    def load_model_from_memory(self, model_data: bytes, meta_file: os.PathLike | str | bytes = '') -> None:
         """
-                Loads a model from a file.
+                Loads a model from memory.
         
                 If another model was previously loaded, it is automatically disposed before 
                 loading the new one.
-            
-                :param str model_file: The path to a `.synap` model file. Legacy `.nb` model 
-                                        files are also supported.
-                :param str meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+        
+                :param bytes model_data: The binary model data.
+                :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                         Required for legacy `.nb` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
