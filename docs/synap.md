@@ -109,27 +109,22 @@ Overloaded function.
    >   If any element in the list is not a valid NumPy array.
    > * **raises RuntimeError:**
    >   If inference fails.
-3. predict(self: synap.Network, 
+3. predict(self: synap.Network, input_feed: dict) -> synap.Tensors
+   > Runs inference using a mapping of input names to input data.
 
-   ```
-   *
-   ```
-
-   args) -> synap.Tensors
-   > Runs inference using the provided input data.
-
-   > Each argument must be a NumPy array. Currently, only uint8, int16,
-   > and float data types are supported. The number of provided inputs must match
-   > the number of model inputs. The inference results are stored in Network.outputs
-   > and also returned by this function.
-   > * **param numpy.ndarray input_data:**
-   >   One or more NumPy arrays representing the input data.
+   > Each key must be a valid input name and each value must be a NumPy array.
+   > Currently, only uint8, int16, and float data types are supported.
+   > The inference results are stored in Network.outputs and also returned by this function.
+   > * **param dict input_feed:**
+   >   A mapping of input names to input data.
    > * **return:**
    >   The output Tensors collection.
    > * **rtype:**
    >   Tensors
    > * **raises ValueError:**
    >   If the number of input data does not match the number of model inputs.
+   > * **raises KeyError:**
+   >   If an input name is missing in the mapping.
    > * **raises TypeError:**
    >   If any element in the list is not a valid NumPy array.
    > * **raises RuntimeError:**
