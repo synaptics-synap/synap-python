@@ -143,6 +143,9 @@ def test_tensor_assign_bytes(sample_uint8_tensor, sample_uint8_tensor_props, sam
     Test Tensor assign with bytes data
     """
     data, deq_data = sample_uint8_data
+    # test bad input size
+    with pytest.raises(ValueError, match="Size mismatch"):
+        sample_uint8_tensor.assign(data.tobytes()[:-1])
     sample_uint8_tensor.assign(data.tobytes())
     assert np.array_equal(sample_uint8_tensor.to_numpy(), deq_data)
     _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
@@ -151,7 +154,17 @@ def test_tensor_assign_numpy(sample_uint8_tensor, sample_uint8_tensor_props, sam
     """
     Test Tensor assign with numpy data
     """
+    # TODO: Check for valid input
     data, deq_data = sample_uint8_data
+    # test bad input rank
+    with pytest.raises(ValueError, match="Dimensions mismatch"):
+        sample_uint8_tensor.assign(data[np.newaxis, :])
+    if data.ndim > 1:
+        with pytest.raises(ValueError, match="Dimensions mismatch"):
+            sample_uint8_tensor.assign(data.flatten())
+        # test bad input shape
+        with pytest.raises(ValueError, match="Shape mismatch"):
+            sample_uint8_tensor.assign(data.transpose())
     sample_uint8_tensor.assign(data)
     assert np.array_equal(sample_uint8_tensor.to_numpy(), deq_data)
     _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
@@ -251,6 +264,13 @@ def test_network_predict_with_input(valid_uint8_model_path, valid_uint8_model_pr
     Test network predict with input data
     """
     net = synap.Network(valid_uint8_model_path)
+    # test predict with invalid number of inputs
+    with pytest.raises(ValueError, match="Invalid number of inputs"):
+        net.predict([[0]] * (len(net.inputs) + np.random.randint(1, 3)))
+    # test predict with non-Numpy input
+    with pytest.raises(TypeError, match="Input data must be a collection of numpy arrays"):
+        net.predict([[0]] * len(net.inputs))
+
     inp_props = valid_uint8_model_props["inputs"]
     inputs = [np.zeros(inp_props[i]["shape"]).astype(np.uint8) for i in range(len(net.inputs))]
     net.predict(inputs)
