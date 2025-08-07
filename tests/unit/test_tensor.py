@@ -251,6 +251,13 @@ def test_network_predict_with_input(valid_uint8_model_path, valid_uint8_model_pr
     Test network predict with input data
     """
     net = synap.Network(valid_uint8_model_path)
+    # test predict with invalid number of inputs
+    with pytest.raises(ValueError, match="Invalid number of inputs"):
+        net.predict([[0]] * (len(net.inputs) + np.random.randint(1, 3)))
+    # test predict with non-Numpy input
+    with pytest.raises(TypeError, match="Input data must be a collection of numpy arrays"):
+        net.predict([[0]] * len(net.inputs))
+
     inp_props = valid_uint8_model_props["inputs"]
     inputs = [np.zeros(inp_props[i]["shape"]).astype(np.uint8) for i in range(len(net.inputs))]
     net.predict(inputs)
