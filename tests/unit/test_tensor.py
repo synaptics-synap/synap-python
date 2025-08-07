@@ -268,10 +268,27 @@ def test_network_predict_with_input(valid_uint8_model_path, valid_uint8_model_pr
     with pytest.raises(ValueError, match="Invalid number of inputs"):
         net.predict([[0]] * (len(net.inputs) + np.random.randint(1, 3)))
     # test predict with non-Numpy input
-    with pytest.raises(TypeError, match="Input data must be a collection of numpy arrays"):
+    with pytest.raises(TypeError, match="Input data must be a collection of NumPy arrays"):
         net.predict([[0]] * len(net.inputs))
 
     inp_props = valid_uint8_model_props["inputs"]
     inputs = [np.zeros(inp_props[i]["shape"]).astype(np.uint8) for i in range(len(net.inputs))]
+    net.predict(inputs)
+    _validate_model_output(net, valid_uint8_model_props["outputs"])
+
+def test_network_predict_with_mapping(valid_uint8_model_path, valid_uint8_model_props):
+    """
+    Test network predict with input mapping
+    """
+    net = synap.Network(valid_uint8_model_path)
+    inp_props = valid_uint8_model_props["inputs"]
+    # test predict missing inputs
+    with pytest.raises(KeyError, match="Missing input"):
+        net.predict({"bad_input": np.zeros(inp_props[i]["shape"]).astype(np.uint8) for i in range(len(net.inputs))})
+    # test predict with non-Numpy input
+    with pytest.raises(TypeError, match="must be a NumPy array"):
+        net.predict({inp.name: [0] for inp in net.inputs})
+
+    inputs = {inp.name: np.zeros(inp_props[i]["shape"]).astype(np.uint8) for i, inp in enumerate(net.inputs)}
     net.predict(inputs)
     _validate_model_output(net, valid_uint8_model_props["outputs"])
