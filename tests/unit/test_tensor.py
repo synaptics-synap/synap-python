@@ -143,6 +143,9 @@ def test_tensor_assign_bytes(sample_uint8_tensor, sample_uint8_tensor_props, sam
     Test Tensor assign with bytes data
     """
     data, deq_data = sample_uint8_data
+    # test bad input size
+    with pytest.raises(ValueError, match="Size mismatch"):
+        sample_uint8_tensor.assign(data.tobytes()[:-1])
     sample_uint8_tensor.assign(data.tobytes())
     assert np.array_equal(sample_uint8_tensor.to_numpy(), deq_data)
     _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
@@ -151,7 +154,17 @@ def test_tensor_assign_numpy(sample_uint8_tensor, sample_uint8_tensor_props, sam
     """
     Test Tensor assign with numpy data
     """
+    # TODO: Check for valid input
     data, deq_data = sample_uint8_data
+    # test bad input rank
+    with pytest.raises(ValueError, match="Dimensions mismatch"):
+        sample_uint8_tensor.assign(data[np.newaxis, :])
+    if data.ndim > 1:
+        with pytest.raises(ValueError, match="Dimensions mismatch"):
+            sample_uint8_tensor.assign(data.flatten())
+        # test bad input shape
+        with pytest.raises(ValueError, match="Shape mismatch"):
+            sample_uint8_tensor.assign(data.transpose())
     sample_uint8_tensor.assign(data)
     assert np.array_equal(sample_uint8_tensor.to_numpy(), deq_data)
     _validate_tensor_props(sample_uint8_tensor, sample_uint8_tensor_props)
