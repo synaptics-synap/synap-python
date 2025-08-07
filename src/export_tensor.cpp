@@ -672,28 +672,6 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "predict",
-        [](std::shared_ptr<Network> self, py::args input_data) -> TensorsWrapper  {
-            predict_from(*self, input_data);
-            return TensorsWrapper {self, &self->outputs};
-        },
-        R"doc(
-        Runs inference using the provided input data.
-
-        Each argument must be a NumPy array. Currently, only `uint8`, `int16`, 
-        and `float` data types are supported. The number of provided inputs must match 
-        the number of model inputs. The inference results are stored in `Network.outputs` 
-        and also returned by this function.
-
-        :param numpy.ndarray input_data: One or more NumPy arrays representing the input data.
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises ValueError: If the number of input data does not match the number of model inputs.
-        :raises TypeError: If any element in the list is not a valid NumPy array.
-        :raises RuntimeError: If inference fails.
-        )doc"
-    )
-    .def(
-        "predict",
         [](std::shared_ptr<Network> self, py::dict feed) -> TensorsWrapper {
             const auto& n_inputs = feed.size();
             const auto& n_net_inputs = self->inputs.size();
@@ -720,7 +698,7 @@ static void export_tensors(py::module_& m)
             }
             return TensorsWrapper{self, &self->outputs};
         },
-        py::arg("inputs"),
+        py::arg("input_feed"),
         R"doc(
         Runs inference using a mapping of input names to input data.
 
@@ -728,7 +706,7 @@ static void export_tensors(py::module_& m)
         Currently, only `uint8`, `int16`, and `float` data types are supported. 
         The inference results are stored in `Network.outputs` and also returned by this function.
 
-        :param numpy.ndarray feed: A mapping of input names to input data.
+        :param dict input_feed: A mapping of input names to input data.
         :return: The output `Tensors` collection.
         :rtype: Tensors
         :raises ValueError: If the number of input data does not match the number of model inputs.
