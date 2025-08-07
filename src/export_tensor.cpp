@@ -117,28 +117,47 @@ static void assign_tensor(Tensor &t, const py::array &data) {
     }
 }
 
-static void predict_from(Network& net, py::iterable input_data)
-{
-    const auto& n_inputs = py::len(input_data);
-    const auto& n_net_inputs = net.inputs.size();
+static void _check_num_inputs(const size_t n_inputs, const size_t n_net_inputs) {
     if (n_inputs != n_net_inputs) {
         std::ostringstream err;
         err << "Invalid number of inputs: expected " << n_net_inputs << " inputs, got " << n_inputs << " inputs";
         throw std::invalid_argument(err.str());
     }
+}
 
+static void _check_predict(Network& net) {
+    if (!net.predict()) {
+        throw std::runtime_error("Failed to predict");
+    }
+}
+
+static void predict_from_seq(Network& net, const py::iterable& seq) {
+    _check_num_inputs(py::len(seq), net.inputs.size());
     size_t inp_idx = 0;
-    for (auto item : input_data) {
+    for (auto item : seq) {
         if (!py::isinstance<py::array>(item)) {
-            throw py::type_error("Input data must be a collection of numpy arrays");
+            throw py::type_error("Input data must be a collection of NumPy arrays");
         }
         assign_tensor(net.inputs[inp_idx], item.cast<py::array>());
         ++inp_idx;
     }
+    _check_predict(net);
+}
 
-    if (!net.predict()) {
-        throw std::runtime_error("Failed to predict");
+static void predict_from_feed(Network& net, const py::dict& feed) {
+    _check_num_inputs(feed.size(), net.inputs.size());
+    for (auto& t : net.inputs) {
+        PyObject* raw = PyDict_GetItemString(feed.ptr(), t.name().c_str());
+        if (!raw) {
+            throw py::key_error("Missing input '" + t.name() + "'");
+        }
+        if (!py::isinstance<py::array>(raw)) {
+            throw py::type_error("Input '" + t.name() + "' must be a NumPy array");
+        }
+        // zero-copy borrow
+        assign_tensor(t, py::reinterpret_borrow<py::array>(raw));
     }
+    _check_predict(net);
 }
 
 static void export_tensors(py::module_& m)
@@ -649,8 +668,8 @@ static void export_tensors(py::module_& m)
     )
     .def(
         "predict",
-        [](std::shared_ptr<Network> self, py::list input_data) -> TensorsWrapper  {
-            predict_from(*self, input_data);
+        [](std::shared_ptr<Network> self, py::list seq) -> TensorsWrapper  {
+            predict_from_seq(*self, seq);
             return TensorsWrapper {self, &self->outputs};
         },
         py::arg("input_data"),
@@ -673,29 +692,7 @@ static void export_tensors(py::module_& m)
     .def(
         "predict",
         [](std::shared_ptr<Network> self, py::dict feed) -> TensorsWrapper {
-            const auto& n_inputs = feed.size();
-            const auto& n_net_inputs = self->inputs.size();
-            if (feed.size() != self->inputs.size()) {
-                std::ostringstream err;
-                err << "Invalid number of inputs: expected " << n_net_inputs << " inputs, got " << n_inputs << " inputs";
-                throw std::invalid_argument(err.str());
-            }
-
-            for (auto& t : self->inputs) {
-                PyObject* raw = PyDict_GetItemString(feed.ptr(), t.name().c_str());
-                if (!raw) {
-                    throw py::key_error("Missing input '" + t.name() + "'");
-                }
-                if (!py::isinstance<py::array>(raw)) {
-                    throw py::type_error("Input '" + t.name() + "' must be a NumPy array");
-                }
-                // zero-copy borrow
-                assign_tensor(t, py::reinterpret_borrow<py::array>(raw));
-            }
-
-            if (!self->predict()) {
-                throw std::runtime_error("Inference failed");
-            }
+            predict_from_feed(*self, feed);
             return TensorsWrapper{self, &self->outputs};
         },
         py::arg("input_feed"),
