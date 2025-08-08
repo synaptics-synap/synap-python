@@ -19,8 +19,7 @@ ROOT_DIR="$DOCS_ROOT/.."
 VENV_DIR="$DOCS_ROOT/.docs-$PYTHON_VERSION"
 DIST_DIR="$ROOT_DIR/dist"
 SRC_DIR="$DOCS_ROOT/src"
-SPHINX_SRC_DIR="$SRC_DIR/sphinx"
-SPHINX_OUT_DIR="$DOCS_ROOT/html"
+BUILD_DIR="$DOCS_ROOT/html"
 
 cleanup() {
     if [ -n "$VIRTUAL_ENV" ]; then
@@ -44,27 +43,34 @@ echo "Generating docs in virtual environment $VENV_DIR"
 echo "Installing documentation tools..."
 pip install --upgrade pip > /dev/null
 pip install build sphinx sphinx-rtd-theme sphinx-autodoc-typehints wheel > /dev/null
-pip install mkdocs mkdocstrings[python] mkdocs-material > /dev/null
-pip install mkdocs-gen-files mkdocs-literate-nav > /dev/null
 
 echo "Installing SyNAP Python API wheel..."
 PY_WHL="$DIST_DIR/synap_python-${SYNAP_VERSION}-${PYTHON_TAG}-${PYTHON_TAG}-${PLAT_TAG}_${HOST_ARCH}.whl"
 if [ ! -f "$PY_WHL" ]; then
-    echo -e "\033[31mError: Wheel file for $HOST_ARCH not found\033[0m"
-    if [ "$HOST_ARCH" == "x86_64" ]; then
-        echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh --x86_64\033[0m"
-    elif [ "$HOST_ARCH" == "aarch64" ]; then
-        echo -e "       \033[31mBuild wheel with $ROOT_DIR/build.sh\033[0m"
-    else
-        echo -e "       \033[31mError: Unsupported architecture '$HOST_ARCH'\033[0m"
+    echo -e "\033[33mError: Wheel file for $HOST_ARCH not found, starting build...\033[0m"
+    cd "$ROOT_DIR"
+    if [ ! -f "$ROOT_DIR/build.sh" ]; then
+        echo -e "\033[31mError: build.sh not found in $ROOT_DIR\033[0m"
+        exit 1
     fi
+    if [ "$HOST_ARCH" == "x86_64" ]; then
+        ./build.sh --x86_64
+    elif [ "$HOST_ARCH" == "aarch64" ]; then
+        ./build.sh
+    else
+        echo -e " \033[31mError: Unsupported architecture '$HOST_ARCH'\033[0m"
+        exit 1
+    fi
+fi
+cd "$DOCS_ROOT"
+if [ ! -f "$PY_WHL" ]; then
+    echo -e "\033[33mError: Wheel file for $HOST_ARCH not found after build, aborting\033[0m"
     exit 1
 fi
 pip install --force-reinstall "$PY_WHL" > /dev/null
 
 echo "Generating ReStructuredText docs with Sphinx......"
-mkdir -p "$SPHINX_SRC_DIR/_static"
-sphinx-build --write-all -b html "$SPHINX_SRC_DIR" "$SPHINX_OUT_DIR"
-find "$SPHINX_OUT_DIR" -type f -name "*.html" -exec sed -i "s/synap\._synap/synap/g" {} +
+mkdir -p "$SRC_DIR/_static"
+sphinx-build --write-all -b html "$SRC_DIR" "$BUILD_DIR"
+find "$BUILD_DIR" -type f -name "*.html" -exec sed -i "s/synap\._synap/synap/g" {} +
 echo -e "\033[32mReStrcturedText docs generated successfully\033[0m"
-
