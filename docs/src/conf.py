@@ -17,11 +17,18 @@ release = 'stable'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx_autodoc_typehints"
+    'autoapi.extension',
+    'sphinx.ext.autodoc', 
+    'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints'
 ]
 
+autoapi_dirs = ['../../src']
+autoapi_file_patterns = ['*.pyi']
+autoapi_options = ['members', 'inherited-members', 'imported-members', 'undoc-members']
+autoapi_add_toctree_entry = False
+autoapi_template_dir = '_templates/autoapi'
+autodoc_typehints = 'description'
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
