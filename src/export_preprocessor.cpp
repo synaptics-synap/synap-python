@@ -151,11 +151,11 @@ static void export_preprocessor(py::module_& m)
         Create input data from a byte buffer.
         :param bytes: Input data buffer.
         :param InputType type: Data type.
-        :param Shape shape: (optional) Data shape, not needed for `InputType.encoded_image`. 
-                            The order of elements in `shape` must align with the specified `layout`.  
-                            For example, a 640x480 RGB image with an `Layout.nhwc` layout should have shape `Shape([1, 480, 640, 3])`.
-        :param Layout layout: (optional) Data layout, not needed for `InputType.encoded_image`. 
-                                Use `Layout.nchw` for planar images, and `Layout.nhwc` for interleaved images.
+        :param Shape shape: (optional) Data shape, not needed for ``InputType.encoded_image`. 
+                            The order of elements in ``shape`` must align with the specified ``layout``.  
+                            For example, a 640x480 RGB image with an ``Layout.nhwc`` layout should have shape ``Shape([1, 480, 640, 3])``.
+        :param Layout layout: (optional) Data layout, not needed for ``InputType.encoded_image``. 
+                                Use ``Layout.nchw`` for planar images, and ``Layout.nhwc`` for interleaved images.
         :raises ValueError: If the buffer is empty or the data is invalid.
         )doc"
     )
@@ -198,7 +198,7 @@ static void export_preprocessor(py::module_& m)
         Get a NumPy array view of the data.
 
         The returned NumPy array is a **view**, not a copy, meaning the data is owned 
-        by the `InputData` object. The array will be invalidated if the `InputData` 
+        by the ``InputData`` object. The array will be invalidated if the ``InputData`` 
         object is destroyed.
 
         :return: NumPy array view of the data.
@@ -270,8 +270,8 @@ static void export_preprocessor(py::module_& m)
         [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
             PyErr_WarnEx(
                 PyExc_DeprecationWarning,
-                "`assign(..., shape, ...)` is deprecated and will be removed in v1.1.0; "
-                "please omit the `shape` argument and let it be inferred automatically.",
+                "``assign(..., shape, ...)`` is deprecated and will be removed in v1.1.0; "
+                "please omit the ``shape`` argument and let it be inferred automatically.",
                 1
             );
             return py::cast(const_cast<PreprocessorWrapper&>(self))

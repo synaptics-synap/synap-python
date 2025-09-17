@@ -155,7 +155,7 @@ static void export_postprocessor(py::module_& m)
         Perform object detection on network outputs.
 
         The output format of object detection networks depends on the network architecture used. 
-        The format type must be specified in the network's output tensor `format` field in the conversion metafile.
+        The format type must be specified in the network's output tensor ``format`` field in the conversion metafile.
         This following formats are currently supported: "retinanet_boxes", "tflite_detection_boxes", "yolov5"
 
         :param float score_threshold: The minimum confidence score to consider a detection.

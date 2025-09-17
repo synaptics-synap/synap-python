@@ -40,18 +40,18 @@ class Network:
         """
                 Creates a new network instance with no model.
         
-                The network will have empty input and output `Tensors`. A model must be 
-                loaded using `load_model()` before inference can be run.
+                The network will have empty input and output ``Tensors``. A model must be 
+                loaded using ``load_model()`` before inference can be run.
         """
     @typing.overload
     def __init__(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
         """
                 Creates a new network instance and loads a model from a file.
         
-                :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
+                :param os.Pathlike or str or bytes model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
                                         files are also supported.
                 :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy `.nb` models, otherwise should be an empty string.
+                                        Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     def load_model(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
@@ -61,10 +61,10 @@ class Network:
                 If another model was previously loaded, it is automatically disposed before 
                 loading the new one.
             
-                :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
+                :param os.Pathlike or str or bytes model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
                                         files are also supported.
                 :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy `.nb` models, otherwise should be an empty string.
+                                        Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     def load_model_from_memory(self, model_data: bytes, meta_file: os.PathLike | str | bytes = '') -> None:
@@ -76,7 +76,7 @@ class Network:
         
                 :param bytes model_data: The binary model data.
                 :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy `.nb` models, otherwise should be an empty string.
+                                        Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     @typing.overload
@@ -116,7 +116,7 @@ class Network:
                 These tensors must be set before running inference. The number and shape of 
                 the input tensors depend on the loaded model.
         
-                :return: The collection of input `Tensors`.
+                :return: The collection of input ``Tensors``.
                 :rtype: Tensors
         """
     @property
@@ -127,7 +127,7 @@ class Network:
                 These tensors hold the results after running inference. The number and shape 
                 of the output tensors depend on the loaded model.
         
-                :return: The collection of output `Tensors`.
+                :return: The collection of output ``Tensors``.
                 :rtype: Tensors
         """
 class Tensor:
@@ -135,8 +135,8 @@ class Tensor:
     
             Represents a Synap data tensor.
     
-            Creating tensors outside a `Network` is not supported,
-            users can only access tensors created by the `Network` instance itself.
+            Creating tensors outside a ``Network`` is not supported,
+            users can only access tensors created by the ``Network`` instance itself.
     
             :ivar str name: The tensor name.
             :ivar bool is_scalar: Whether the tensor is a scalar.
@@ -154,11 +154,11 @@ class Tensor:
         """
                 Checks if two tensors reference the same underlying object in memory.
         
-                This returns `True` if both tensors share the same internal data buffer.
+                This returns ``True`` if both tensors share the same internal data buffer.
         
                 :param Tensor t1: The first tensor.
                 :param Tensor t2: The second tensor.
-                :return: `True` if both tensors reference the same object, otherwise `False`.
+                :return: ``True`` if both tensors reference the same object, otherwise ``False``.
                 :rtype: bool
         """
     def __init__(self, arg0: Tensor) -> None:
@@ -203,7 +203,7 @@ class Tensor:
                 Returns the tensor's current data buffer.
         
                 This is the tensor's default buffer unless a different buffer has been assigned 
-                using `set_buffer()`.
+                using ``set_buffer()``.
         
                 :return: The current data buffer.
                 :rtype: Buffer
@@ -292,7 +292,7 @@ class Tensors:
     
             Represents a collection of tensors.
     
-            This class provides a convenient way to access multiple tensors in a `Network`.
+            This class provides a convenient way to access multiple tensors in a ``Network``.
     
             :ivar int size: The number of tensors in the collection.
             
@@ -301,7 +301,7 @@ class Tensors:
         """
                 Retrieves a tensor by index.
         
-                Supports indexing with `tensors[i]`.
+                Supports indexing with ``tensors[i]``.
         
                 :param int index: The index of the tensor to retrieve.
                 :return: The Tensor at the given index.
@@ -312,7 +312,7 @@ class Tensors:
         """
                 Returns an iterator over the tensors in the collection.
         
-                This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+                This allows for iteration using a for loop, e.g., ``for tensor in tensors:``.
         
                 :return: An iterator over the tensors in the collection.
                 :rtype: iterator
