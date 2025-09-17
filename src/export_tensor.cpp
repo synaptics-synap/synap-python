@@ -13,6 +13,7 @@
 #include "synap/buffer.hpp"
 #include "export_tensor.hpp"
 #include "export_utils.hpp"
+#include "export_docstrings.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -286,16 +287,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to assign tensor data to tensor");
             }
         },
-        py::arg("src"),
-        R"doc(
-        Copies the contents of another tensor into this tensor.
-
-        No normalization or data conversion is performed. The source and destination 
-        tensors must have the same data type and size.
-
-        :param Tensor src: The source tensor.
-        :raises RuntimeError: If the copy operation fails.
-        )doc"
+        py::arg("src")
     )
     .def(
         "assign",
@@ -304,17 +296,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to assign scalar data to tensor");
             }
         },
-        py::arg("value"),
-        R"doc(
-        Assigns a scalar value to the tensor.
-
-        This operation is only valid if the tensor is a scalar. The value is converted 
-        to the tensor's data type (8, 16, or 32-bit integer) and rescaled if required, 
-        based on the tensor format attributes, before being written to the data buffer.
-
-        :param int value: The scalar value to assign.
-        :raises RuntimeError: If the assignment fails.
-        )doc"
+        py::arg("value")
     )
     .def(
         "assign",
@@ -331,18 +313,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to assign raw data to tensor");
             }
         },
-        py::arg("data"),
-        R"doc(
-        Copies raw data into the tensor's data buffer.
-
-        The provided data is treated as raw bytes, meaning no normalization or data 
-        conversion is performed, regardless of the tensor's actual data type. The 
-        data size must match the tensor's `size`.
-
-        :param bytes data: The raw data to assign.
-        :raises ValueError: If the data size does not match the tensor size.
-        :raises RuntimeError: If the assignment fails.
-        )doc"
+        py::arg("raw")
     )
     .def(
         "assign",
@@ -350,17 +321,7 @@ static void export_tensors(py::module_& m)
             assign_tensor(*self.tensor, data);
         },
         py::arg("data"),
-        R"doc(
-        Assigns a NumPy array to the tensor.
-
-        The NumPy array does not need to include the outermost batch dimension, but its 
-        remaining shape must match the tensor's shape. Currently, only `uint8`, `int16`, 
-        and `float` data types are supported.
-
-        :param numpy.ndarray data: The NumPy array to assign.
-        :raises ValueError: If the array size or shape does not match the tensor, or if it has an unsupported data type.
-        :raises RuntimeError: If the assignment fails.
-        )doc"
+        docs::tensor::doc_assign
     )
     .def(
         "buffer",
@@ -654,17 +615,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to predict");
             }
             return TensorsWrapper {self, &self->outputs};
-        },
-        R"doc(
-        Runs inference using the current input tensors.
-    
-        Input data must be set beforehand via `Network.inputs`. The inference results 
-        are stored in `Network.outputs` and also returned by this function.
-    
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises RuntimeError: If inference fails.
-        )doc"
+        }
     )
     .def(
         "predict",
@@ -672,22 +623,7 @@ static void export_tensors(py::module_& m)
             predict_from_seq(*self, seq);
             return TensorsWrapper {self, &self->outputs};
         },
-        py::arg("input_data"),
-        R"doc(
-        Runs inference using the provided list of input data.
-
-        Each element in the list must be a NumPy array. Currently, only `uint8`, `int16`, 
-        and `float` data types are supported. The length of the list must 
-        match the number of model inputs. The inference results are stored in 
-        `Network.outputs` and also returned by this function.
-
-        :param list input_data: A list of NumPy arrays representing the input data.
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises ValueError: If the length of the list does not match the number of model inputs.
-        :raises TypeError: If any element in the list is not a valid NumPy array.
-        :raises RuntimeError: If inference fails.
-        )doc"
+        py::arg("input_data")
     )
     .def(
         "predict",
@@ -696,21 +632,7 @@ static void export_tensors(py::module_& m)
             return TensorsWrapper{self, &self->outputs};
         },
         py::arg("input_feed"),
-        R"doc(
-        Runs inference using a mapping of input names to input data.
-
-        Each key must be a valid input name and each value must be a NumPy array. 
-        Currently, only `uint8`, `int16`, and `float` data types are supported. 
-        The inference results are stored in `Network.outputs` and also returned by this function.
-
-        :param dict input_feed: A mapping of input names to input data.
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises ValueError: If the number of input data does not match the number of model inputs.
-        :raises KeyError: If an input name is missing in the mapping.
-        :raises TypeError: If any element in the list is not a valid NumPy array.
-        :raises RuntimeError: If inference fails.
-        )doc"
+        docs::network::doc_predict
     )
     .def_property_readonly(
         "inputs",

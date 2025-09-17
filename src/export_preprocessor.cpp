@@ -9,6 +9,7 @@
 #include "synap/tensor.hpp"
 #include "synap/types.hpp"
 #include "export_tensor.hpp"
+#include "export_docstrings.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -239,17 +240,7 @@ static void export_preprocessor(py::module_& m)
         },
         py::arg("inputs"),
         py::arg("input_data"),
-        py::arg("input_index") = 0,
-        R"doc(
-        Write input data to network inputs.
-
-        :param Tensors inputs: Network inputs.
-        :param InputData input_data: Input data.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        py::arg("input_index") = 0
     )
     .def(
         "assign",
@@ -258,18 +249,7 @@ static void export_preprocessor(py::module_& m)
         },
         py::arg("inputs"),
         py::arg("filename"),
-        py::arg("input_index") = 0,
-        R"doc(
-        Write image data to network inputs.
-
-        :param Tensors inputs: Network inputs.
-        :param str filename: Path to image file.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises ValueError: If the image file is not found or the data is invalid.
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        py::arg("input_index") = 0
     )
     .def(
         "assign",
@@ -283,27 +263,14 @@ static void export_preprocessor(py::module_& m)
         py::arg("inputs"),
         py::arg("data"),
         py::arg("layout"),
-        py::arg("input_index") = 0,
-        R"doc(
-        Write raw data to network inputs.
-
-        Data must be provided as a NumPy array of type `uint8`.
-
-        :param Tensors inputs: Network inputs.
-        :param numpy.ndarray data: Raw data buffer.
-        :param Layout layout: Data layout.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        py::arg("input_index") = 0
     )
     .def(
         "assign",
         [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
             PyErr_WarnEx(
                 PyExc_DeprecationWarning,
-                "`assign(..., shape, ...)` is deprecated and will be removed in v0.2.0; "
+                "`assign(..., shape, ...)` is deprecated and will be removed in v1.1.0; "
                 "please omit the `shape` argument and let it be inferred automatically.",
                 1
             );
@@ -316,22 +283,7 @@ static void export_preprocessor(py::module_& m)
         py::arg("shape"),
         py::arg("layout"),
         py::arg("input_index") = 0,
-        R"doc(
-        WARNING: This method is deprecated as input shape is inferred instead of being passed explicitly. Please use `assign(inputs, data, layout, input_index)`.
-
-        Write raw data to network inputs.
-
-        Data must be provided as a NumPy array of type `uint8`.
-
-        :param Tensors inputs: Network inputs.
-        :param numpy.ndarray data: Raw data buffer.
-        :param Shape shape: Data shape.
-        :param Layout layout: Data layout.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        docs::preprocessor::doc_assign
     )
     ;
 }

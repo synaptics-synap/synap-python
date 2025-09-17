@@ -193,12 +193,20 @@ class DetectorResultItems:
         Number of detection result items in the collection.
         """
 @typing.overload
-def to_json_str(arg0: ClassifierResult) -> str:
-    """
-    Get ClassifierResult as a JSON string.
-    """
+def to_json_str(classification_result: ClassifierResult) -> str:
+    ...
 @typing.overload
-def to_json_str(arg0: DetectorResult) -> str:
+def to_json_str(detection_result: DetectorResult) -> str:
     """
-    Get DetectorResult as a JSON string.
+    Convert a result object to its JSON string representation.
+    
+    **Signatures**
+        - ``to_json_str(classification_result: Classifier.Result) -> str``
+        - ``to_json_str(detection_result: Detector.Result) -> str``
+    
+    :param Classifier.Result classification_result: The classification result to convert.
+    :param Detector.Result detection_result: The detection result to convert.
+    
+    :returns: JSON-formatted string representation of the result.
+    :rtype: str
     """

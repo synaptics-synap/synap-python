@@ -158,59 +158,39 @@ class Preprocessor:
         ...
     @typing.overload
     def assign(self, inputs: synap.Tensors, input_data: InputData, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
-        """
-                Write input data to network inputs.
-        
-                :param Tensors inputs: Network inputs.
-                :param InputData input_data: Input data.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises RuntimeError: If an error occurs during preprocessing.
-        """
+        ...
     @typing.overload
     def assign(self, inputs: synap.Tensors, filename: str, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
-        """
-                Write image data to network inputs.
-        
-                :param Tensors inputs: Network inputs.
-                :param str filename: Path to image file.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises ValueError: If the image file is not found or the data is invalid.
-                :raises RuntimeError: If an error occurs during preprocessing.
-        """
+        ...
     @typing.overload
     def assign(self, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
-        """
-                Write raw data to network inputs.
-        
-                Data must be provided as a NumPy array of type `uint8`.
-        
-                :param Tensors inputs: Network inputs.
-                :param numpy.ndarray data: Raw data buffer.
-                :param Layout layout: Data layout.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises RuntimeError: If an error occurs during preprocessing.
-        """
+        ...
     @typing.overload
     def assign(self, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
         """
-                WARNING: This method is deprecated as input shape is inferred instead of being passed explicitly. Please use `assign(inputs, data, layout, input_index)`.
+        Write input data to network inputs and return the assigned ROI.
         
-                Write raw data to network inputs.
+        **Signatures**
+            - ``assign(inputs: Tensors, input_data: InputData, input_index: int = 0)``
+            - ``assign(inputs: Tensors, filename: str, input_index: int = 0)``
+            - ``assign(inputs: Tensors, data: numpy.ndarray, layout: Layout, input_index: int = 0)``
+            - ``assign(inputs: Tensors, data: numpy.ndarray, shape: Shape, layout: Layout, input_index: int = 0)``  *(deprecated)*
         
-                Data must be provided as a NumPy array of type `uint8`.
+        :param Tensors inputs: Network inputs to write into.
+        :param InputData input_data: Pre-decoded input payload to write.
+        :param str filename: Path to an image file to load and write.
+        :param numpy.ndarray data: Raw data buffer (must be ``uint8``).
+        :param Layout layout: Layout of ``data`` when providing raw input (e.g., ``NHWC``, ``NCHW``).
+        :param Shape shape: *(deprecated)* Explicit data shape. This argument is no longer required as shape is inferred automatically.
+        :param int input_index: Index of the input tensor to write to (default: ``0``).
         
-                :param Tensors inputs: Network inputs.
-                :param numpy.ndarray data: Raw data buffer.
-                :param Shape shape: Data shape.
-                :param Layout layout: Data layout.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises RuntimeError: If an error occurs during preprocessing.
+        :returns: Assigned ROI in the target input tensor.
+        :rtype: Rect
+        
+        :raises ValueError: If the image file (``filename``) is not found or contains invalid data.
+        :raises RuntimeError: If an error occurs during preprocessing.
+        
+        .. warning::
+           The overload ``assign(inputs, data, shape, layout, input_index)`` is **deprecated**
+           and will be removed in **v1.1.0**. Use ``assign(inputs, data, layout, input_index)`` instead.
         """
