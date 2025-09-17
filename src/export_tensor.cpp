@@ -555,9 +555,9 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new network instance and loads a model from a file.
 
-        :param os.Pathlike or str or bytes model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
+        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
                                 files are also supported.
-        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                 Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
@@ -582,7 +582,7 @@ static void export_tensors(py::module_& m)
         loading the new one.
 
         :param bytes model_data: The binary model data.
-        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                 Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
@@ -601,9 +601,9 @@ static void export_tensors(py::module_& m)
         If another model was previously loaded, it is automatically disposed before 
         loading the new one.
     
-        :param os.Pathlike or str or bytes model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
+        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
                                 files are also supported.
-        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
                                 Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
