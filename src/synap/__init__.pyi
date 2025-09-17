@@ -40,18 +40,15 @@ class Network:
         """
                 Creates a new network instance with no model.
         
-                The network will have empty input and output `Tensors`. A model must be 
-                loaded using `load_model()` before inference can be run.
+                The network will have empty input and output ``Tensors``. A model must be loaded using ``load_model()`` before inference can be run.
         """
     @typing.overload
     def __init__(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
         """
                 Creates a new network instance and loads a model from a file.
         
-                :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
-                                        files are also supported.
-                :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy `.nb` models, otherwise should be an empty string.
+                :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     def load_model(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
@@ -61,10 +58,8 @@ class Network:
                 If another model was previously loaded, it is automatically disposed before 
                 loading the new one.
             
-                :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
-                                        files are also supported.
-                :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy `.nb` models, otherwise should be an empty string.
+                :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     def load_model_from_memory(self, model_data: bytes, meta_file: os.PathLike | str | bytes = '') -> None:
@@ -75,65 +70,46 @@ class Network:
                 loading the new one.
         
                 :param bytes model_data: The binary model data.
-                :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy `.nb` models, otherwise should be an empty string.
+                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     @typing.overload
     def predict(self) -> Tensors:
-        """
-                Runs inference using the current input tensors.
-            
-                Input data must be set beforehand via `Network.inputs`. The inference results 
-                are stored in `Network.outputs` and also returned by this function.
-            
-                :return: The output `Tensors` collection.
-                :rtype: Tensors
-                :raises RuntimeError: If inference fails.
-        """
+        ...
     @typing.overload
     def predict(self, input_data: list) -> Tensors:
-        """
-                Runs inference using the provided list of input data.
-        
-                Each element in the list must be a NumPy array. Currently, only `uint8`, `int16`, 
-                and `float` data types are supported. The length of the list must 
-                match the number of model inputs. The inference results are stored in 
-                `Network.outputs` and also returned by this function.
-        
-                :param list input_data: A list of NumPy arrays representing the input data.
-                :return: The output `Tensors` collection.
-                :rtype: Tensors
-                :raises ValueError: If the length of the list does not match the number of model inputs.
-                :raises TypeError: If any element in the list is not a valid NumPy array.
-                :raises RuntimeError: If inference fails.
-        """
+        ...
     @typing.overload
     def predict(self, input_feed: dict) -> Tensors:
         """
-                Runs inference using a mapping of input names to input data.
+        Run inference with the network.
         
-                Each key must be a valid input name and each value must be a NumPy array. 
-                Currently, only `uint8`, `int16`, and `float` data types are supported. 
-                The inference results are stored in `Network.outputs` and also returned by this function.
+        **Signatures**
+            - ``predict()``
+            - ``predict(input_data: list[numpy.ndarray])``
+            - ``predict(input_feed: dict[str, numpy.ndarray])``
         
-                :param dict input_feed: A mapping of input names to input data.
-                :return: The output `Tensors` collection.
-                :rtype: Tensors
-                :raises ValueError: If the number of input data does not match the number of model inputs.
-                :raises KeyError: If an input name is missing in the mapping.
-                :raises TypeError: If any element in the list is not a valid NumPy array.
-                :raises RuntimeError: If inference fails.
+        The method executes inference and returns the network's output tensors. Input data must be assigned beforehand via ``Network.inputs`` or passed directly as arguments.
+        
+        :param list[numpy.ndarray] input_data: A list of NumPy arrays representing input data. The number of elements must match the number of model inputs.
+        :param dict[str, numpy.ndarray] input_feed: A mapping of input names to NumPy arrays. Each key must be a valid network input name.
+        
+        :returns: The inference output as a ``Tensors`` collection, also accessible via ``Network.outputs``.
+        :rtype: Tensors
+        
+        :raises ValueError: If the number of inputs does not match the model's expected inputs.
+        :raises KeyError: If an input name is missing in ``input_feed``.
+        :raises TypeError: If any provided element is not a valid NumPy array.
+        :raises RuntimeError: If inference fails.
         """
     @property
     def inputs(self) -> Tensors:
         """
                 The input tensors of the network.
         
-                These tensors must be set before running inference. The number and shape of 
-                the input tensors depend on the loaded model.
+                These tensors must be set before running inference. The number and shape of the input tensors depend on the loaded model.
         
-                :return: The collection of input `Tensors`.
+                :return: The collection of input ``Tensors``.
                 :rtype: Tensors
         """
     @property
@@ -141,10 +117,9 @@ class Network:
         """
                 The output tensors of the network.
         
-                These tensors hold the results after running inference. The number and shape 
-                of the output tensors depend on the loaded model.
+                These tensors hold the results after running inference. The number and shape of the output tensors depend on the loaded model.
         
-                :return: The collection of output `Tensors`.
+                :return: The collection of output ``Tensors``.
                 :rtype: Tensors
         """
 class Tensor:
@@ -152,8 +127,8 @@ class Tensor:
     
             Represents a Synap data tensor.
     
-            Creating tensors outside a `Network` is not supported,
-            users can only access tensors created by the `Network` instance itself.
+            Creating tensors outside a ``Network`` is not supported,
+            users can only access tensors created by the ``Network`` instance itself.
     
             :ivar str name: The tensor name.
             :ivar bool is_scalar: Whether the tensor is a scalar.
@@ -171,77 +146,54 @@ class Tensor:
         """
                 Checks if two tensors reference the same underlying object in memory.
         
-                This returns `True` if both tensors share the same internal data buffer.
+                This returns ``True`` if both tensors share the same internal data buffer.
         
                 :param Tensor t1: The first tensor.
                 :param Tensor t2: The second tensor.
-                :return: `True` if both tensors reference the same object, otherwise `False`.
+                :return: ``True`` if both tensors reference the same object, otherwise ``False``.
                 :rtype: bool
         """
     def __init__(self, arg0: Tensor) -> None:
         """
                 Creates a new tensor as an alias of an existing tensor.
         
-                This operation does not create a copy. Instead, the new tensor shares the same 
-                data buffer as the original tensor.
+                This operation does not create a copy. Instead, the new tensor shares the same data buffer as the original tensor.
         
                 :param Tensor other: The existing tensor to alias.
         """
     @typing.overload
     def assign(self, src: Tensor) -> None:
-        """
-                Copies the contents of another tensor into this tensor.
-        
-                No normalization or data conversion is performed. The source and destination 
-                tensors must have the same data type and size.
-        
-                :param Tensor src: The source tensor.
-                :raises RuntimeError: If the copy operation fails.
-        """
+        ...
     @typing.overload
     def assign(self, value: typing.SupportsInt) -> None:
-        """
-                Assigns a scalar value to the tensor.
-        
-                This operation is only valid if the tensor is a scalar. The value is converted 
-                to the tensor's data type (8, 16, or 32-bit integer) and rescaled if required, 
-                based on the tensor format attributes, before being written to the data buffer.
-        
-                :param int value: The scalar value to assign.
-                :raises RuntimeError: If the assignment fails.
-        """
+        ...
     @typing.overload
-    def assign(self, data: bytes) -> None:
-        """
-                Copies raw data into the tensor's data buffer.
-        
-                The provided data is treated as raw bytes, meaning no normalization or data 
-                conversion is performed, regardless of the tensor's actual data type. The 
-                data size must match the tensor's `size`.
-        
-                :param bytes data: The raw data to assign.
-                :raises ValueError: If the data size does not match the tensor size.
-                :raises RuntimeError: If the assignment fails.
-        """
+    def assign(self, raw: bytes) -> None:
+        ...
     @typing.overload
     def assign(self, data: numpy.ndarray) -> None:
         """
-                Assigns a NumPy array to the tensor.
+        Assign data to this tensor.
         
-                The NumPy array does not need to include the outermost batch dimension, but its 
-                remaining shape must match the tensor's shape. Currently, only `uint8`, `int16`, 
-                and `float` data types are supported.
+        **Signatures**
+            - ``assign(src: Tensor)``
+            - ``assign(value: int)``
+            - ``assign(raw: bytes)``
+            - ``assign(data: numpy.ndarray)``
         
-                :param numpy.ndarray data: The NumPy array to assign.
-                :raises ValueError: If the array size or shape does not match the tensor, or if it has an unsupported data type.
-                :raises RuntimeError: If the assignment fails.
+        :param Tensor src: Copies the contents of another tensor. No normalization or data conversion is performed. Source and destination must have the same data type and size.
+        :param int value: Assigns a scalar value. Valid only if the tensor is scalar. The value is converted to the tensor's data type (8, 16, or 32-bit integer) and rescaled if required by tensor format attributes.
+        :param bytes raw: Raw byte copy into the tensor's data buffer. Treated as opaque bytes (no conversion). The byte count must equal ``tensor.size``.
+        :param numpy.ndarray data: Assigns from a NumPy array. The outermost batch dimension may be omitted; remaining shape must match the tensor.
+        
+        :raises ValueError: If ``bytes`` size mismatches ``tensor.size`` or if a NumPy array shape/size/dtype is invalid.
+        :raises RuntimeError: If the assignment operation fails.
         """
     def buffer(self) -> typing_extensions.Buffer:
         """
                 Returns the tensor's current data buffer.
         
-                This is the tensor's default buffer unless a different buffer has been assigned 
-                using `set_buffer()`.
+                This is the tensor's default buffer unless a different buffer has been assigned using ``set_buffer()``.
         
                 :return: The current data buffer.
                 :rtype: Buffer
@@ -261,8 +213,7 @@ class Tensor:
         """
                 Returns a NumPy copy of the tensor's dequantized data.
         
-                The returned NumPy array contains a **copy** of the tensor data, ensuring safety
-                from unintended modifications. However, copying may be memory inefficient for large tensors.
+                The returned NumPy array contains a **copy** of the tensor data, ensuring safety from unintended modifications. However, copying may be memory inefficient for large tensors.
         
                 :return: A NumPy array containing a copy of the tensor data.
                 :rtype: numpy.ndarray
@@ -273,8 +224,7 @@ class Tensor:
                 Returns a NumPy view of the tensor's dequantized data.
         
                 The returned NumPy array is a **view**, not a copy, meaning it shares memory with the tensor.
-                This makes it memory efficient but also means modifying the tensor will affect the array, 
-                and vice versa.
+                This makes it memory efficient but also means modifying the tensor will affect the array, and vice versa.
         
                 :return: A NumPy view of the tensor data.
                 :rtype: numpy.ndarray
@@ -330,7 +280,7 @@ class Tensors:
     
             Represents a collection of tensors.
     
-            This class provides a convenient way to access multiple tensors in a `Network`.
+            This class provides a convenient way to access multiple tensors in a ``Network``.
     
             :ivar int size: The number of tensors in the collection.
             
@@ -339,7 +289,7 @@ class Tensors:
         """
                 Retrieves a tensor by index.
         
-                Supports indexing with `tensors[i]`.
+                Supports indexing with ``tensors[i]``.
         
                 :param int index: The index of the tensor to retrieve.
                 :return: The Tensor at the given index.
@@ -350,7 +300,7 @@ class Tensors:
         """
                 Returns an iterator over the tensors in the collection.
         
-                This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+                This allows for iteration using a for loop, e.g., ``for tensor in tensors:``.
         
                 :return: An iterator over the tensors in the collection.
                 :rtype: iterator

@@ -13,6 +13,7 @@
 #include "synap/buffer.hpp"
 #include "export_tensor.hpp"
 #include "export_utils.hpp"
+#include "export_docstrings.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -189,8 +190,8 @@ static void export_tensors(py::module_& m)
     py::class_<TensorWrapper>(m, "Tensor", R"doc(
         Represents a Synap data tensor.
 
-        Creating tensors outside a `Network` is not supported,
-        users can only access tensors created by the `Network` instance itself.
+        Creating tensors outside a ``Network`` is not supported,
+        users can only access tensors created by the ``Network`` instance itself.
 
         :ivar str name: The tensor name.
         :ivar bool is_scalar: Whether the tensor is a scalar.
@@ -210,8 +211,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new tensor as an alias of an existing tensor.
 
-        This operation does not create a copy. Instead, the new tensor shares the same 
-        data buffer as the original tensor.
+        This operation does not create a copy. Instead, the new tensor shares the same data buffer as the original tensor.
 
         :param Tensor other: The existing tensor to alias.
         )doc"
@@ -286,16 +286,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to assign tensor data to tensor");
             }
         },
-        py::arg("src"),
-        R"doc(
-        Copies the contents of another tensor into this tensor.
-
-        No normalization or data conversion is performed. The source and destination 
-        tensors must have the same data type and size.
-
-        :param Tensor src: The source tensor.
-        :raises RuntimeError: If the copy operation fails.
-        )doc"
+        py::arg("src")
     )
     .def(
         "assign",
@@ -304,17 +295,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to assign scalar data to tensor");
             }
         },
-        py::arg("value"),
-        R"doc(
-        Assigns a scalar value to the tensor.
-
-        This operation is only valid if the tensor is a scalar. The value is converted 
-        to the tensor's data type (8, 16, or 32-bit integer) and rescaled if required, 
-        based on the tensor format attributes, before being written to the data buffer.
-
-        :param int value: The scalar value to assign.
-        :raises RuntimeError: If the assignment fails.
-        )doc"
+        py::arg("value")
     )
     .def(
         "assign",
@@ -331,18 +312,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to assign raw data to tensor");
             }
         },
-        py::arg("data"),
-        R"doc(
-        Copies raw data into the tensor's data buffer.
-
-        The provided data is treated as raw bytes, meaning no normalization or data 
-        conversion is performed, regardless of the tensor's actual data type. The 
-        data size must match the tensor's `size`.
-
-        :param bytes data: The raw data to assign.
-        :raises ValueError: If the data size does not match the tensor size.
-        :raises RuntimeError: If the assignment fails.
-        )doc"
+        py::arg("raw")
     )
     .def(
         "assign",
@@ -350,17 +320,7 @@ static void export_tensors(py::module_& m)
             assign_tensor(*self.tensor, data);
         },
         py::arg("data"),
-        R"doc(
-        Assigns a NumPy array to the tensor.
-
-        The NumPy array does not need to include the outermost batch dimension, but its 
-        remaining shape must match the tensor's shape. Currently, only `uint8`, `int16`, 
-        and `float` data types are supported.
-
-        :param numpy.ndarray data: The NumPy array to assign.
-        :raises ValueError: If the array size or shape does not match the tensor, or if it has an unsupported data type.
-        :raises RuntimeError: If the assignment fails.
-        )doc"
+        docs::tensor::doc_assign
     )
     .def(
         "buffer",
@@ -375,8 +335,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Returns the tensor's current data buffer.
 
-        This is the tensor's default buffer unless a different buffer has been assigned 
-        using `set_buffer()`.
+        This is the tensor's default buffer unless a different buffer has been assigned using ``set_buffer()``.
 
         :return: The current data buffer.
         :rtype: Buffer
@@ -429,8 +388,7 @@ static void export_tensors(py::module_& m)
         Returns a NumPy view of the tensor's dequantized data.
 
         The returned NumPy array is a **view**, not a copy, meaning it shares memory with the tensor.
-        This makes it memory efficient but also means modifying the tensor will affect the array, 
-        and vice versa.
+        This makes it memory efficient but also means modifying the tensor will affect the array, and vice versa.
 
         :return: A NumPy view of the tensor data.
         :rtype: numpy.ndarray
@@ -461,8 +419,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Returns a NumPy copy of the tensor's dequantized data.
 
-        The returned NumPy array contains a **copy** of the tensor data, ensuring safety
-        from unintended modifications. However, copying may be memory inefficient for large tensors.
+        The returned NumPy array contains a **copy** of the tensor data, ensuring safety from unintended modifications. However, copying may be memory inefficient for large tensors.
 
         :return: A NumPy array containing a copy of the tensor data.
         :rtype: numpy.ndarray
@@ -479,11 +436,11 @@ static void export_tensors(py::module_& m)
         R"doc(
         Checks if two tensors reference the same underlying object in memory.
 
-        This returns `True` if both tensors share the same internal data buffer.
+        This returns ``True`` if both tensors share the same internal data buffer.
 
         :param Tensor t1: The first tensor.
         :param Tensor t2: The second tensor.
-        :return: `True` if both tensors reference the same object, otherwise `False`.
+        :return: ``True`` if both tensors reference the same object, otherwise ``False``.
         :rtype: bool
         )doc"
     )
@@ -493,7 +450,7 @@ static void export_tensors(py::module_& m)
     py::class_<TensorsWrapper>(m, "Tensors", R"doc(
         Represents a collection of tensors.
 
-        This class provides a convenient way to access multiple tensors in a `Network`.
+        This class provides a convenient way to access multiple tensors in a ``Network``.
 
         :ivar int size: The number of tensors in the collection.
         )doc"
@@ -531,7 +488,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Retrieves a tensor by index.
 
-        Supports indexing with `tensors[i]`.
+        Supports indexing with ``tensors[i]``.
 
         :param int index: The index of the tensor to retrieve.
         :return: The Tensor at the given index.
@@ -551,7 +508,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Returns an iterator over the tensors in the collection.
 
-        This allows for iteration using a for loop, e.g., `for tensor in tensors:`.
+        This allows for iteration using a for loop, e.g., ``for tensor in tensors:``.
 
         :return: An iterator over the tensors in the collection.
         :rtype: iterator
@@ -577,8 +534,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new network instance with no model.
 
-        The network will have empty input and output `Tensors`. A model must be 
-        loaded using `load_model()` before inference can be run.
+        The network will have empty input and output ``Tensors``. A model must be loaded using ``load_model()`` before inference can be run.
         )doc"
     )
     .def(
@@ -594,10 +550,8 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new network instance and loads a model from a file.
 
-        :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
-                                files are also supported.
-        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                Required for legacy `.nb` models, otherwise should be an empty string.
+        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
@@ -621,8 +575,7 @@ static void export_tensors(py::module_& m)
         loading the new one.
 
         :param bytes model_data: The binary model data.
-        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                Required for legacy `.nb` models, otherwise should be an empty string.
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
@@ -640,10 +593,8 @@ static void export_tensors(py::module_& m)
         If another model was previously loaded, it is automatically disposed before 
         loading the new one.
     
-        :param os.Pathlike or str or bytes model_file: The path to a `.synap` model file. Legacy `.nb` model 
-                                files are also supported.
-        :param os.Pathlike or str or bytes meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                Required for legacy `.nb` models, otherwise should be an empty string.
+        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
@@ -654,17 +605,7 @@ static void export_tensors(py::module_& m)
                 throw std::runtime_error("Failed to predict");
             }
             return TensorsWrapper {self, &self->outputs};
-        },
-        R"doc(
-        Runs inference using the current input tensors.
-    
-        Input data must be set beforehand via `Network.inputs`. The inference results 
-        are stored in `Network.outputs` and also returned by this function.
-    
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises RuntimeError: If inference fails.
-        )doc"
+        }
     )
     .def(
         "predict",
@@ -672,22 +613,7 @@ static void export_tensors(py::module_& m)
             predict_from_seq(*self, seq);
             return TensorsWrapper {self, &self->outputs};
         },
-        py::arg("input_data"),
-        R"doc(
-        Runs inference using the provided list of input data.
-
-        Each element in the list must be a NumPy array. Currently, only `uint8`, `int16`, 
-        and `float` data types are supported. The length of the list must 
-        match the number of model inputs. The inference results are stored in 
-        `Network.outputs` and also returned by this function.
-
-        :param list input_data: A list of NumPy arrays representing the input data.
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises ValueError: If the length of the list does not match the number of model inputs.
-        :raises TypeError: If any element in the list is not a valid NumPy array.
-        :raises RuntimeError: If inference fails.
-        )doc"
+        py::arg("input_data")
     )
     .def(
         "predict",
@@ -696,21 +622,7 @@ static void export_tensors(py::module_& m)
             return TensorsWrapper{self, &self->outputs};
         },
         py::arg("input_feed"),
-        R"doc(
-        Runs inference using a mapping of input names to input data.
-
-        Each key must be a valid input name and each value must be a NumPy array. 
-        Currently, only `uint8`, `int16`, and `float` data types are supported. 
-        The inference results are stored in `Network.outputs` and also returned by this function.
-
-        :param dict input_feed: A mapping of input names to input data.
-        :return: The output `Tensors` collection.
-        :rtype: Tensors
-        :raises ValueError: If the number of input data does not match the number of model inputs.
-        :raises KeyError: If an input name is missing in the mapping.
-        :raises TypeError: If any element in the list is not a valid NumPy array.
-        :raises RuntimeError: If inference fails.
-        )doc"
+        docs::network::doc_predict
     )
     .def_property_readonly(
         "inputs",
@@ -720,10 +632,9 @@ static void export_tensors(py::module_& m)
         R"doc(
         The input tensors of the network.
 
-        These tensors must be set before running inference. The number and shape of 
-        the input tensors depend on the loaded model.
+        These tensors must be set before running inference. The number and shape of the input tensors depend on the loaded model.
 
-        :return: The collection of input `Tensors`.
+        :return: The collection of input ``Tensors``.
         :rtype: Tensors
         )doc"
     )
@@ -735,10 +646,9 @@ static void export_tensors(py::module_& m)
         R"doc(
         The output tensors of the network.
 
-        These tensors hold the results after running inference. The number and shape 
-        of the output tensors depend on the loaded model.
+        These tensors hold the results after running inference. The number and shape of the output tensors depend on the loaded model.
 
-        :return: The collection of output `Tensors`.
+        :return: The collection of output ``Tensors``.
         :rtype: Tensors
         )doc"
     )

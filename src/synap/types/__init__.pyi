@@ -122,13 +122,27 @@ class Dim2d:
 class Dimensions:
     """
     
-            Represents tensor dimensions as named fields for 4D tensors.
+    Represents tensor dimensions as named fields for 4D tensors.
     
-            :ivar int n: The number of elements in the batch.
-            :ivar int h: The height of the tensor.
-            :ivar int w: The width of the tensor.
-            :ivar int c: The number of channels in the tensor.
-            
+    :ivar int n: The number of elements in the batch.
+    :ivar int h: The height of the tensor.
+    :ivar int w: The width of the tensor.
+    :ivar int c: The number of channels in the tensor.
+    
+    **Signatures**
+        - ``Dimensions(n: int = 0, h: int = 0, w: int = 0, c: int = 0)``
+        - ``Dimensions(shape: Shape, layout: Layout)``
+    
+    :param int n: The number of elements in the batch.
+    :param int h: The height of the tensor.
+    :param int w: The width of the tensor.
+    :param int c: The number of channels in the tensor.
+    
+    :param Shape shape: A shape object describing the tensor dimensions.
+    :param Layout layout: The layout that defines how dimensions map onto ``n``, ``h``, ``w``, ``c``.
+    
+    :returns: A new ``Dimensions`` instance.
+    :rtype: Dimensions
     """
     __hash__: typing.ClassVar[None] = None
     def __eq__(self, arg0: Dimensions) -> bool:
@@ -325,11 +339,22 @@ class Mask:
 class Rect:
     """
     
-            Represents a rectangular region of interest (ROI).
+    Represents a rectangular region of interest (ROI).
     
-            :ivar synap.types.Dim2d origin: The ROI origin (in pixels).
-            :ivar synap.types.Dim2d size: The ROI size (in pixels).
-            
+    :ivar synap.types.Dim2d origin: The ROI origin (in pixels).
+    :ivar synap.types.Dim2d size: The ROI size (in pixels).
+    
+    **Signatures**
+        - ``Rect(origin: Dim2d = Dim2d(), size: Dim2d = Dim2d())``
+        - ``Rect(origin: tuple[int, int], size: tuple[int, int])``
+    
+    :param origin: The top-left corner of the ROI.
+    :type origin: Dim2d | tuple[int, int]
+    :param size: The width and height of the ROI, in pixels.
+    :type size: Dim2d | tuple[int, int]
+    
+    :returns: A new ``Rect`` instance.
+    :rtype: Rect
     """
     __hash__: typing.ClassVar[None] = None
     def __eq__(self, arg0: Rect) -> bool:
