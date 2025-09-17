@@ -211,8 +211,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new tensor as an alias of an existing tensor.
 
-        This operation does not create a copy. Instead, the new tensor shares the same 
-        data buffer as the original tensor.
+        This operation does not create a copy. Instead, the new tensor shares the same data buffer as the original tensor.
 
         :param Tensor other: The existing tensor to alias.
         )doc"
@@ -336,8 +335,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Returns the tensor's current data buffer.
 
-        This is the tensor's default buffer unless a different buffer has been assigned 
-        using ``set_buffer()``.
+        This is the tensor's default buffer unless a different buffer has been assigned using ``set_buffer()``.
 
         :return: The current data buffer.
         :rtype: Buffer
@@ -390,8 +388,7 @@ static void export_tensors(py::module_& m)
         Returns a NumPy view of the tensor's dequantized data.
 
         The returned NumPy array is a **view**, not a copy, meaning it shares memory with the tensor.
-        This makes it memory efficient but also means modifying the tensor will affect the array, 
-        and vice versa.
+        This makes it memory efficient but also means modifying the tensor will affect the array, and vice versa.
 
         :return: A NumPy view of the tensor data.
         :rtype: numpy.ndarray
@@ -422,8 +419,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Returns a NumPy copy of the tensor's dequantized data.
 
-        The returned NumPy array contains a **copy** of the tensor data, ensuring safety
-        from unintended modifications. However, copying may be memory inefficient for large tensors.
+        The returned NumPy array contains a **copy** of the tensor data, ensuring safety from unintended modifications. However, copying may be memory inefficient for large tensors.
 
         :return: A NumPy array containing a copy of the tensor data.
         :rtype: numpy.ndarray
@@ -538,8 +534,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new network instance with no model.
 
-        The network will have empty input and output ``Tensors``. A model must be 
-        loaded using ``load_model()`` before inference can be run.
+        The network will have empty input and output ``Tensors``. A model must be loaded using ``load_model()`` before inference can be run.
         )doc"
     )
     .def(
@@ -555,10 +550,8 @@ static void export_tensors(py::module_& m)
         R"doc(
         Creates a new network instance and loads a model from a file.
 
-        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
-                                files are also supported.
-        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                Required for legacy ``.nb`` models, otherwise should be an empty string.
+        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
@@ -582,8 +575,7 @@ static void export_tensors(py::module_& m)
         loading the new one.
 
         :param bytes model_data: The binary model data.
-        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                Required for legacy ``.nb`` models, otherwise should be an empty string.
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
@@ -601,10 +593,8 @@ static void export_tensors(py::module_& m)
         If another model was previously loaded, it is automatically disposed before 
         loading the new one.
     
-        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
-                                files are also supported.
-        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                Required for legacy ``.nb`` models, otherwise should be an empty string.
+        :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+        :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
         :raises RuntimeError: If the model cannot be loaded.
         )doc"
     )
@@ -642,8 +632,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         The input tensors of the network.
 
-        These tensors must be set before running inference. The number and shape of 
-        the input tensors depend on the loaded model.
+        These tensors must be set before running inference. The number and shape of the input tensors depend on the loaded model.
 
         :return: The collection of input ``Tensors``.
         :rtype: Tensors
@@ -657,8 +646,7 @@ static void export_tensors(py::module_& m)
         R"doc(
         The output tensors of the network.
 
-        These tensors hold the results after running inference. The number and shape 
-        of the output tensors depend on the loaded model.
+        These tensors hold the results after running inference. The number and shape of the output tensors depend on the loaded model.
 
         :return: The collection of output ``Tensors``.
         :rtype: Tensors

@@ -129,6 +129,7 @@ static void export_preprocessor(py::module_& m)
         py::arg("filename"),
         R"doc(
         Create input data from image file.
+
         :param str filename: Filename to load data from.
         :raises ValueError: If the file is not found or the data is invalid.
         )doc"
@@ -149,6 +150,7 @@ static void export_preprocessor(py::module_& m)
         py::arg("layout") = Layout::none,
         R"doc(
         Create input data from a byte buffer.
+
         :param bytes: Input data buffer.
         :param InputType type: Data type.
         :param Shape shape: (optional) Data shape, not needed for ``InputType.encoded_image`. 
@@ -164,6 +166,7 @@ static void export_preprocessor(py::module_& m)
         &InputData::empty,
         R"doc(
         Check if data is present.
+
         :return: True if no data is present.
         :rtype: bool
         )doc"
@@ -197,9 +200,7 @@ static void export_preprocessor(py::module_& m)
         R"doc(
         Get a NumPy array view of the data.
 
-        The returned NumPy array is a **view**, not a copy, meaning the data is owned 
-        by the ``InputData`` object. The array will be invalidated if the ``InputData`` 
-        object is destroyed.
+        The returned NumPy array is a **view**, not a copy, meaning the data is owned by the ``InputData`` object. The array will be invalidated if the ``InputData`` object is destroyed.
 
         :return: NumPy array view of the data.
         :rtype: numpy.ndarray

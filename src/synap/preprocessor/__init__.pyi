@@ -37,6 +37,7 @@ class InputData:
     def __init__(self, filename: str) -> None:
         """
                 Create input data from image file.
+        
                 :param str filename: Filename to load data from.
                 :raises ValueError: If the file is not found or the data is invalid.
         """
@@ -44,6 +45,7 @@ class InputData:
     def __init__(self, bytes: bytes, type: InputType, shape: synap.types.Shape = ..., layout: synap.types.Layout = synap.types.Layout.none) -> None:
         """
                 Create input data from a byte buffer.
+        
                 :param bytes: Input data buffer.
                 :param InputType type: Data type.
                 :param Shape shape: (optional) Data shape, not needed for ``InputType.encoded_image`. 
@@ -57,9 +59,7 @@ class InputData:
         """
                 Get a NumPy array view of the data.
         
-                The returned NumPy array is a **view**, not a copy, meaning the data is owned 
-                by the ``InputData`` object. The array will be invalidated if the ``InputData`` 
-                object is destroyed.
+                The returned NumPy array is a **view**, not a copy, meaning the data is owned by the ``InputData`` object. The array will be invalidated if the ``InputData`` object is destroyed.
         
                 :return: NumPy array view of the data.
                 :rtype: numpy.ndarray
@@ -67,6 +67,7 @@ class InputData:
     def empty(self) -> bool:
         """
                 Check if data is present.
+        
                 :return: True if no data is present.
                 :rtype: bool
         """

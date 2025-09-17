@@ -40,18 +40,15 @@ class Network:
         """
                 Creates a new network instance with no model.
         
-                The network will have empty input and output ``Tensors``. A model must be 
-                loaded using ``load_model()`` before inference can be run.
+                The network will have empty input and output ``Tensors``. A model must be loaded using ``load_model()`` before inference can be run.
         """
     @typing.overload
     def __init__(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
         """
                 Creates a new network instance and loads a model from a file.
         
-                :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
-                                        files are also supported.
-                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy ``.nb`` models, otherwise should be an empty string.
+                :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     def load_model(self, model_file: os.PathLike | str | bytes, meta_file: os.PathLike | str | bytes = '') -> None:
@@ -61,10 +58,8 @@ class Network:
                 If another model was previously loaded, it is automatically disposed before 
                 loading the new one.
             
-                :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model 
-                                        files are also supported.
-                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy ``.nb`` models, otherwise should be an empty string.
+                :param model_file: The path to a ``.synap`` model file. Legacy ``.nb`` model files are also supported.
+                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     def load_model_from_memory(self, model_data: bytes, meta_file: os.PathLike | str | bytes = '') -> None:
@@ -75,8 +70,7 @@ class Network:
                 loading the new one.
         
                 :param bytes model_data: The binary model data.
-                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). 
-                                        Required for legacy ``.nb`` models, otherwise should be an empty string.
+                :param meta_file: (Optional) The path to the model metadata file (JSON-formatted). Required for legacy ``.nb`` models, otherwise should be an empty string.
                 :raises RuntimeError: If the model cannot be loaded.
         """
     @typing.overload
@@ -113,8 +107,7 @@ class Network:
         """
                 The input tensors of the network.
         
-                These tensors must be set before running inference. The number and shape of 
-                the input tensors depend on the loaded model.
+                These tensors must be set before running inference. The number and shape of the input tensors depend on the loaded model.
         
                 :return: The collection of input ``Tensors``.
                 :rtype: Tensors
@@ -124,8 +117,7 @@ class Network:
         """
                 The output tensors of the network.
         
-                These tensors hold the results after running inference. The number and shape 
-                of the output tensors depend on the loaded model.
+                These tensors hold the results after running inference. The number and shape of the output tensors depend on the loaded model.
         
                 :return: The collection of output ``Tensors``.
                 :rtype: Tensors
@@ -165,8 +157,7 @@ class Tensor:
         """
                 Creates a new tensor as an alias of an existing tensor.
         
-                This operation does not create a copy. Instead, the new tensor shares the same 
-                data buffer as the original tensor.
+                This operation does not create a copy. Instead, the new tensor shares the same data buffer as the original tensor.
         
                 :param Tensor other: The existing tensor to alias.
         """
@@ -202,8 +193,7 @@ class Tensor:
         """
                 Returns the tensor's current data buffer.
         
-                This is the tensor's default buffer unless a different buffer has been assigned 
-                using ``set_buffer()``.
+                This is the tensor's default buffer unless a different buffer has been assigned using ``set_buffer()``.
         
                 :return: The current data buffer.
                 :rtype: Buffer
@@ -223,8 +213,7 @@ class Tensor:
         """
                 Returns a NumPy copy of the tensor's dequantized data.
         
-                The returned NumPy array contains a **copy** of the tensor data, ensuring safety
-                from unintended modifications. However, copying may be memory inefficient for large tensors.
+                The returned NumPy array contains a **copy** of the tensor data, ensuring safety from unintended modifications. However, copying may be memory inefficient for large tensors.
         
                 :return: A NumPy array containing a copy of the tensor data.
                 :rtype: numpy.ndarray
@@ -235,8 +224,7 @@ class Tensor:
                 Returns a NumPy view of the tensor's dequantized data.
         
                 The returned NumPy array is a **view**, not a copy, meaning it shares memory with the tensor.
-                This makes it memory efficient but also means modifying the tensor will affect the array, 
-                and vice versa.
+                This makes it memory efficient but also means modifying the tensor will affect the array, and vice versa.
         
                 :return: A NumPy view of the tensor data.
                 :rtype: numpy.ndarray
