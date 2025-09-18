@@ -51,15 +51,22 @@ The SyNAP Python API provides access to the following classes and functions:
 - `Rect`
 - `Shape`
 
-## Building the Python Wheel
+## Installation
 
+### Install directly from PyPI
+Use `pip` to install the latest version:
+```
+pip install synap-python
+```
+
+### Build from source
 Follow the steps below to set up your development environment and build the Python wheel. You can build this on a Linux machine, WSL2, or locally on the Astra board.
 
-### **Prerequisites**
+#### Prerequisites
 
 Ensure you have necessary build dependencies installed:
 
-#### **Linux/WSL2**
+##### Linux/WSL2
 
 ```sh
 sudo apt update
@@ -67,15 +74,15 @@ sudo apt install python3.10 python3.10-venv python3.10-dev
 sudo apt install -y build-essential cmake ninja-build
 ```
 
-#### **Astra**
+##### Astra
 
-The [`python3-dev` debian package](https://synaptics-synap.github.io/examples-prebuilts/packages/python3-dev_3.10.13-r0_arm64.deb) for Astra is required. Install with:
+The `python3-dev` debian package for Astra is required. Install with:
 ```sh
 wget https://synaptics-synap.github.io/examples-prebuilts/packages/python3-dev_3.10.13-r0_arm64.deb
 dpkg -i python3-dev_3.10.13-r0_arm64.deb
 ```
 
-### **Setup Virtual Environment**
+#### Setup Virtual Environment
 
 Create and activate a virtual environment to manage dependencies:
 
@@ -84,8 +91,8 @@ python3.10 -m venv venv
 source venv/bin/activate
 ```
 
-### **Build Package**:
-To build the Python wheel, just run:
+#### Build Package
+To build the Python wheel, run:
 ```sh
 ./build.sh 
 ```
