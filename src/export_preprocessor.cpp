@@ -9,6 +9,7 @@
 #include "synap/tensor.hpp"
 #include "synap/types.hpp"
 #include "export_tensor.hpp"
+#include "export_docstrings.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -128,6 +129,7 @@ static void export_preprocessor(py::module_& m)
         py::arg("filename"),
         R"doc(
         Create input data from image file.
+
         :param str filename: Filename to load data from.
         :raises ValueError: If the file is not found or the data is invalid.
         )doc"
@@ -148,13 +150,14 @@ static void export_preprocessor(py::module_& m)
         py::arg("layout") = Layout::none,
         R"doc(
         Create input data from a byte buffer.
+
         :param bytes: Input data buffer.
         :param InputType type: Data type.
-        :param Shape shape: (optional) Data shape, not needed for `InputType.encoded_image`. 
-                            The order of elements in `shape` must align with the specified `layout`.  
-                            For example, a 640x480 RGB image with an `Layout.nhwc` layout should have shape `Shape([1, 480, 640, 3])`.
-        :param Layout layout: (optional) Data layout, not needed for `InputType.encoded_image`. 
-                                Use `Layout.nchw` for planar images, and `Layout.nhwc` for interleaved images.
+        :param Shape shape: (optional) Data shape, not needed for ``InputType.encoded_image`. 
+                            The order of elements in ``shape`` must align with the specified ``layout``.  
+                            For example, a 640x480 RGB image with an ``Layout.nhwc`` layout should have shape ``Shape([1, 480, 640, 3])``.
+        :param Layout layout: (optional) Data layout, not needed for ``InputType.encoded_image``. 
+                                Use ``Layout.nchw`` for planar images, and ``Layout.nhwc`` for interleaved images.
         :raises ValueError: If the buffer is empty or the data is invalid.
         )doc"
     )
@@ -163,6 +166,7 @@ static void export_preprocessor(py::module_& m)
         &InputData::empty,
         R"doc(
         Check if data is present.
+
         :return: True if no data is present.
         :rtype: bool
         )doc"
@@ -196,9 +200,7 @@ static void export_preprocessor(py::module_& m)
         R"doc(
         Get a NumPy array view of the data.
 
-        The returned NumPy array is a **view**, not a copy, meaning the data is owned 
-        by the `InputData` object. The array will be invalidated if the `InputData` 
-        object is destroyed.
+        The returned NumPy array is a **view**, not a copy, meaning the data is owned by the ``InputData`` object. The array will be invalidated if the ``InputData`` object is destroyed.
 
         :return: NumPy array view of the data.
         :rtype: numpy.ndarray
@@ -239,17 +241,7 @@ static void export_preprocessor(py::module_& m)
         },
         py::arg("inputs"),
         py::arg("input_data"),
-        py::arg("input_index") = 0,
-        R"doc(
-        Write input data to network inputs.
-
-        :param Tensors inputs: Network inputs.
-        :param InputData input_data: Input data.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        py::arg("input_index") = 0
     )
     .def(
         "assign",
@@ -258,46 +250,41 @@ static void export_preprocessor(py::module_& m)
         },
         py::arg("inputs"),
         py::arg("filename"),
-        py::arg("input_index") = 0,
-        R"doc(
-        Write image data to network inputs.
-
-        :param Tensors inputs: Network inputs.
-        :param str filename: Path to image file.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises ValueError: If the image file is not found or the data is invalid.
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        py::arg("input_index") = 0
+    )
+    .def(
+        "assign",
+        [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Layout layout, size_t input_index) -> Rect {
+            py::buffer_info info = data.request();
+            const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
+            size_t buffer_size = info.size;
+            Shape buffer_shape(info.shape.begin(), info.shape.end());
+            return self.assign(*tw.tensors, buffer, buffer_size, buffer_shape, layout, input_index);
+        },
+        py::arg("inputs"),
+        py::arg("data"),
+        py::arg("layout"),
+        py::arg("input_index") = 0
     )
     .def(
         "assign",
         [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
-            py::buffer_info info = data.request();
-            const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
-            size_t buffer_size = info.size;
-            return self.assign(*tw.tensors, buffer, buffer_size, shape, layout, input_index);
+            PyErr_WarnEx(
+                PyExc_DeprecationWarning,
+                "``assign(..., shape, ...)`` is deprecated and will be removed in v1.0.0; "
+                "please omit the ``shape`` argument and let it be inferred automatically.",
+                1
+            );
+            return py::cast(const_cast<PreprocessorWrapper&>(self))
+                        .attr("assign")(tw, data, layout, input_index)
+                        .cast<Rect>();
         },
         py::arg("inputs"),
         py::arg("data"),
         py::arg("shape"),
         py::arg("layout"),
         py::arg("input_index") = 0,
-        R"doc(
-        Write raw data to network inputs.
-
-        Data must be provided as a NumPy array of type `uint8`.
-
-        :param Tensors inputs: Network inputs.
-        :param numpy.ndarray data: Raw data buffer.
-        :param Shape shape: Data shape.
-        :param Layout layout: Data layout.
-        :param int input_index: Index of the input tensor to write to.
-        :return: Assigned rectangle in the input tensor.
-        :rtype: Rect
-        :raises RuntimeError: If an error occurs during preprocessing.
-        )doc"
+        docs::preprocessor::doc_assign
     )
     ;
 }

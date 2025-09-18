@@ -15,7 +15,7 @@ using namespace synaptics::synap;
 PYBIND11_MODULE(_synap, m)
 {
     m.doc() = "SyNAP Python API";
-    m.attr("__version__") = "0.0.4";
+    m.attr("__version__") = "0.9.0";
 
     export_types(m);
     export_tensors(m);

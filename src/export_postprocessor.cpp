@@ -11,6 +11,7 @@
 #include "synap/types.hpp"
 #include "export_tensor.hpp"
 #include "export_utils.hpp"
+#include "export_docstrings.hpp"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl_bind.h>
@@ -154,7 +155,7 @@ static void export_postprocessor(py::module_& m)
         Perform object detection on network outputs.
 
         The output format of object detection networks depends on the network architecture used. 
-        The format type must be specified in the network's output tensor `format` field in the conversion metafile.
+        The format type must be specified in the network's output tensor ``format`` field in the conversion metafile.
         This following formats are currently supported: "retinanet_boxes", "tflite_detection_boxes", "yolov5"
 
         :param float score_threshold: The minimum confidence score to consider a detection.
@@ -186,11 +187,12 @@ static void export_postprocessor(py::module_& m)
     postprocessor.def(
         "to_json_str",
         static_cast<std::string(*)(const Classifier::Result&)>(&to_json_str),
-        "Get ClassifierResult as a JSON string."
+        py::arg("classification_result")
     );
     postprocessor.def(
         "to_json_str",
         static_cast<std::string(*)(const Detector::Result&)>(&to_json_str),
-        "Get DetectorResult as a JSON string."
+        py::arg("detection_result"),
+        docs::postprocessor::doc_to_json_str
     );
 }

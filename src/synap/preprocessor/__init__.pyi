@@ -6,6 +6,7 @@ SyNAP preprocessor
 """
 from __future__ import annotations
 import numpy
+import numpy.typing
 import synap
 import synap.types
 import typing
@@ -36,6 +37,7 @@ class InputData:
     def __init__(self, filename: str) -> None:
         """
                 Create input data from image file.
+        
                 :param str filename: Filename to load data from.
                 :raises ValueError: If the file is not found or the data is invalid.
         """
@@ -43,22 +45,21 @@ class InputData:
     def __init__(self, bytes: bytes, type: InputType, shape: synap.types.Shape = ..., layout: synap.types.Layout = synap.types.Layout.none) -> None:
         """
                 Create input data from a byte buffer.
+        
                 :param bytes: Input data buffer.
                 :param InputType type: Data type.
-                :param Shape shape: (optional) Data shape, not needed for `InputType.encoded_image`. 
-                                    The order of elements in `shape` must align with the specified `layout`.  
-                                    For example, a 640x480 RGB image with an `Layout.nhwc` layout should have shape `Shape([1, 480, 640, 3])`.
-                :param Layout layout: (optional) Data layout, not needed for `InputType.encoded_image`. 
-                                        Use `Layout.nchw` for planar images, and `Layout.nhwc` for interleaved images.
+                :param Shape shape: (optional) Data shape, not needed for ``InputType.encoded_image`. 
+                                    The order of elements in ``shape`` must align with the specified ``layout``.  
+                                    For example, a 640x480 RGB image with an ``Layout.nhwc`` layout should have shape ``Shape([1, 480, 640, 3])``.
+                :param Layout layout: (optional) Data layout, not needed for ``InputType.encoded_image``. 
+                                        Use ``Layout.nchw`` for planar images, and ``Layout.nhwc`` for interleaved images.
                 :raises ValueError: If the buffer is empty or the data is invalid.
         """
     def data(self) -> numpy.ndarray:
         """
                 Get a NumPy array view of the data.
         
-                The returned NumPy array is a **view**, not a copy, meaning the data is owned 
-                by the `InputData` object. The array will be invalidated if the `InputData` 
-                object is destroyed.
+                The returned NumPy array is a **view**, not a copy, meaning the data is owned by the ``InputData`` object. The array will be invalidated if the ``InputData`` object is destroyed.
         
                 :return: NumPy array view of the data.
                 :rtype: numpy.ndarray
@@ -66,6 +67,7 @@ class InputData:
     def empty(self) -> bool:
         """
                 Check if data is present.
+        
                 :return: True if no data is present.
                 :rtype: bool
         """
@@ -134,7 +136,7 @@ class InputType:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: typing.SupportsInt) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -142,7 +144,7 @@ class InputType:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: int) -> None:
+    def __setstate__(self, state: typing.SupportsInt) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -156,43 +158,40 @@ class Preprocessor:
     def __init__(self) -> None:
         ...
     @typing.overload
-    def assign(self, inputs: synap.Tensors, input_data: InputData, input_index: int = 0) -> synap.types.Rect:
-        """
-                Write input data to network inputs.
-        
-                :param Tensors inputs: Network inputs.
-                :param InputData input_data: Input data.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises RuntimeError: If an error occurs during preprocessing.
-        """
+    def assign(self, inputs: synap.Tensors, input_data: InputData, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
+        ...
     @typing.overload
-    def assign(self, inputs: synap.Tensors, filename: str, input_index: int = 0) -> synap.types.Rect:
-        """
-                Write image data to network inputs.
-        
-                :param Tensors inputs: Network inputs.
-                :param str filename: Path to image file.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises ValueError: If the image file is not found or the data is invalid.
-                :raises RuntimeError: If an error occurs during preprocessing.
-        """
+    def assign(self, inputs: synap.Tensors, filename: str, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
+        ...
     @typing.overload
-    def assign(self, inputs: synap.Tensors, data: numpy.ndarray[numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: int = 0) -> synap.types.Rect:
+    def assign(self, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
+        ...
+    @typing.overload
+    def assign(self, inputs: synap.Tensors, data: typing.Annotated[numpy.typing.ArrayLike, numpy.uint8], shape: synap.types.Shape, layout: synap.types.Layout, input_index: typing.SupportsInt = 0) -> synap.types.Rect:
         """
-                Write raw data to network inputs.
+        Write input data to network inputs and return the assigned ROI.
         
-                Data must be provided as a NumPy array of type `uint8`.
+        **Signatures**
+            - ``assign(inputs: Tensors, input_data: InputData, input_index: int = 0)``
+            - ``assign(inputs: Tensors, filename: str, input_index: int = 0)``
+            - ``assign(inputs: Tensors, data: numpy.ndarray, layout: Layout, input_index: int = 0)``
+            - ``assign(inputs: Tensors, data: numpy.ndarray, shape: Shape, layout: Layout, input_index: int = 0)``  *(deprecated)*
         
-                :param Tensors inputs: Network inputs.
-                :param numpy.ndarray data: Raw data buffer.
-                :param Shape shape: Data shape.
-                :param Layout layout: Data layout.
-                :param int input_index: Index of the input tensor to write to.
-                :return: Assigned rectangle in the input tensor.
-                :rtype: Rect
-                :raises RuntimeError: If an error occurs during preprocessing.
+        :param Tensors inputs: Network inputs to write into.
+        :param InputData input_data: Pre-decoded input payload to write.
+        :param str filename: Path to an image file to load and write.
+        :param numpy.ndarray data: Raw data buffer (must be ``uint8``).
+        :param Layout layout: Layout of ``data`` when providing raw input (e.g., ``NHWC``, ``NCHW``).
+        :param Shape shape: *(deprecated)* Explicit data shape. This argument is no longer required as shape is inferred automatically.
+        :param int input_index: Index of the input tensor to write to (default: ``0``).
+        
+        :returns: Assigned ROI in the target input tensor.
+        :rtype: Rect
+        
+        :raises ValueError: If the image file (``filename``) is not found or contains invalid data.
+        :raises RuntimeError: If an error occurs during preprocessing.
+        
+        .. warning::
+           The overload ``assign(inputs, data, shape, layout, input_index)`` is **deprecated**
+           and will be removed in **v1.0.0**. Use ``assign(inputs, data, layout, input_index)`` instead.
         """

@@ -10,20 +10,27 @@ project = 'SyNAP Python API'
 copyright = '2025, Synaptics Incorporated'
 author = 'Synaptics Incorporated'
 
-version = '0.0.4'
-release = 'preview'
+version = '0.9.0'
+release = 'stable'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.viewcode",
+    'autoapi.extension',
+    'sphinx.ext.autodoc', 
+    'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints'
 ]
 
+autoapi_dirs = ['../../src']
+autoapi_file_patterns = ['*.pyi']
+autoapi_options = ['members', 'inherited-members', 'imported-members', 'undoc-members']
+autoapi_add_toctree_entry = False
+autoapi_template_dir = '_templates/autoapi'
+autodoc_typehints = 'description'
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 language = 'en'
 
@@ -33,13 +40,3 @@ language = 'en'
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
-import re
-
-def remove_self_typehint(app, what, name, obj, options, signature, return_annotation):
-    if signature:
-        signature = re.sub(r"\(self: [^,)\s]+", "(self", signature)
-        signature = re.sub(r"\(cls: [^,)\s]+", "(cls", signature)
-    return signature, return_annotation
-
-def setup(app):
-    app.connect("autodoc-process-signature", remove_self_typehint)

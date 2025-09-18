@@ -186,9 +186,25 @@ def test_preprocessor_assign_image(sample_network, sample_image_jpg):
 def test_preprocessor_assign_numpy(sample_network, sample_image_jpg, sample_image_props):
     """Test Preprocessor assign with numpy array"""
     inp = sample_network.inputs[0]
+    inp_w, inp_h = (inp.shape[2], inp.shape[1]) if inp.layout == Layout.nhwc else (inp.shape[3], inp.shape[2])
     inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
     init_data = inp.to_numpy()
     preprocessor = Preprocessor()
-    image = cv2.imread(sample_image_jpg)
-    preprocessor.assign(sample_network.inputs, image, sample_image_props["shape"], sample_image_props["layout"])
+    image = cv2.resize(cv2.imread(sample_image_jpg), (inp_w, inp_h))[np.newaxis, :]
+    preprocessor.assign(sample_network.inputs, image, sample_image_props["layout"])
+    assert not np.allclose(inp.to_numpy(), init_data)
+
+
+def test_preprocessor_assign_numpy_deprecated(sample_network, sample_image_jpg, sample_image_props):
+    """Test Preprocessor assign with numpy array"""
+    inp = sample_network.inputs[0]
+    inp_w, inp_h = (inp.shape[2], inp.shape[1]) if inp.layout == Layout.nhwc else (inp.shape[3], inp.shape[2])
+    inp.assign(np.zeros(inp.shape, dtype=inp.data_type.np_type()))
+    init_data = inp.to_numpy()
+    preprocessor = Preprocessor()
+    image = cv2.resize(cv2.imread(sample_image_jpg), (inp_w, inp_h))[np.newaxis, :]
+    with pytest.warns(DeprecationWarning) as rec:
+        preprocessor.assign(sample_network.inputs, image, sample_image_props["shape"], sample_image_props["layout"])
+    assert len(rec) == 1
+    assert rec[0].filename.endswith("test_preprocessor.py")
     assert not np.allclose(inp.to_numpy(), init_data)

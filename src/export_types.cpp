@@ -9,6 +9,7 @@
 #include <pybind11/stl.h>
 #include <sstream>
 #include "export_utils.hpp"
+#include "export_docstrings.hpp"
 
 namespace py = pybind11;
 
@@ -248,13 +249,7 @@ static void export_types(py::module_& m)
     ;
 
     /* Rect */
-    py::class_<Rect>(types, "Rect", R"doc(
-        Represents a rectangular region of interest (ROI).
-
-        :ivar synap.types.Dim2d origin: The ROI origin (in pixels).
-        :ivar synap.types.Dim2d size: The ROI size (in pixels).
-        )doc"
-    )
+    py::class_<Rect>(types, "Rect", docs::rect::doc_class)
     .def(
         py::init<Dim2d, Dim2d>(),
         py::arg("origin") = Dim2d {},
@@ -403,15 +398,7 @@ static void export_types(py::module_& m)
     ;
 
     /* Dimensions */
-    py::class_<Dimensions>(types, "Dimensions", R"doc(
-        Represents tensor dimensions as named fields for 4D tensors.
-
-        :ivar int n: The number of elements in the batch.
-        :ivar int h: The height of the tensor.
-        :ivar int w: The width of the tensor.
-        :ivar int c: The number of channels in the tensor.
-        )doc"
-    )
+    py::class_<Dimensions>(types, "Dimensions", docs::dimensions::doc_class)
     .def(
         py::init<int32_t, int32_t, int32_t, int32_t>(),
         py::arg("n") = 0,
