@@ -5,7 +5,7 @@
 name = "synap-python"
 version = "0.9.0"
 requires-python = ">=3.10"
-authors = [{ "name" = "Sauryadeep Pal", "email" = "sauryadeep.pal@synaptics.com" }]
+authors = [{ "name" = "synaptics-astra", "email" = "zSvcastrateam@synaptics.com" }]
 description = "Python bindings for SyNAP"
 license = { "file" = "LICENSE" }
 readme = "README.md"
