@@ -98,15 +98,15 @@ jobs:
           name: python-package-distributions-${{ matrix.python-ver }}
           path: ${{ env.DIST_DIR }}
 
-  publish-to-testpypi:
-    name: Publish Python distribution to TestPyPI
+  publish-to-pypi:
+    name: Publish Python distribution to PyPI
     needs:
     - build-aarch64
     runs-on: ubuntu-latest
 
     environment:
-      name: testpypi
-      url: https://test.pypi.org/p/synap-python
+      name: pypi
+      url: https://pypi.org/p/synap-python
 
     permissions:
       id-token: write
@@ -121,6 +121,4 @@ jobs:
 
     - name: Publish distribution to TestPyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        skip-existing: true
+
