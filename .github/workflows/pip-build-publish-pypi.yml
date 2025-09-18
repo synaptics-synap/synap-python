@@ -1,4 +1,4 @@
-name: Build pip wheels and publish to TestPyPI
+name: Build pip wheels and publish to PyPI
 
 on: [workflow_dispatch]
 
@@ -119,6 +119,6 @@ jobs:
         merge-multiple: true
         path: ${{ env.DIST_DIR }}
 
-    - name: Publish distribution to TestPyPI
+    - name: Publish distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 
