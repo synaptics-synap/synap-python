@@ -6,7 +6,7 @@ SyNAP-Python-API
 
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://developer.synaptics.com/)
 [![python](https://img.shields.io/badge/python-3.10-brightgreen)](https://www.python.org/downloads/release/python-3123/)
-[![version](https://img.shields.io/badge/release-0.1.0-yellow)](https://github.com/synaptics-synap/synap-python/releases)
+[![version](https://img.shields.io/badge/release-0.9.0-yellow)](https://github.com/synaptics-synap/synap-python/releases)
 [![license](https://img.shields.io/badge/license-Apache%202-blue)](./LICENSE)
 
 [Hardware](https://www.synaptics.com/products/embedded-processors/astra-machina-foundation-series)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Models](https://developer.synaptics.com/models?operator=AND)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[Documentation](https://developer.synaptics.com/)
@@ -69,8 +69,9 @@ sudo apt install -y build-essential cmake ninja-build
 
 #### **Astra**
 
-The `python3-dev` debian package for Astra is required. Once you have the package, install with:
+The [`python3-dev` debian package](https://synaptics-synap.github.io/examples-prebuilts/packages/python3-dev_3.10.13-r0_arm64.deb) for Astra is required. Install with:
 ```sh
+wget https://synaptics-synap.github.io/examples-prebuilts/packages/python3-dev_3.10.13-r0_arm64.deb
 dpkg -i python3-dev_3.10.13-r0_arm64.deb
 ```
 
@@ -93,7 +94,7 @@ Use `--verbose` for detailed build steps and `--clean` for a clean build.
 The build process generates a wheel file stored in the dist folder. The output should resemble the following:
 
 ```sh
-Successfully built synap_python-0.1.0-cp310-cp310-manylinux_2_35_aarch64.whl
+Successfully built synap_python-0.9.0-cp310-cp310-manylinux_2_35_aarch64.whl
 Building Python extensions ... Success!
 Build completed successfully, wheel located at /home/../synap-python/dist/
 ```

@@ -271,7 +271,7 @@ static void export_preprocessor(py::module_& m)
         [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Shape shape, Layout layout, size_t input_index) -> Rect {
             PyErr_WarnEx(
                 PyExc_DeprecationWarning,
-                "``assign(..., shape, ...)`` is deprecated and will be removed in v1.1.0; "
+                "``assign(..., shape, ...)`` is deprecated and will be removed in v1.0.0; "
                 "please omit the ``shape`` argument and let it be inferred automatically.",
                 1
             );

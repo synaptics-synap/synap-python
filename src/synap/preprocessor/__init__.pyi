@@ -193,5 +193,5 @@ class Preprocessor:
         
         .. warning::
            The overload ``assign(inputs, data, shape, layout, input_index)`` is **deprecated**
-           and will be removed in **v1.1.0**. Use ``assign(inputs, data, layout, input_index)`` instead.
+           and will be removed in **v1.0.0**. Use ``assign(inputs, data, layout, input_index)`` instead.
         """

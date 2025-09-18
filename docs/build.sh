@@ -5,7 +5,7 @@
 
 set -e
 
-SYNAP_VERSION="0.1.0"
+SYNAP_VERSION="0.9.0"
 SYNAP_RELEASE="stable"
 HOST_ARCH=$(uname -m)
 PLAT_TAG="manylinux_2_35"
