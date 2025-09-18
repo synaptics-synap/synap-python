@@ -1,0 +1,126 @@
+name: Build pip wheels and publish to TestPyPI
+
+on: [workflow_dispatch]
+
+env:
+    DIST_DIR: ${{ github.workspace }}/dist
+
+jobs:
+  build-aarch64:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - python-ver: "3.10"
+            python-dev-ver: "3.10.15"
+          - python-ver: "3.11"
+            python-dev-ver: "3.11.10"
+          - python-ver: "3.12"
+            python-dev-ver: "3.12.7"
+          - python-ver: "3.13"
+            python-dev-ver: "3.13.0"
+  
+    env:
+      TARGET_ARCH: aarch64
+      PLAT_TAG: manylinux_2_35
+      BUILD_DIR: ${{ github.workspace }}/build
+      TOOLCHAIN_URL: "https://developer.arm.com/-/media/Files/downloads/gnu/11.3.rel1/binrel/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+      TOOLCHAIN_DIR:  ${{ github.workspace }}/build/toolchain
+      PYTHON_DEV_URL: "https://github.com/tttapa/python-dev/releases/download/0.0.7/python-dev-${{ matrix.python-dev-ver }}-aarch64-rpi3-linux-gnu.tar.gz"
+      PYTHON_DEV_DIR:  ${{ github.workspace }}/build/python-${{ matrix.python-dev-ver }}-dev
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python ${{ matrix.python-ver }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-ver }}
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install -U pip setuptools
+          pip install build wheel
+
+      - name: Set up toolchain and python-dev
+        run: |
+          mkdir -p "${BUILD_DIR}"
+          cd "${BUILD_DIR}"
+
+          if [ ! -d "${PYTHON_DEV_DIR}" ]; then
+            mkdir -p "${PYTHON_DEV_DIR}"
+            wget -O temp.tar.gz "${PYTHON_DEV_URL}"
+            tar -C "${PYTHON_DEV_DIR}" -xvf temp.tar.gz --strip-components=1
+            rm temp.tar.gz
+          fi
+
+          if [ ! -d "${TOOLCHAIN_DIR}" ]; then
+            mkdir -p "${TOOLCHAIN_DIR}"
+            wget -O temp.tar.xz "${TOOLCHAIN_URL}"
+            tar -C "${TOOLCHAIN_DIR}" -xvf temp.tar.xz --strip-components=1
+            rm temp.tar.xz
+          fi
+
+      - name: Generate build config
+        run: |
+          PY_MAJOR=$(echo "${{ matrix.python-ver }}" | cut -d. -f1)
+          PY_MINOR=$(echo "${{ matrix.python-ver }}" | cut -d. -f2)
+          PY_VER="${PY_MAJOR}${PY_MINOR}"
+          PY_VER_DOT="${{ matrix.python-ver }}"
+          PY_ABI="cp${PY_VER}"
+
+          TEMPLATE="${BUILD_DIR}/aarch64-linux-gnu.python3.cross.py-build-cmake.toml.in"
+          OUTPUT="${BUILD_DIR}/aarch64-linux-gnu.python${PY_VER_DOT}.cross.py-build-cmake.toml"
+
+          echo "Building config $OUTPUT from $TEMPLATE"
+          sed -e "s|@PY_VER@|${PY_VER}|g; \
+                  s|@PY_VER_DOT@|${PY_VER_DOT}|g; \
+                  s|@PY_ABI@|${PY_ABI}|g;" \
+              "${TEMPLATE}" > "${OUTPUT}"
+
+          echo "BUILD_CONFIG=${OUTPUT}" >> $GITHUB_ENV
+
+      - name: Build wheels
+        run: python -m build -w . -C "cross=${{ env.BUILD_CONFIG }}" -C "override=cross.arch=${{ env.PLAT_TAG }}_${{ env.TARGET_ARCH }}"
+
+      - name: Build sdist
+        if: matrix.python-ver == '3.10'
+        run: python -m build --sdist .
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: ${{ env.DIST_DIR }}
+
+  publish-to-testpypi:
+    name: Publish Python distribution to TestPyPI
+    needs:
+    - build-aarch64
+    runs-on: ubuntu-latest
+
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/synap-python
+
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v4
+      with:
+        pattern: python-package-distributions
+        merge-multiple: true
+        path: ${{ env.DIST_DIR }}
+
+    - name: Publish distribution to TestPyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+        skip-existing: true
