@@ -253,10 +253,17 @@ static void export_preprocessor(py::module_& m)
     .def(
         "assign",
         [](const PreprocessorWrapper& self, const TensorsWrapper& tw, py::array_t<uint8_t> data, Layout layout, size_t input_index) -> Rect {
-            py::buffer_info info = data.request();
-            const uint8_t* buffer = static_cast<const uint8_t*>(info.ptr);
-            size_t buffer_size = info.size;
-            Shape buffer_shape(info.shape.begin(), info.shape.end());
+            Tensor& t = (*tw.tensors)[input_index];
+            validate_input(t, data);
+            const auto &data_dims = data.ndim();
+            const auto &tensor_dims = t.shape().size();
+            const bool chw_input = data_dims == tensor_dims - 1;
+            const uint8_t* buffer = data.data();
+            const size_t buffer_size = static_cast<size_t>(data.nbytes());
+            Shape buffer_shape(data.shape(), data.shape() + data.ndim());
+            if (chw_input) {
+                buffer_shape.insert(buffer_shape.begin(), 1);
+            }
             return self.assign(*tw.tensors, buffer, buffer_size, buffer_shape, layout, input_index);
         },
         py::arg("inputs"),
