@@ -15,8 +15,6 @@
 #include "export_utils.hpp"
 #include "export_docstrings.hpp"
 
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
 #include <pybind11/stl/filesystem.h> 
 
 namespace py = pybind11;
